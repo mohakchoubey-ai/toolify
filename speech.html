@@ -1,27 +1,195 @@
-/* Back Button Styling */
-.back-btn {
-    position: fixed;
-    top: 20px;
-    right: 20px; /* Positioned on the opposite side of Refresh */
-    background: var(--glass);
-    border: 1px solid rgba(255,255,255,0.2);
-    padding: 10px 18px;
-    border-radius: 12px;
-    color: white;
-    text-decoration: none;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-    transition: 0.3s;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 600;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTS Pro Suite | Toolbox Hub</title>
+    
+    <style>
+        :root {
+            --primary: #7efaff;
+            --secondary: #e0c3fc;
+            --accent: #8ec5fc;
+            --glass: rgba(255, 255, 255, 0.12);
+            --text: #ffffff;
+        }
 
-.back-btn:hover {
-    background: rgba(255,255,255,0.2);
-    transform: translateX(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(-45deg, #243b55, #141e30, #7b4397, #dc2430);
+            background-size: 400% 400%;
+            animation: gradientBG 10s ease infinite;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Navigation Buttons */
+        .refresh-btn, .back-btn {
+            position: fixed;
+            top: 20px;
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 15px;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .refresh-btn { left: 20px; }
+        .back-btn { right: 20px; }
+
+        .refresh-btn:hover { background: rgba(255,255,255,0.2); transform: rotate(15deg); }
+        .back-btn:hover { background: rgba(255,255,255,0.2); transform: translateX(-5px); }
+
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 35px;
+            padding: 35px;
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            margin-top: 80px; /* Adjusted for top buttons */
+            animation: slideIn 0.8s ease;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.4);
+            color: white;
+            outline: none;
+            margin-bottom: 20px;
+            resize: none;
+            font-size: 16px;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            margin-bottom: 25px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        select option {
+            background-color: #1a1a2e;
+            color: white !important;
+            padding: 10px;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
+            border: none;
+            padding: 16px;
+            border-radius: 50px;
+            color: #111;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(142, 197, 252, 0.4); }
+        .btn-dl { background: #2ecc71; color: white; }
+
+        footer { margin-top: auto; padding: 20px; opacity: 0.7; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<button class="refresh-btn" onclick="location.reload()">🔄 Refresh</button>
+
+<a href="index.html" class="back-btn">
+    <span>🏠</span> Back to Hub
+</a>
+
+<div class="container">
+    <h2>🎙️ Text to Speech</h2>
+    
+    <textarea id="text-input" placeholder="Type your text here..."></textarea>
+    
+    <p style="text-align: left; font-size: 12px; margin-bottom: 5px; margin-left: 5px;">Select Voice:</p>
+    <select id="voice-select">
+        <option value="">Detecting Voices...</option>
+    </select>
+
+    <div class="btn-group">
+        <button class="btn" onclick="speak()">▶️ Play</button>
+        <button class="btn btn-dl" onclick="downloadSpeech()">📥 Download</button>
+    </div>
+</div>
+
+<footer>Developed by <strong>Mohak Choubey</strong></footer>
+
+<script>
+    const synth = window.speechSynthesis;
+    const textInput = document.getElementById('text-input');
+    const voiceSelect = document.getElementById('voice-select');
+    let voices = [];
+
+    function populateVoices() {
+        voices = synth.getVoices();
+        voiceSelect.innerHTML = voices
+            .map((voice, i) => `<option value="${i}">${voice.name} (${voice.lang})</option>`)
+            .join('');
+    }
+
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = populateVoices;
+    }
+    populateVoices();
+
+    function speak() {
+        if (synth.speaking) synth.cancel();
+        if (textInput.value.trim() !== '') {
+            const utter = new SpeechSynthesisUtterance(textInput.value);
+            utter.voice = voices[voiceSelect.value];
+            synth.speak(utter);
+        }
+    }
+
+    function downloadSpeech() {
+        alert("Audio file generation requires a server connection. Use 'Play' for instant preview!");
+    }
+</script>
+
+</body>
+</html>
