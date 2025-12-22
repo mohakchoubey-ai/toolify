@@ -1,47 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Pro | Toolbox Hub</title>
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.12);
+            --primary: #7efaff;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            font-weight: 600;
+        }
+
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 30px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            margin-top: 80px;
+        }
+
+        h2 { color: var(--primary); margin-bottom: 25px; font-size: 2rem; }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            background: rgba(0,0,0,0.2);
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            outline: none;
+            resize: none;
+            box-sizing: border-box;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        select option { background: #764ba2; color: white; }
+
+        .btn-group { display: flex; gap: 10px; }
+
+        .play-btn {
+            flex: 2;
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            background: var(--primary);
+            color: #000;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .stop-btn {
+            flex: 1;
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid #ff4b2b;
+            background: rgba(255, 75, 43, 0.1);
+            color: #ff4b2b;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .play-btn:hover { transform: scale(1.02); background: white; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">🏠 Dashboard</a>
+
+    <div class="container">
+        <h2>🎙️ Speech Pro</h2>
+        <textarea id="text-input" placeholder="Type or paste your text here..."></textarea>
+        
+        <label style="display:block; text-align:left; font-size:0.8rem; margin-bottom:5px; opacity:0.7;">Select Voice:</label>
+        <select id="voice-select"></select>
+
+        <div class="btn-group">
+            <button class="play-btn" onclick="speak()">SPEAK NOW</button>
+            <button class="stop-btn" onclick="stopSpeech()">STOP</button>
+        </div>
+    </div>
+
 <script>
     const synth = window.speechSynthesis;
     const textInput = document.getElementById('text-input');
     const voiceSelect = document.getElementById('voice-select');
     let voices = [];
 
-    // Voices ko load karne ka function
     function populateVoices() {
         voices = synth.getVoices();
-        if (voices.length === 0) return; // Wait if not loaded
+        if (voices.length === 0) return;
 
         voiceSelect.innerHTML = voices
             .map((voice, i) => `<option value="${i}">${voice.name} (${voice.lang})</option>`)
             .join('');
     }
 
-    // Kuch browsers mein voices load hone mein time lagta hai
+    // Chrome and other browsers trigger this event when voices are ready
     if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = populateVoices;
     }
-    
-    // Initial call
-    setTimeout(populateVoices, 100);
+
+    // Initial load for Safari/Firefox
+    window.onload = populateVoices;
 
     function speak() {
         if (synth.speaking) {
-            synth.cancel(); // Agar pehle se bol raha hai toh stop karein
+            synth.cancel(); // Reset agar pehle se chal raha hai
         }
         
         if (textInput.value.trim() !== '') {
             const utter = new SpeechSynthesisUtterance(textInput.value);
-            // Selected voice apply karein
-            if (voices[voiceSelect.value]) {
-                utter.voice = voices[voiceSelect.value];
+            const selectedVoiceIndex = voiceSelect.value;
+            
+            if (voices[selectedVoiceIndex]) {
+                utter.voice = voices[selectedVoiceIndex];
             }
+
+            // Awaaj ki pitch aur rate adjust karne ke liye (Optional)
+            utter.pitch = 1;
+            utter.rate = 1;
+
             synth.speak(utter);
         } else {
-            alert("Please enter some text first!");
+            alert("Please enter some text!");
         }
     }
 
-    function downloadSpeech() {
-        // Browser API se direct MP3 download possible nahi hai bina server ke
-        alert("Audio download (MP3) is a premium feature that requires a backend server. Use 'Play' for instant preview!");
+    function stopSpeech() {
+        synth.cancel();
     }
 </script>
 
@@ -49,7 +179,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    // Use your actual Firebase config here
     const firebaseConfig = {
         apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
         authDomain: "toolbox-hub-98c03.firebaseapp.com",
@@ -61,9 +190,7 @@
     const auth = getAuth(app);
 
     onAuthStateChanged(auth, user => {
-        if(!user) {
-            window.location.href="login.html";
-        }
+        if(!user) window.location.href="login.html";
     });
 </script>
 
