@@ -9,7 +9,6 @@
     
     <style>
         :root {
-            /* Light Mode Colors */
             --bg-gradient: linear-gradient(-45deg, #f0f2f5, #e0e7ff, #d1fae5, #ffedd5);
             --container-bg: rgba(255, 255, 255, 0.85);
             --text-color: #1f2937;
@@ -19,7 +18,6 @@
         }
 
         [data-theme="dark"] {
-            /* Dark Mode Colors */
             --bg-gradient: linear-gradient(-45deg, #0f172a, #1e1b4b, #064e3b, #451a03);
             --container-bg: rgba(15, 23, 42, 0.85);
             --text-color: #f9fafb;
@@ -58,7 +56,7 @@
         }
 
         .logo-area { display: flex; align-items: center; gap: 12px; }
-        .logo-img { height: 45px; border-radius: 10px; }
+        .logo-img { height: 45px; border-radius: 10px; object-fit: contain; }
         .site-name { font-weight: 800; font-size: 1.6rem; letter-spacing: -1px; }
 
         .nav-right { display: flex; align-items: center; gap: 15px; }
@@ -74,7 +72,6 @@
             align-items: center;
         }
 
-        /* MAIN CONTAINER */
         .container {
             width: 90%;
             max-width: 1000px;
@@ -114,13 +111,6 @@
         .tool-card:hover { transform: translateY(-10px); border-color: var(--accent); }
         .tool-card i { font-size: 2.5rem; display: block; margin-bottom: 10px; font-style: normal; }
 
-        /* GOOGLE LOGIN SECTION */
-        .auth-box {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
         footer {
             margin-top: auto;
             padding: 30px;
@@ -144,8 +134,9 @@
         </div>
         <div class="nav-right">
             <div id="g_id_onload"
-                 data-client_id=508839785690-24tmuselefk1knuj1crh95jqqsphpnv5.apps.googleusercontent.com
-                 data-callback="handleCredentialResponse">
+                 data-client_id="508839785690-24tmuselefk1knuj1crh95jqqsphpnv5.apps.googleusercontent.com"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false">
             </div>
             <div class="g_id_signin" data-type="standard"></div>
             
@@ -154,7 +145,7 @@
     </header>
 
     <main class="container">
-        <img src="Untitled design (3).jpg" alt="Toolify Logo" class="hero-logo">
+        <img src="Untitled design (3).png" alt="Toolify Logo" class="hero-logo">
         <h1>Toolbox</h1>
         <p class="hero-desc">Your premium all-in-one digital utility hub.</p>
 
@@ -173,7 +164,6 @@
     </footer>
 
     <script>
-        // THEME TOGGLE
         const toggleBtn = document.getElementById('theme-toggle');
         const body = document.body;
 
@@ -187,11 +177,10 @@
             }
         });
 
-        // GOOGLE LOGIN HANDLER
         function handleCredentialResponse(response) {
             console.log("Logged in successfully!");
-            // Token user ki information store karta hai
-            // Dashboard par redirect karein
+            // Storing basic login state in browser so dashboard knows we are logged in
+            localStorage.setItem('isLoggedIn', 'true');
             window.location.href = "dashboard.html";
         }
     </script>
