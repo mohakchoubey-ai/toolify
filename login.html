@@ -1,43 +1,77 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login | Toolbox Hub</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body{display:flex;justify-content:center;align-items:center;height:100vh;font-family:Segoe UI;
-background:linear-gradient(135deg,#1e3c72,#2a5298);color:white;}
-.card{background:rgba(255,255,255,0.15);padding:35px;border-radius:20px;width:350px;text-align:center;}
-button{width:100%;padding:12px;margin:10px 0;border:none;border-radius:8px;font-weight:600;cursor:pointer;}
-.google{background:white;color:black;}
-</style>
+    <title>Login | Toolbox Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            display: flex; justify-content: center; align-items: center; height: 100vh; 
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg,#1e3c72,#2a5298); color: white; margin: 0;
+        }
+        .card {
+            background: rgba(255,255,255,0.15); padding: 35px; border-radius: 20px; 
+            width: 350px; text-align: center; backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h2 { margin-bottom: 25px; }
+        button { 
+            width: 100%; padding: 12px; margin: 10px 0; border: none; 
+            border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;
+        }
+        .google { 
+            background: white; color: black; display: flex; 
+            align-items: center; justify-content: center; gap: 10px; 
+        }
+        .google:hover { background: #f1f1f1; transform: translateY(-2px); }
+        .google img { width: 18px; }
+    </style>
 </head>
 <body>
 
 <div class="card">
-  <h2>Login to Toolbox Hub</h2>
-  <button class="google" onclick="googleLogin()">Continue with Google</button>
+    <h2>Login to Toolbox Hub</h2>
+    <button class="google" onclick="googleLogin()">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+        Continue with Google
+    </button>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    // Firebase SDK imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  appId: "YOUR_APP_ID"
-};
+    // 1. Yahaan apni asli details bharein (Firebase Settings se copy karein)
+    const firebaseConfig = {
+        apiKey: "AIzaSy...", 
+        authDomain: "your-project-id.firebaseapp.com",
+        projectId: "your-project-id",
+        appId: "1:xxx:web:xxx"
+    };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-window.googleLogin = () => {
-  const provider = new GoogleAuthProvider();
-  signInWithPopup(auth, provider)
-    .then(() => window.location.href="dashboard.html")
-    .catch(err => alert(err.message));
-};
+    // 2. IMPORTANT: Function ko window par attach karna zaroori hai
+    window.googleLogin = () => {
+        const provider = new GoogleAuthProvider();
+        
+        // Forced account selection (optional, useful for testing)
+        provider.setCustomParameters({ prompt: 'select_account' });
+
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                console.log("Success:", result.user);
+                window.location.href = "index.html"; // Ya dashboard.html
+            })
+            .catch((error) => {
+                console.error("Error:", error.code);
+                // Agar 'auth/api-key-not-valid' aaye, toh check karein Cloud Console mein restrictions
+                alert("Login Error: " + error.message);
+            });
+    };
 </script>
 
 </body>
