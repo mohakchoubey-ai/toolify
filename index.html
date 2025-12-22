@@ -4,165 +4,226 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toolbox | Toolify</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-gradient: linear-gradient(-45deg, #f0f2f5, #e0e7ff, #d1fae5, #ffedd5);
-            --container-bg: rgba(255, 255, 255, 0.7);
-            --text-color: #1f2937;
-            --card-bg: #ffffff;
-            --accent: #3b82f6;
+            /* Google Flow Inspired Mesh Background */
+            --bg-mesh: radial-gradient(at 0% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                       radial-gradient(at 50% 0%, hsla(225,39%,20%,1) 0, transparent 50%), 
+                       radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --accent: #7efaff;
+            --menu-bg: #1a1f2e;
+        }
+
+        [data-theme="light"] {
+            --bg-mesh: radial-gradient(at 0% 0%, #e0e7ff 0, transparent 50%), 
+                       radial-gradient(at 50% 0%, #f0fdf4 0, transparent 50%), 
+                       radial-gradient(at 100% 0%, #fff7ed 0, transparent 50%);
+            --glass: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --text: #1f2937;
+            --accent: #2563eb;
             --menu-bg: #ffffff;
         }
 
-        [data-theme="dark"] {
-            --bg-gradient: linear-gradient(-45deg, #0f172a, #1e1b4b, #064e3b, #451a03);
-            --container-bg: rgba(15, 23, 42, 0.7);
-            --text-color: #f9fafb;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --menu-bg: #1e293b;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
         body {
             font-family: 'Inter', sans-serif;
-            color: var(--text-color);
+            color: var(--text);
             min-height: 100vh;
-            background: var(--bg-gradient);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            background-color: #0f172a;
+            background-image: var(--bg-mesh);
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow-x: hidden;
         }
 
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Header & Settings */
+        /* Fixed Header Logic */
         header {
             width: 100%;
-            padding: 20px 5%;
+            padding: 20px 8%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
         }
 
-        .settings-container { position: relative; }
+        /* RESTORED LOGO AREA */
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-text { 
+            font-weight: 800; 
+            font-size: 1.5rem; 
+            letter-spacing: -1px; 
+        }
+        .logo-text span { color: var(--accent); }
 
+        /* Settings Icon & Dropdown */
+        .settings-container { position: relative; }
+        
         #settingsBtn {
-            background: var(--card-bg);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 10px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 12px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .settings-menu {
             position: absolute;
-            top: 55px;
+            top: 65px;
             right: 0;
-            width: 220px;
+            width: 240px;
             background: var(--menu-bg);
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             padding: 10px;
-            display: none; /* Initially hidden */
+            display: none;
             flex-direction: column;
-            gap: 5px;
-            z-index: 100;
-            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 10001; 
+            border: 1px solid var(--glass-border);
         }
 
-        .settings-menu.active { display: flex; animation: fadeIn 0.3s ease; }
+        .settings-menu.active { display: flex; animation: slideDown 0.3s ease forwards; }
+
+        @keyframes slideDown { 
+            from { opacity: 0; transform: translateY(-10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
 
         .menu-item {
-            padding: 12px 15px;
-            border-radius: 10px;
+            padding: 14px 18px;
+            border-radius: 12px;
             text-decoration: none;
-            color: var(--text-color);
+            color: var(--text);
             font-size: 0.9rem;
-            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             border: none;
             background: transparent;
+            cursor: pointer;
             width: 100%;
             text-align: left;
         }
 
-        .menu-item:hover { background: rgba(126, 250, 255, 0.1); }
-        .logout-item { color: #ff4b2b; border-top: 1px solid rgba(0,0,0,0.1); margin-top: 5px; }
+        .menu-item:hover { background: rgba(126, 250, 255, 0.1); transform: translateX(5px); }
+        .logout-item { color: #ff5f5f; border-top: 1px solid var(--glass-border); margin-top: 8px; }
 
-        /* Rest of the UI */
-        .container {
-            width: 90%; max-width: 900px;
-            margin: 40px auto;
-            background: var(--container-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
-            padding: 40px;
+        /* Hero Container */
+        .hero {
+            margin-top: 60px;
             text-align: center;
+            z-index: 1;
+        }
+        .hero h1 { font-size: 4rem; font-weight: 800; letter-spacing: -2px; margin-bottom: 10px; }
+        .hero p { opacity: 0.6; font-size: 1.1rem; }
+
+        /* Main Glass Container */
+        .main-container {
+            width: 90%;
+            max-width: 1100px;
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            padding: 50px;
+            margin: 40px 0;
+            z-index: 5;
         }
 
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 25px;
         }
 
         .tool-card {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            padding: 40px 20px;
+            border-radius: 24px;
             text-decoration: none;
-            color: var(--text-color);
-            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .tool-card:hover {
+            background: var(--accent);
+            color: #000;
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .tool-card .icon { font-size: 2.5rem; }
+        .tool-card span { font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-size: 0.8rem; }
+
+        footer { margin-top: auto; padding: 40px; opacity: 0.5; font-size: 0.8rem; text-align: center; width: 100%; }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2.5rem; }
+            .main-container { padding: 25px; }
+        }
     </style>
 </head>
 <body data-theme="dark">
 
     <header>
         <div class="logo-area">
-            <span style="font-weight: 800; font-size: 1.5rem;">Toolify</span>
+            <div class="logo-text">TOOL<span>IFY.</span></div>
         </div>
         <div class="nav-right">
             <div class="settings-container">
-                <button id="settingsBtn">⚙️</button>
+                <button id="settingsBtn" aria-label="Settings">⚙️</button>
                 <div class="settings-menu" id="settingsMenu">
                     <button class="menu-item" onclick="toggleTheme()" id="themeText">☀️ Light Mode</button>
                     <a href="privacy.html" class="menu-item">🛡️ Privacy Policy</a>
                     <a href="terms.html" class="menu-item">📜 Terms & Conditions</a>
-                    <button class="menu-item" id="loginMenuBtn" onclick="login()">🔑 Sign In</button>
+                    <a href="login.html" target="_blank" class="menu-item" id="loginMenuBtn">🔑 Sign In</a>
                     <button class="menu-item logout-item" id="logoutMenuBtn" onclick="logout()" style="display:none;">🚪 Logout</button>
                 </div>
             </div>
         </div>
     </header>
 
-    <main class="container">
-        <h1 id="welcomeText">Welcome to Toolbox</h1>
-        <p id="userEmail" style="opacity: 0.6; margin-bottom: 20px;"></p>
+    <div class="hero">
+        <h1 id="welcomeHeader">Toolbox</h1>
+        <p id="userSubText">Your high-performance digital workspace.</p>
+    </div>
 
+    <main class="main-container">
         <div class="tools-grid">
-            <a href="alarm.html" class="tool-card">⏰<br>Alarm</a>
-            <a href="calculator.html" class="tool-card">🧮<br>Calculator</a>
-            <a href="weather.html" class="tool-card">☀️<br>Weather</a>
-            <a href="qr.html" class="tool-card">🔍<br>QR Maker</a>
-            <a href="clock.html" class="tool-card">🕓<br>Clock</a>
-            <a href="timer.html" class="tool-card">⌛<br>Timer</a>
+            <a href="alarm.html" class="tool-card"><div class="icon">⏰</div><span>Alarm</span></a>
+            <a href="calculator.html" class="tool-card"><div class="icon">🧮</div><span>Calculator</span></a>
+            <a href="weather.html" class="tool-card"><div class="icon">☀️</div><span>Weather</span></a>
+            <a href="qr.html" class="tool-card"><div class="icon">🔍</div><span>QR Maker</span></a>
+            <a href="clock.html" class="tool-card"><div class="icon">🕓</div><span>Clock</span></a>
+            <a href="timer.html" class="tool-card"><div class="icon">⌛</div><span>Timer</span></a>
         </div>
     </main>
+
+    <footer>DEVELOPED WITH ❤️ BY MOHAK</footer>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -179,16 +240,23 @@
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // Toggle Settings Menu
+    // Menu Toggle Logic
     const settingsBtn = document.getElementById('settingsBtn');
     const settingsMenu = document.getElementById('settingsMenu');
-    settingsBtn.onclick = () => settingsMenu.classList.toggle('active');
+    
+    settingsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsMenu.classList.toggle('active');
+    });
 
-    // Theme Logic
+    document.addEventListener('click', () => settingsMenu.classList.remove('active'));
+
+    // Theme Switch Logic
     window.toggleTheme = () => {
         const body = document.body;
         const themeText = document.getElementById('themeText');
-        if (body.getAttribute('data-theme') === 'dark') {
+        const currentTheme = body.getAttribute('data-theme');
+        if (currentTheme === 'dark') {
             body.setAttribute('data-theme', 'light');
             themeText.innerText = "🌙 Dark Mode";
         } else {
@@ -197,35 +265,29 @@
         }
     };
 
-    // Auth Actions
-    window.login = () => signInWithPopup(auth, provider);
-    window.logout = () => signOut(auth);
+    // Firebase Auth logic
+    window.logout = () => {
+        if(confirm("Are you sure you want to sign out?")) signOut(auth);
+    };
 
     onAuthStateChanged(auth, user => {
         const loginMenuBtn = document.getElementById("loginMenuBtn");
         const logoutMenuBtn = document.getElementById("logoutMenuBtn");
-        const welcomeText = document.getElementById("welcomeText");
-        const userEmail = document.getElementById("userEmail");
+        const welcomeHeader = document.getElementById("welcomeHeader");
+        const userSubText = document.getElementById("userSubText");
 
         if (user) {
             loginMenuBtn.style.display = "none";
-            logoutMenuBtn.style.display = "block";
-            welcomeText.innerText = "Hi, " + user.displayName.split(' ')[0];
-            userEmail.innerText = user.email;
+            logoutMenuBtn.style.display = "flex";
+            welcomeHeader.innerText = "Hi, " + user.displayName.split(' ')[0];
+            userSubText.innerText = user.email;
         } else {
-            loginMenuBtn.style.display = "block";
+            loginMenuBtn.style.display = "flex";
             logoutMenuBtn.style.display = "none";
-            welcomeText.innerText = "Welcome to Toolbox";
-            userEmail.innerText = "";
+            welcomeHeader.innerText = "Toolbox";
+            userSubText.innerText = "Your high-performance digital workspace.";
         }
     });
-
-    // Close menu when clicking outside
-    window.onclick = (event) => {
-        if (!event.target.matches('#settingsBtn')) {
-            settingsMenu.classList.remove('active');
-        }
-    }
 </script>
 </body>
 </html>
