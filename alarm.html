@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clock Essential | Toolbox Hub</title>
+    <title>Clock Essential | Toolify Hub</title>
     <style>
         :root {
             --bg:#f4f7fa; --card:#fff; --text:#111; --muted:#777;
@@ -67,7 +67,8 @@
         .stop-btn { background:var(--danger); width:80%; padding:20px; border-radius:20px; border:none; color:white; font-weight:800; font-size:1.3rem; cursor:pointer; }
     </style>
 </head>
-<body class="dark"> <div class="app">
+<body class="dark">
+<div class="app">
     <div class="nav-bar">
         <a href="index.html" class="hub-link">← TOOLBOX HUB</a>
         <button onclick="document.body.classList.toggle('dark')" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">🌓</button>
@@ -82,7 +83,7 @@
         <label>Alarm Name</label>
         <input id="labelInput" placeholder="Wake Up">
 
-        <label>Repeat Days</label>
+        <label>Repeat Days (Optional)</label>
         <div class="day-grid">
             <button class="day" data-d="0">S</button>
             <button class="day" data-d="1">M</button>
@@ -100,13 +101,15 @@
 </div>
 
 <div class="overlay" id="overlay">
-    <div style="font-size:6rem; margin-bottom: 20px; animation: pulse 1s infinite;">🔔</div>
+    <div style="font-size:6rem; margin-bottom: 20px;">🚨</div>
     <h1 id="ringTime" style="font-size:4rem; margin:0;">00:00</h1>
     <p id="ringLabel" style="font-size:1.5rem; color:#8e8e93; margin-bottom:40px;"></p>
     <button class="stop-btn" onclick="stopAlarm()">STOP ALARM</button>
 </div>
 
-<audio id="audio" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" loop></audio>
+<audio id="audio" loop>
+    <source src="https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/pause.wav" type="audio/wav">
+</audio>
 
 <script>
     let alarms = JSON.parse(localStorage.getItem("essential_alarms") || "[]");
@@ -115,7 +118,8 @@
     const timeInput = document.getElementById("timeInput");
     const labelInput = document.getElementById("labelInput");
 
-    // Day Selection Logic
+    if ("Notification" in window) Notification.requestPermission();
+
     document.querySelectorAll(".day").forEach(btn => {
         btn.onclick = () => {
             btn.classList.toggle("active");
@@ -130,13 +134,20 @@
 
     function saveAlarm() {
         if(!timeInput.value) return alert("Please set a time!");
+        
+        // Smart Logic: Agar koi day select nahi kiya, toh aaj ka day select kar lo
+        let daysToSave = [...selectedDays];
+        if (daysToSave.length === 0) {
+            daysToSave.push(new Date().getDay());
+        }
 
         const newAlarm = {
             id: editId || Date.now(),
             time: timeInput.value,
             label: labelInput.value || "Alarm",
-            days: [...selectedDays],
-            lastTriggered: ""
+            days: daysToSave,
+            lastTriggered: "",
+            preNotified: "" 
         };
 
         if (editId) {
@@ -155,13 +166,16 @@
     function render() {
         const list = document.getElementById("list");
         list.innerHTML = "";
+        const dayNames = ['S','M','T','W','T','F','S'];
+        
         alarms.sort((a,b) => a.time.localeCompare(b.time)).forEach(a => {
+            let activeDaysText = a.days.map(d => dayNames[d]).join(', ');
             let div = document.createElement("div");
             div.className = "alarm-item";
             div.innerHTML = `
                 <div class="alarm-info">
                     <b>${a.time}</b><br>
-                    <small style="color:var(--muted)">${a.label} ${a.days.length ? '• Rep' : ''}</small>
+                    <small style="color:var(--muted)">${a.label} • ${activeDaysText}</small>
                 </div>
                 <div class="alarm-actions">
                     <button class="action-btn" onclick="editAlarm(${a.id})">✏️</button>
@@ -171,25 +185,6 @@
         });
     }
 
-    window.editAlarm = (id) => {
-        const a = alarms.find(x => x.id === id);
-        editId = a.id;
-        timeInput.value = a.time;
-        labelInput.value = a.label;
-        selectedDays = [...a.days];
-        document.querySelectorAll(".day").forEach(btn => {
-            const d = parseInt(btn.dataset.d);
-            btn.classList.toggle("active", selectedDays.includes(d));
-        });
-        document.getElementById("saveBtn").innerText = "UPDATE ALARM";
-    };
-
-    window.delAlarm = (id) => {
-        alarms = alarms.filter(a => a.id !== id);
-        localStorage.setItem("essential_alarms", JSON.stringify(alarms));
-        render();
-    };
-
     function tick() {
         let now = new Date();
         let h = now.getHours().toString().padStart(2, '0');
@@ -197,25 +192,40 @@
         let s = now.getSeconds().toString().padStart(2, '0');
         let timeStr = `${h}:${m}`;
         
+        let nextMin = new Date(now.getTime() + 60000);
+        let preTimeStr = `${nextMin.getHours().toString().padStart(2, '0')}:${nextMin.getMinutes().toString().padStart(2, '0')}`;
+
         document.getElementById('clock').innerText = `${h}:${m}:${s}`;
         
         alarms.forEach(a => {
-            if (a.time === timeStr && a.lastTriggered !== timeStr) {
-                // Check if repeat is set and matches today
-                if (a.days.length === 0 || a.days.includes(now.getDay())) {
+            // Check if alarm is for today
+            if (a.days.includes(now.getDay())) {
+                // Warning 1 min before
+                if (a.time === preTimeStr && a.preNotified !== preTimeStr) {
+                    notifyUser("Almost Time!", `Alarm "${a.label}" is ringing in 60 seconds.`);
+                    a.preNotified = preTimeStr;
+                }
+                // Actual Ring
+                if (a.time === timeStr && a.lastTriggered !== timeStr) {
                     triggerRing(a);
+                    notifyUser("WAKE UP!", a.label);
                     a.lastTriggered = timeStr;
                 }
             }
         });
     }
 
+    function notifyUser(title, body) {
+        if (Notification.permission === "granted") new Notification(title, { body });
+    }
+
     function triggerRing(a) {
+        audio.playbackRate = 1.4; // Forced High Speed
         audio.play();
-        if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 500]);
         document.getElementById("ringTime").innerText = a.time;
         document.getElementById("ringLabel").innerText = a.label;
         document.getElementById("overlay").classList.add("active");
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200], true);
     }
 
     function stopAlarm() {
@@ -224,35 +234,31 @@
         document.getElementById("overlay").classList.remove("active");
     }
 
+    window.delAlarm = (id) => {
+        alarms = alarms.filter(a => a.id !== id);
+        localStorage.setItem("essential_alarms", JSON.stringify(alarms));
+        render();
+    };
+
+    window.editAlarm = (id) => {
+        const a = alarms.find(x => x.id === id);
+        editId = a.id;
+        timeInput.value = a.time;
+        labelInput.value = a.label;
+        selectedDays = [...a.days];
+        document.querySelectorAll(".day").forEach(btn => {
+            btn.classList.toggle("active", selectedDays.includes(parseInt(btn.dataset.d)));
+        });
+        document.getElementById("saveBtn").innerText = "UPDATE ALARM";
+    };
+
     function resetForm() {
-        timeInput.value = "";
-        labelInput.value = "";
-        selectedDays = [];
+        timeInput.value = ""; labelInput.value = ""; selectedDays = [];
         document.querySelectorAll(".day").forEach(d => d.classList.remove("active"));
     }
 
     setInterval(tick, 1000);
     render();
 </script>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
-        authDomain: "toolbox-hub-98c03.firebaseapp.com",
-        projectId: "toolbox-hub-98c03",
-        appId: "1:321020105472:web:356e7c2903def7b9d859e5"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    onAuthStateChanged(auth, user => {
-        if(!user) window.location.href="login.html";
-    });
-</script>
-
 </body>
 </html>
