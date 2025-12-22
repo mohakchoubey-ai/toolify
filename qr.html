@@ -1,155 +1,154 @@
-<script>
-    let cropper;
-    let stream = null;
-    let isScanning = false;
-
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('fileInput');
-    const resultBox = document.getElementById('result-box');
-    const video = document.getElementById('video-preview');
-
-    function switchTab(mode) {
-        stopCamera();
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        if(mode === 'scan') {
-            document.querySelector('.tab:nth-child(1)').classList.add('active');
-            document.getElementById('scan-section').classList.add('active');
-        } else {
-            document.querySelector('.tab:nth-child(2)').classList.add('active');
-            document.getElementById('generate-section').classList.add('active');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Pro Suite | Toolbox Hub</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.12);
+            --primary: #7efaff;
         }
-    }
 
-    dropZone.onclick = () => fileInput.click();
-    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('dragover'); };
-    dropZone.ondragleave = () => dropZone.classList.remove('dragover');
-    dropZone.ondrop = (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        handleFile(e.dataTransfer.files[0]);
-    };
-    fileInput.onchange = (e) => handleFile(e.target.files[0]);
-
-    function handleFile(file) {
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            stopCamera();
-            const img = document.getElementById('image-to-crop');
-            img.src = e.target.result;
-            document.getElementById('crop-container').style.display = 'block';
-            document.getElementById('extractBtn').style.display = 'block';
-            dropZone.style.display = 'none';
-            if (cropper) cropper.destroy();
-            cropper = new Cropper(img, { viewMode: 1, autoCropArea: 0.8 });
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function scanCroppedImage() {
-        const canvas = cropper.getCroppedCanvas();
-        // QR Code detection logic
-        const code = jsQR(canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data, canvas.width, canvas.height);
-        showResult(code ? code.data : null);
-    }
-
-    async function startCamera() {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-            video.srcObject = stream;
-            video.style.display = "block";
-            dropZone.style.display = "none";
-            document.getElementById('crop-container').style.display = "none";
-            document.getElementById('extractBtn').style.display = "none";
-            isScanning = true;
-            requestAnimationFrame(tick);
-        } catch (err) {
-            alert("Camera not accessible. Make sure you are using HTTPS.");
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
         }
-    }
 
-    function stopCamera() {
-        if (stream) {
-            stream.getTracks().forEach(t => t.stop());
-            video.style.display = "none";
-            dropZone.style.display = "block";
-            isScanning = false;
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            font-weight: 600;
         }
-    }
 
-    function tick() {
-        if (video.readyState === video.HAVE_ENOUGH_DATA && isScanning) {
-            const canvas = document.getElementById('hidden-canvas');
-            canvas.height = video.videoHeight;
-            canvas.width = video.videoWidth;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
-            if (code) {
-                showResult(code.data);
-                stopCamera();
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 30px;
+            padding: 40px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            margin-top: 80px;
+        }
+
+        h2 { color: var(--primary); margin-bottom: 25px; }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .gen-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            background: var(--primary);
+            color: #000;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .gen-btn:hover { transform: scale(1.02); background: white; }
+
+        #qrcode {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 25px auto;
+            display: inline-block;
+            min-height: 128px;
+            min-width: 128px;
+        }
+
+        #qrcode img { margin: 0 auto; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">🏠 Dashboard</a>
+
+    <div class="container">
+        <h2>🔍 QR Code Maker</h2>
+        <input type="text" id="qrText" placeholder="Paste link or text here...">
+        <button class="gen-btn" onclick="generateQR()">GENERATE QR CODE</button>
+        
+        <div id="qrcode"></div>
+        <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 15px;">Your QR will appear above</p>
+    </div>
+
+    <script>
+        function generateQR() {
+            const text = document.getElementById("qrText").value;
+            const container = document.getElementById("qrcode");
+            
+            if (!text) {
+                alert("Please enter some text or a URL!");
                 return;
             }
+
+            // Clear old QR
+            container.innerHTML = "";
+
+            // Generate New QR
+            new QRCode(container, {
+                text: text,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
         }
-        if (isScanning) requestAnimationFrame(tick);
-    }
+    </script>
 
-    function showResult(data) {
-        resultBox.style.display = "block";
-        if (data) {
-            // Check if it's a URL
-            const isUrl = data.startsWith('http');
-            resultBox.innerHTML = `
-                <span style="color:#2ecc71; font-weight:bold;">Success!</span><br><br>
-                <span style="font-size:14px;">${data}</span><br>
-                ${isUrl ? `<a href="${data}" target="_blank" class="btn" style="display:block; margin-top:10px; text-decoration:none; text-align:center;">Visit Link</a>` : ''}
-            `;
-        } else {
-            resultBox.innerHTML = `<span style="color:#ff4b2b;">No QR found.</span><br>Try cropping tighter!`;
-        }
-    }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    function generateQR() {
-        const text = document.getElementById('qr-input').value;
-        const qrDiv = document.getElementById('qrcode');
-        if(!text) return alert("Enter some text first!");
-        qrDiv.innerHTML = "";
-        qrDiv.style.display = "block";
-        new QRCode(qrDiv, { text: text, width: 220, height: 220, colorDark: "#111", colorLight: "#fff" });
-        document.getElementById('dlBtn').style.display = "block";
-    }
+        const firebaseConfig = {
+            apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
+            authDomain: "toolbox-hub-98c03.firebaseapp.com",
+            projectId: "toolbox-hub-98c03",
+            appId: "1:321020105472:web:356e7c2903def7b9d859e5"
+        };
 
-    function downloadQR() {
-        const img = document.querySelector('#qrcode img');
-        if(!img) return alert("Generate QR first!");
-        const link = document.createElement('a');
-        link.download = 'Toolify_QR.png';
-        link.href = img.src;
-        link.click();
-    }
-</script>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        onAuthStateChanged(auth, user => {
+            if(!user) window.location.href="login.html";
+        });
+    </script>
 
-    // IMPORTANT: Paste your ACTUAL config here
-    const firebaseConfig = {
-        apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb",
-        authDomain: "toolbox-hub-98c03.firebaseapp.com",
-        projectId: "toolbox-hub-98c03",
-        appId: "1:321020105472:web:356e7c2903def7b9d859e5"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    onAuthStateChanged(auth, user => {
-        if(!user) {
-            // Redirect to login if not authenticated
-            window.location.href="login.html";
-        }
-    });
-</script>
+</body>
+</html>
