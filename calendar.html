@@ -3,26 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Embedded Google Calendar</title>
+  <title>Events Calendar | Toolbox Hub</title>
   <style>
+    :root {
+        --glass: rgba(255, 255, 255, 0.12);
+        --primary: #7efaff;
+    }
+
     body {
-        font-family: Arial, sans-serif;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        background: linear-gradient(-45deg, #243b55, #141e30, #7b4397, #dc2430);
+        background-size: 400% 400%;
+        animation: gradientBG 10s ease infinite;
+        color: white;
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
         margin: 0;
         padding: 20px;
-        background-color: #f0f0f0;
     }
+
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .back-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--glass);
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 10px 20px;
+        border-radius: 12px;
+        color: white;
+        text-decoration: none;
+        backdrop-filter: blur(10px);
+        font-weight: 600;
+        transition: 0.3s;
+        z-index: 100;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.2); transform: translateX(-5px); }
+
+    .container {
+        background: var(--glass);
+        backdrop-filter: blur(30px);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 35px;
+        padding: 25px;
+        width: 100%;
+        max-width: 900px;
+        text-align: center;
+        box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+        margin-top: 80px;
+        animation: slideIn 0.8s ease;
+    }
+
+    @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    h2 { margin-bottom: 20px; letter-spacing: 2px; color: var(--primary); }
+
     .calendar-wrapper {
       position: relative;
-      padding-bottom: 75%;   /* adjust aspect ratio if needed */
+      padding-bottom: 75%; /* Aspect Ratio */
       height: 0;
       overflow: hidden;
-      width: 100%;
-      max-width: 800px;      /* maximum width on desktop */
-      margin: 20px auto;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
     }
+    
     .calendar-wrapper iframe {
       position: absolute;
       top: 0;
@@ -30,37 +81,48 @@
       width: 100%;
       height: 100%;
       border: 0;
+      filter: invert(90%) hue-rotate(180deg); /* Dark mode effect for Google Calendar */
     }
-    /* New Style for Navigation */
-    .back-btn {
-        background: #6c757d;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-weight: bold;
-        cursor: pointer;
-        margin-bottom: 20px;
-        transition: 0.2s;
-        text-decoration: none;
-        display: inline-block;
-    }
-    .back-btn:hover {
-        background: #5a6268;
-    }
+
+    footer { margin-top: 20px; opacity: 0.7; font-size: 13px; }
   </style>
 </head>
 <body>
 
-  <a href="index.html" class="back-btn">← Back to Tools Hub</a>
+  <a href="index.html" class="back-btn">🏠 Back to Toolbox</a>
 
-  <div class="calendar-wrapper">
-    <iframe
-      src="https://calendar.google.com/calendar/u/0/embed?color=%2316a765&src=en.indian%23holiday@group.v.calendar.google.com"
-      frameborder="0"
-      scrolling="no">
-    </iframe>
+  <div class="container">
+    <h2>🗓️ Events & Holidays</h2>
+    <div class="calendar-wrapper">
+      <iframe
+        src="https://calendar.google.com/calendar/u/0/embed?color=%2316a765&src=en.indian%23holiday@group.v.calendar.google.com&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=0"
+        scrolling="no">
+      </iframe>
+    </div>
   </div>
+
+  <footer>Developed by <strong>Mohak Choubey</strong></footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
+      authDomain: "toolbox-hub-98c03.firebaseapp.com",
+      projectId: "toolbox-hub-98c03",
+      appId: "1:321020105472:web:356e7c2903def7b9d859e5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, user => {
+      if(!user) {
+        window.location.href="login.html";
+      }
+    });
+  </script>
 
 </body>
 </html>
