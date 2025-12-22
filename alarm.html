@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clock Essential | Toolify Hub</title>
+    <title>Secure Clock | Toolify Hub</title>
     <style>
         :root {
             --bg:#f4f7fa; --card:#fff; --text:#111; --muted:#777;
@@ -33,8 +33,9 @@
         }
         label { font-size:.7rem; font-weight:800; color:var(--muted); margin-top:15px; display:block; text-transform:uppercase; letter-spacing: 1px; }
         input {
-            width:100%; padding:15px; border-radius:14px; border:none;
+            width:100%; padding:15px; border-radius:14px; border:1px solid transparent;
             margin-top:8px; font-size:1rem; background:var(--accent); color:var(--text); outline:none;
+            box-sizing: border-box;
         }
         
         .day-grid { display:flex; gap:6px; margin-top:12px; }
@@ -65,13 +66,23 @@
         }
         .overlay.active { display:flex; }
         .stop-btn { background:var(--danger); width:80%; padding:20px; border-radius:20px; border:none; color:white; font-weight:800; font-size:1.3rem; cursor:pointer; }
+        
+        .perm-banner {
+            background: var(--accent); padding: 10px; border-radius: 12px; margin-bottom: 15px;
+            font-size: 0.8rem; text-align: center; display: none;
+        }
     </style>
 </head>
 <body class="dark">
 <div class="app">
     <div class="nav-bar">
-        <a href="index.html" class="hub-link">← TOOLBOX HUB</a>
+        <a href="#" class="hub-link">← TOOLBOX HUB</a>
         <button onclick="document.body.classList.toggle('dark')" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">🌓</button>
+    </div>
+
+    <div id="permBanner" class="perm-banner">
+        Enable notifications for a better experience 
+        <button onclick="requestPerm()" style="border:none; background:var(--primary); color:white; padding:4px 8px; border-radius:5px; margin-left:10px; cursor:pointer;">Enable</button>
     </div>
 
     <h1 id="clock">00:00:00</h1>
@@ -81,7 +92,7 @@
         <input type="time" id="timeInput">
         
         <label>Alarm Name</label>
-        <input id="labelInput" placeholder="Wake Up">
+        <input id="labelInput" placeholder="Wake Up" maxlength="30">
 
         <label>Repeat Days (Optional)</label>
         <div class="day-grid">
@@ -107,7 +118,7 @@
     <button class="stop-btn" onclick="stopAlarm()">STOP ALARM</button>
 </div>
 
-<audio id="audio" loop>
+<audio id="audio" loop preload="auto">
     <source src="https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/pause.wav" type="audio/wav">
 </audio>
 
@@ -118,7 +129,16 @@
     const timeInput = document.getElementById("timeInput");
     const labelInput = document.getElementById("labelInput");
 
-    if ("Notification" in window) Notification.requestPermission();
+    // UI: Only show permission banner if not granted
+    if ("Notification" in window && Notification.permission !== "granted") {
+        document.getElementById("permBanner").style.display = "block";
+    }
+
+    function requestPerm() {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") document.getElementById("permBanner").style.display = "none";
+        });
+    }
 
     document.querySelectorAll(".day").forEach(btn => {
         btn.onclick = () => {
@@ -135,16 +155,13 @@
     function saveAlarm() {
         if(!timeInput.value) return alert("Please set a time!");
         
-        // Smart Logic: Agar koi day select nahi kiya, toh aaj ka day select kar lo
         let daysToSave = [...selectedDays];
-        if (daysToSave.length === 0) {
-            daysToSave.push(new Date().getDay());
-        }
+        if (daysToSave.length === 0) daysToSave.push(new Date().getDay());
 
         const newAlarm = {
             id: editId || Date.now(),
             time: timeInput.value,
-            label: labelInput.value || "Alarm",
+            label: labelInput.value.replace(/<[^>]*>?/gm, '') || "Alarm", // Basic Sanitize
             days: daysToSave,
             lastTriggered: "",
             preNotified: "" 
@@ -172,15 +189,31 @@
             let activeDaysText = a.days.map(d => dayNames[d]).join(', ');
             let div = document.createElement("div");
             div.className = "alarm-item";
-            div.innerHTML = `
-                <div class="alarm-info">
-                    <b>${a.time}</b><br>
-                    <small style="color:var(--muted)">${a.label} • ${activeDaysText}</small>
-                </div>
-                <div class="alarm-actions">
-                    <button class="action-btn" onclick="editAlarm(${a.id})">✏️</button>
-                    <button class="action-btn" onclick="delAlarm(${a.id})" style="color:var(--danger)">🗑</button>
-                </div>`;
+            
+            // SECURITY: Using textContent for a.label to prevent XSS
+            const infoDiv = document.createElement("div");
+            infoDiv.className = "alarm-info";
+            
+            const timeHeading = document.createElement("b");
+            timeHeading.textContent = a.time;
+            
+            const subDetail = document.createElement("small");
+            subDetail.style.color = "var(--muted)";
+            subDetail.style.display = "block";
+            subDetail.textContent = `${a.label} • ${activeDaysText}`;
+            
+            infoDiv.appendChild(timeHeading);
+            infoDiv.appendChild(subDetail);
+
+            const actionsDiv = document.createElement("div");
+            actionsDiv.className = "alarm-actions";
+            actionsDiv.innerHTML = `
+                <button class="action-btn" onclick="editAlarm(${a.id})">✏️</button>
+                <button class="action-btn" onclick="delAlarm(${a.id})" style="color:var(--danger)">🗑</button>
+            `;
+
+            div.appendChild(infoDiv);
+            div.appendChild(actionsDiv);
             list.appendChild(div);
         });
     }
@@ -198,14 +231,11 @@
         document.getElementById('clock').innerText = `${h}:${m}:${s}`;
         
         alarms.forEach(a => {
-            // Check if alarm is for today
             if (a.days.includes(now.getDay())) {
-                // Warning 1 min before
                 if (a.time === preTimeStr && a.preNotified !== preTimeStr) {
-                    notifyUser("Almost Time!", `Alarm "${a.label}" is ringing in 60 seconds.`);
+                    notifyUser("Almost Time!", `Alarm "${a.label}" in 60s`);
                     a.preNotified = preTimeStr;
                 }
-                // Actual Ring
                 if (a.time === timeStr && a.lastTriggered !== timeStr) {
                     triggerRing(a);
                     notifyUser("WAKE UP!", a.label);
@@ -220,12 +250,10 @@
     }
 
     function triggerRing(a) {
-        audio.playbackRate = 1.4; // Forced High Speed
-        audio.play();
-        document.getElementById("ringTime").innerText = a.time;
-        document.getElementById("ringLabel").innerText = a.label;
+        audio.play().catch(e => console.log("Autoplay blocked until user interaction"));
+        document.getElementById("ringTime").textContent = a.time;
+        document.getElementById("ringLabel").textContent = a.label;
         document.getElementById("overlay").classList.add("active");
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200], true);
     }
 
     function stopAlarm() {
@@ -242,6 +270,7 @@
 
     window.editAlarm = (id) => {
         const a = alarms.find(x => x.id === id);
+        if(!a) return;
         editId = a.id;
         timeInput.value = a.time;
         labelInput.value = a.label;
