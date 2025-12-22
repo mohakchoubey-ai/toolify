@@ -1,79 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clock Essential</title>
-<style>
-    :root {
-        --bg:#f4f7fa; --card:#fff; --text:#111; --muted:#777;
-        --primary:#0071e3; --danger:#ff3b30; --accent:#e8f0fe;
-    }
-    .dark {
-        --bg:#000; --card:#1c1c1e; --text:#fff; --muted:#8e8e93; --primary:#0a84ff; --accent:#2c2c2e;
-    }
-    body {
-        margin:0; font-family: system-ui, -apple-system, sans-serif; background:var(--bg);
-        display:flex; justify-content:center; color:var(--text); transition: 0.3s;
-    }
-    .app { max-width: 480px; width:100%; padding:20px; }
-    .nav-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-    .hub-link { text-decoration:none; color:var(--primary); font-weight:700; font-size:0.85rem; border:1px solid var(--primary); padding:6px 12px; border-radius:10px; }
-    
-    #clock { text-align:center; font-size:4.5rem; margin:20px 0; font-weight: 800; color: var(--primary); letter-spacing: -2px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock Essential | Toolbox Hub</title>
+    <style>
+        :root {
+            --bg:#f4f7fa; --card:#fff; --text:#111; --muted:#777;
+            --primary:#0071e3; --danger:#ff3b30; --accent:#e8f0fe;
+        }
+        .dark {
+            --bg:#000; --card:#1c1c1e; --text:#fff; --muted:#8e8e93; --primary:#0a84ff; --accent:#2c2c2e;
+        }
+        body {
+            margin:0; font-family: system-ui, -apple-system, sans-serif; background:var(--bg);
+            display:flex; justify-content:center; color:var(--text); transition: 0.3s;
+            min-height: 100vh;
+        }
+        .app { max-width: 480px; width:100%; padding:20px; }
+        .nav-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .hub-link { 
+            text-decoration:none; color:var(--primary); font-weight:700; font-size:0.85rem; 
+            border:1px solid var(--primary); padding:6px 12px; border-radius:10px; transition: 0.3s;
+        }
+        .hub-link:hover { background: var(--primary); color: white; }
+        
+        #clock { text-align:center; font-size:4.5rem; margin:20px 0; font-weight: 800; color: var(--primary); letter-spacing: -2px; }
 
-    .card {
-        background:var(--card); padding:24px; border-radius:28px;
-        box-shadow:0 10px 30px rgba(0,0,0,.06); margin-bottom:20px;
-    }
-    label { font-size:.7rem; font-weight:800; color:var(--muted); margin-top:15px; display:block; text-transform:uppercase; letter-spacing: 1px; }
-    input {
-        width:100%; padding:15px; border-radius:14px; border:none;
-        margin-top:8px; font-size:1rem; background:var(--accent); color:var(--text); outline:none;
-    }
-    
-    .day-grid { display:flex; gap:6px; margin-top:12px; }
-    .day { 
-        flex:1; padding:12px 0; border-radius:12px; background:var(--accent); 
-        font-weight:700; font-size:0.75rem; cursor:pointer; text-align:center; border:none; color:var(--text); 
-    }
-    .day.active { background:var(--primary); color:#fff; }
+        .card {
+            background:var(--card); padding:24px; border-radius:28px;
+            box-shadow:0 10px 30px rgba(0,0,0,.06); margin-bottom:20px;
+        }
+        label { font-size:.7rem; font-weight:800; color:var(--muted); margin-top:15px; display:block; text-transform:uppercase; letter-spacing: 1px; }
+        input {
+            width:100%; padding:15px; border-radius:14px; border:none;
+            margin-top:8px; font-size:1rem; background:var(--accent); color:var(--text); outline:none;
+        }
+        
+        .day-grid { display:flex; gap:6px; margin-top:12px; }
+        .day { 
+            flex:1; padding:12px 0; border-radius:12px; background:var(--accent); 
+            font-weight:700; font-size:0.75rem; cursor:pointer; text-align:center; border:none; color:var(--text); 
+        }
+        .day.active { background:var(--primary); color:#fff; }
 
-    .save-btn { 
-        width:100%; padding:18px; border-radius:16px; border:none; background:var(--primary); 
-        color:#fff; font-weight:800; font-size:1.1rem; cursor:pointer; margin-top:25px;
-        box-shadow: 0 4px 15px rgba(0, 113, 227, 0.3);
-    }
+        .save-btn { 
+            width:100%; padding:18px; border-radius:16px; border:none; background:var(--primary); 
+            color:#fff; font-weight:800; font-size:1.1rem; cursor:pointer; margin-top:25px;
+            box-shadow: 0 4px 15px rgba(0, 113, 227, 0.3);
+        }
 
-    .alarm-item {
-        background:var(--card); padding:18px; border-radius:22px;
-        display:flex; justify-content:space-between; align-items:center; margin-top:12px; 
-        box-shadow:0 4px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05);
-    }
-    .alarm-info b { font-size: 1.4rem; }
-    .alarm-actions { display: flex; gap: 10px; }
-    .action-btn { background: var(--accent); border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1.1rem; }
+        .alarm-item {
+            background:var(--card); padding:18px; border-radius:22px;
+            display:flex; justify-content:space-between; align-items:center; margin-top:12px; 
+            box-shadow:0 4px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05);
+        }
+        .alarm-info b { font-size: 1.4rem; }
+        .alarm-actions { display: flex; gap: 10px; }
+        .action-btn { background: var(--accent); border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1.1rem; }
 
-    .overlay {
-        position:fixed; inset:0; background:rgba(0,0,0,0.96); color:#fff;
-        display:none; flex-direction:column; justify-content:center; align-items:center; z-index:999;
-    }
-    .overlay.active { display:flex; }
-    .stop-btn { background:var(--danger); width:80%; padding:20px; border-radius:20px; border:none; color:white; font-weight:800; font-size:1.3rem; cursor:pointer; }
-</style>
+        .overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,0.96); color:#fff;
+            display:none; flex-direction:column; justify-content:center; align-items:center; z-index:999;
+        }
+        .overlay.active { display:flex; }
+        .stop-btn { background:var(--danger); width:80%; padding:20px; border-radius:20px; border:none; color:white; font-weight:800; font-size:1.3rem; cursor:pointer; }
+    </style>
 </head>
-<body>
-
-<div class="app">
+<body class="dark"> <div class="app">
     <div class="nav-bar">
-        <a href="index.html" class="hub-link">TOOLBOX HUB</a>
+        <a href="index.html" class="hub-link">← TOOLBOX HUB</a>
         <button onclick="document.body.classList.toggle('dark')" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">🌓</button>
     </div>
 
     <h1 id="clock">00:00:00</h1>
 
     <div class="card">
-        <label>Time</label>
+        <label>Set Time</label>
         <input type="time" id="timeInput">
         
         <label>Alarm Name</label>
@@ -97,130 +100,159 @@
 </div>
 
 <div class="overlay" id="overlay">
-    <div style="font-size:6rem; margin-bottom: 20px;">🔔</div>
+    <div style="font-size:6rem; margin-bottom: 20px; animation: pulse 1s infinite;">🔔</div>
     <h1 id="ringTime" style="font-size:4rem; margin:0;">00:00</h1>
-    <p id="ringLabel" style="font-size:1.5rem; color:var(--muted); margin-bottom:40px;"></p>
+    <p id="ringLabel" style="font-size:1.5rem; color:#8e8e93; margin-bottom:40px;"></p>
     <button class="stop-btn" onclick="stopAlarm()">STOP ALARM</button>
 </div>
 
 <audio id="audio" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" loop></audio>
 
 <script>
-let alarms = JSON.parse(localStorage.getItem("essential_alarms") || "[]");
-let selectedDays = [], editId = null;
-const audio = document.getElementById("audio");
+    let alarms = JSON.parse(localStorage.getItem("essential_alarms") || "[]");
+    let selectedDays = [], editId = null;
+    const audio = document.getElementById("audio");
+    const timeInput = document.getElementById("timeInput");
+    const labelInput = document.getElementById("labelInput");
 
-// Day Selection
-document.querySelectorAll(".day").forEach(btn => {
-    btn.onclick = () => {
-        btn.classList.toggle("active");
-        let d = parseInt(btn.dataset.d);
-        selectedDays.includes(d) ? selectedDays = selectedDays.filter(x => x !== d) : selectedDays.push(d);
-    };
-});
+    // Day Selection Logic
+    document.querySelectorAll(".day").forEach(btn => {
+        btn.onclick = () => {
+            btn.classList.toggle("active");
+            let d = parseInt(btn.dataset.d);
+            if(selectedDays.includes(d)) {
+                selectedDays = selectedDays.filter(x => x !== d);
+            } else {
+                selectedDays.push(d);
+            }
+        };
+    });
 
-function saveAlarm() {
-    if(!timeInput.value) return alert("Please set a time!");
+    function saveAlarm() {
+        if(!timeInput.value) return alert("Please set a time!");
 
-    const newAlarm = {
-        id: editId || Date.now(),
-        time: timeInput.value,
-        label: labelInput.value || "Alarm",
-        days: [...selectedDays],
-        lastTriggered: ""
-    };
+        const newAlarm = {
+            id: editId || Date.now(),
+            time: timeInput.value,
+            label: labelInput.value || "Alarm",
+            days: [...selectedDays],
+            lastTriggered: ""
+        };
 
-    if (editId) {
-        alarms = alarms.map(a => a.id === editId ? newAlarm : a);
-        editId = null;
-        document.getElementById("saveBtn").innerText = "SET ALARM";
-    } else {
-        alarms.push(newAlarm);
+        if (editId) {
+            alarms = alarms.map(a => a.id === editId ? newAlarm : a);
+            editId = null;
+            document.getElementById("saveBtn").innerText = "SET ALARM";
+        } else {
+            alarms.push(newAlarm);
+        }
+
+        localStorage.setItem("essential_alarms", JSON.stringify(alarms));
+        render();
+        resetForm();
     }
 
-    localStorage.setItem("essential_alarms", JSON.stringify(alarms));
+    function render() {
+        const list = document.getElementById("list");
+        list.innerHTML = "";
+        alarms.sort((a,b) => a.time.localeCompare(b.time)).forEach(a => {
+            let div = document.createElement("div");
+            div.className = "alarm-item";
+            div.innerHTML = `
+                <div class="alarm-info">
+                    <b>${a.time}</b><br>
+                    <small style="color:var(--muted)">${a.label} ${a.days.length ? '• Rep' : ''}</small>
+                </div>
+                <div class="alarm-actions">
+                    <button class="action-btn" onclick="editAlarm(${a.id})">✏️</button>
+                    <button class="action-btn" onclick="delAlarm(${a.id})" style="color:var(--danger)">🗑</button>
+                </div>`;
+            list.appendChild(div);
+        });
+    }
+
+    window.editAlarm = (id) => {
+        const a = alarms.find(x => x.id === id);
+        editId = a.id;
+        timeInput.value = a.time;
+        labelInput.value = a.label;
+        selectedDays = [...a.days];
+        document.querySelectorAll(".day").forEach(btn => {
+            const d = parseInt(btn.dataset.d);
+            btn.classList.toggle("active", selectedDays.includes(d));
+        });
+        document.getElementById("saveBtn").innerText = "UPDATE ALARM";
+    };
+
+    window.delAlarm = (id) => {
+        alarms = alarms.filter(a => a.id !== id);
+        localStorage.setItem("essential_alarms", JSON.stringify(alarms));
+        render();
+    };
+
+    function tick() {
+        let now = new Date();
+        let h = now.getHours().toString().padStart(2, '0');
+        let m = now.getMinutes().toString().padStart(2, '0');
+        let s = now.getSeconds().toString().padStart(2, '0');
+        let timeStr = `${h}:${m}`;
+        
+        document.getElementById('clock').innerText = `${h}:${m}:${s}`;
+        
+        alarms.forEach(a => {
+            if (a.time === timeStr && a.lastTriggered !== timeStr) {
+                // Check if repeat is set and matches today
+                if (a.days.length === 0 || a.days.includes(now.getDay())) {
+                    triggerRing(a);
+                    a.lastTriggered = timeStr;
+                }
+            }
+        });
+    }
+
+    function triggerRing(a) {
+        audio.play();
+        if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 500]);
+        document.getElementById("ringTime").innerText = a.time;
+        document.getElementById("ringLabel").innerText = a.label;
+        document.getElementById("overlay").classList.add("active");
+    }
+
+    function stopAlarm() {
+        audio.pause();
+        audio.currentTime = 0;
+        document.getElementById("overlay").classList.remove("active");
+    }
+
+    function resetForm() {
+        timeInput.value = "";
+        labelInput.value = "";
+        selectedDays = [];
+        document.querySelectorAll(".day").forEach(d => d.classList.remove("active"));
+    }
+
+    setInterval(tick, 1000);
     render();
-    resetForm();
-}
-
-function render() {
-    const list = document.getElementById("list");
-    list.innerHTML = "";
-    alarms.sort((a,b) => a.time.localeCompare(b.time)).forEach(a => {
-        let div = document.createElement("div");
-        div.className = "alarm-item";
-        div.innerHTML = `
-            <div class="alarm-info">
-                <b>${a.time}</b><br>
-                <small style="color:var(--muted)">${a.label}</small>
-            </div>
-            <div class="alarm-actions">
-                <button class="action-btn" onclick="editAlarm(${a.id})">✏️</button>
-                <button class="action-btn" onclick="delAlarm(${a.id})" style="color:var(--danger)">🗑</button>
-            </div>`;
-        list.appendChild(div);
-    });
-}
-
-window.editAlarm = (id) => {
-    const a = alarms.find(x => x.id === id);
-    editId = a.id;
-    timeInput.value = a.time;
-    labelInput.value = a.label;
-    
-    // Reset and Load Days
-    selectedDays = [...a.days];
-    document.querySelectorAll(".day").forEach(btn => {
-        const d = parseInt(btn.dataset.d);
-        btn.classList.toggle("active", selectedDays.includes(d));
-    });
-
-    document.getElementById("saveBtn").innerText = "UPDATE ALARM";
-    window.scrollTo({top: 0, behavior: 'smooth'});
-};
-
-window.delAlarm = (id) => {
-    alarms = alarms.filter(a => a.id !== id);
-    localStorage.setItem("essential_alarms", JSON.stringify(alarms));
-    render();
-};
-
-function tick() {
-    let now = new Date();
-    let timeStr = now.toTimeString().slice(0, 5);
-    document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour12:false});
-    
-    alarms.forEach(a => {
-        if (a.time === timeStr && a.lastTriggered !== timeStr && (a.days.length === 0 || a.days.includes(now.getDay()))) {
-            triggerRing(a);
-            a.lastTriggered = timeStr;
-        }
-    });
-}
-
-function triggerRing(a) {
-    audio.play();
-    if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
-    ringTime.innerText = a.time;
-    ringLabel.innerText = a.label;
-    overlay.classList.add("active");
-}
-
-function stopAlarm() {
-    audio.pause();
-    audio.currentTime = 0;
-    overlay.classList.remove("active");
-}
-
-function resetForm() {
-    timeInput.value = "";
-    labelInput.value = "";
-    selectedDays = [];
-    document.querySelectorAll(".day").forEach(d => d.classList.remove("active"));
-}
-
-setInterval(tick, 1000);
-render();
 </script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
+        authDomain: "toolbox-hub-98c03.firebaseapp.com",
+        projectId: "toolbox-hub-98c03",
+        appId: "1:321020105472:web:356e7c2903def7b9d859e5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, user => {
+        if(!user) window.location.href="login.html";
+    });
+</script>
+
 </body>
 </html>
