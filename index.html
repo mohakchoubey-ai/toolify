@@ -8,7 +8,6 @@
     
     <style>
         :root {
-            /* Google Flow Inspired Mesh Background */
             --bg-mesh: radial-gradient(at 0% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
                        radial-gradient(at 50% 0%, hsla(225,39%,20%,1) 0, transparent 50%), 
                        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
@@ -44,7 +43,6 @@
             overflow-x: hidden;
         }
 
-        /* Fixed Header Logic */
         header {
             width: 100%;
             padding: 20px 8%;
@@ -57,12 +55,19 @@
             backdrop-filter: blur(10px);
         }
 
-        /* RESTORED LOGO AREA */
+        /* LOGO AREA WITH IMAGE */
         .logo-area {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
+
+        .logo-img {
+            width: 35px; /* Size adjust karein */
+            height: 35px;
+            object-fit: contain;
+        }
+
         .logo-text { 
             font-weight: 800; 
             font-size: 1.5rem; 
@@ -70,7 +75,6 @@
         }
         .logo-text span { color: var(--accent); }
 
-        /* Settings Icon & Dropdown */
         .settings-container { position: relative; }
         
         #settingsBtn {
@@ -127,7 +131,6 @@
         .menu-item:hover { background: rgba(126, 250, 255, 0.1); transform: translateX(5px); }
         .logout-item { color: #ff5f5f; border-top: 1px solid var(--glass-border); margin-top: 8px; }
 
-        /* Hero Container */
         .hero {
             margin-top: 60px;
             text-align: center;
@@ -136,7 +139,6 @@
         .hero h1 { font-size: 4rem; font-weight: 800; letter-spacing: -2px; margin-bottom: 10px; }
         .hero p { opacity: 0.6; font-size: 1.1rem; }
 
-        /* Main Glass Container */
         .main-container {
             width: 90%;
             max-width: 1100px;
@@ -191,6 +193,7 @@
 
     <header>
         <div class="logo-area">
+            <img src="logo.png" alt="Toolify Logo" class="logo-img">
             <div class="logo-text">TOOL<span>IFY.</span></div>
         </div>
         <div class="nav-right">
@@ -221,9 +224,7 @@
             <a href="clock.html" class="tool-card"><div class="icon">🕓</div><span>Clock</span></a>
             <a href="timer.html" class="tool-card"><div class="icon">⌛</div><span>Timer</span></a>
             <a href="speech.html" class="tool-card"><div class="icon">🗣️</div><span>Text to Speech</span></a>  
-              <a href="calendar.html" class="tool-card"><div class="icon">📅 </div><span> Calendar </span></a> 
-            
-            
+            <a href="calendar.html" class="tool-card"><div class="icon">📅</div><span>Calendar</span></a> 
         </div>
     </main>
 
@@ -244,7 +245,6 @@
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // Menu Toggle Logic
     const settingsBtn = document.getElementById('settingsBtn');
     const settingsMenu = document.getElementById('settingsMenu');
     
@@ -255,7 +255,6 @@
 
     document.addEventListener('click', () => settingsMenu.classList.remove('active'));
 
-    // Theme Switch Logic
     window.toggleTheme = () => {
         const body = document.body;
         const themeText = document.getElementById('themeText');
@@ -269,7 +268,6 @@
         }
     };
 
-    // Firebase Auth logic
     window.logout = () => {
         if(confirm("Are you sure you want to sign out?")) signOut(auth);
     };
