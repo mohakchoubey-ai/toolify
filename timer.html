@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Premium Timer</title>
+    <title>Custom Pro Timer</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
-            background: #0f172a; /* Deep Space Blue */
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0f172a;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             color: white;
+            overflow: hidden;
         }
 
-        /* The Main Container */
         .app-container {
             position: relative;
             width: 100%;
@@ -26,29 +26,27 @@
             text-align: center;
         }
 
-        /* Floating Settings Icon - BIG for Mobile */
+        /* Settings Button */
         .settings-trigger {
             position: absolute;
-            top: 20px;
-            right: 30px;
-            width: 55px; /* Big touch area */
-            height: 55px;
+            top: 10px;
+            right: 25px;
+            width: 50px;
+            height: 50px;
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 18px;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            backdrop-filter: blur(10px);
-            z-index: 10;
+            z-index: 20;
         }
 
-        /* Circular Progress Area */
+        /* Progress Circle */
         .timer-circle-container {
             position: relative;
-            width: 300px;
-            height: 300px;
+            width: min(75vw, 300px);
+            height: min(75vw, 300px);
             margin: 40px auto;
             display: flex;
             align-items: center;
@@ -57,184 +55,193 @@
 
         svg {
             position: absolute;
-            top: 0;
-            left: 0;
+            transform: rotate(-90deg);
             width: 100%;
             height: 100%;
-            transform: rotate(-90deg);
         }
 
         circle {
             fill: none;
-            stroke-width: 8;
+            stroke-width: 10;
             stroke-linecap: round;
         }
 
         .bg-circle { stroke: rgba(255, 255, 255, 0.05); }
         .progress-circle {
-            stroke: #38bdf8; /* Cyan Glow */
+            stroke: #38bdf8;
             stroke-dasharray: 880;
             stroke-dashoffset: 0;
-            transition: stroke-dashoffset 1s linear;
-            filter: drop-shadow(0 0 8px #38bdf8);
+            transition: stroke-dashoffset 0.3s linear;
         }
 
-        /* Big Time Display */
         .time-text {
-            font-size: 4.5rem;
+            font-size: clamp(3rem, 15vw, 4.5rem);
             font-weight: 200;
             font-variant-numeric: tabular-nums;
-            letter-spacing: -2px;
         }
 
-        /* Custom Button Styles */
-        .btn-group {
-            display: flex;
+        /* Modal / Settings Overlay */
+        #settingsModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.95);
+            display: none;
             flex-direction: column;
-            gap: 15px;
-            margin-top: 30px;
-            padding: 0 20px;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(10px);
         }
 
+        .modal-content {
+            width: 80%;
+            max-width: 300px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #38bdf8;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2rem;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        /* Buttons */
+        .btn-group { display: flex; flex-direction: column; gap: 12px; }
         .btn {
             border: none;
-            padding: 18px;
-            border-radius: 20px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.1s, background 0.3s;
         }
 
-        .btn-primary {
-            background: #38bdf8;
-            color: #0f172a;
-            box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.4);
-        }
+        .btn-primary { background: #38bdf8; color: #0f172a; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: white; }
 
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn:active { transform: scale(0.96); }
-
-        /* Animation for when time is up */
+        .urgent { animation: pulse-red 1s infinite; }
         @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); text-shadow: 0 0 10px red; }
+            100% { transform: scale(1); }
         }
-        .urgent { animation: pulse-red 1.5s infinite; border-radius: 32px; }
     </style>
 </head>
 <body>
 
-<div class="app-container" id="mainCard">
-    <div class="settings-trigger" onclick="alert('Settings menu logic here')">
-        <svg style="position:static; transform:none; width:28px; height:28px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-            <circle cx="12" cy="12" r="3" stroke-width="1.5"></circle>
+<div id="settingsModal">
+    <div class="modal-content">
+        <h3>Set Duration (Seconds)</h3>
+        <input type="number" id="durationInput" placeholder="Enter seconds..." value="30">
+        <button class="btn btn-primary" style="width:100%" onclick="applySettings()">APPLY</button>
+        <button class="btn btn-secondary" style="width:100%; margin-top:10px;" onclick="closeSettings()">CANCEL</button>
+    </div>
+</div>
+
+<div class="app-container">
+    <div class="settings-trigger" onclick="openSettings()">
+        <svg style="transform:none; width:24px; height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
         </svg>
     </div>
 
-    <div class="timer-circle-container">
+    <div class="timer-circle-container" id="timerRing">
         <svg viewBox="0 0 300 300">
             <circle class="bg-circle" cx="150" cy="150" r="140"></circle>
             <circle id="progress" class="progress-circle" cx="150" cy="150" r="140"></circle>
         </svg>
-        <div class="time-text" id="display">25:00</div>
+        <div class="time-text" id="display">00:30</div>
     </div>
 
     <div class="btn-group">
-        <button class="btn btn-primary" id="startBtn">START TIMER</button>
-        <button class="btn btn-secondary" id="resetBtn">RESET</button>
+        <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">START</button>
+        <button class="btn btn-secondary" onclick="resetTimer()">RESET</button>
     </div>
 </div>
 
 <script>
-    let timeLeft = 1500; // 25 mins in seconds
-    let totalTime = 1500;
+    let totalTime = 30;
+    let timeLeft = 30;
     let timerId = null;
     const circumference = 2 * Math.PI * 140;
 
     const display = document.getElementById('display');
     const progress = document.getElementById('progress');
     const startBtn = document.getElementById('startBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const mainCard = document.getElementById('mainCard');
-
-    function playBeep() {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        let duration = 4; // 4 seconds total
-        let startTime = ctx.currentTime;
-
-        const interval = setInterval(() => {
-            if (ctx.currentTime - startTime >= duration) {
-                clearInterval(interval);
-                return;
-            }
-            let osc = ctx.createOscillator();
-            let gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            
-            osc.frequency.value = 600; 
-            gain.gain.setValueAtTime(0.1, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-            
-            osc.start();
-            osc.stop(ctx.currentTime + 0.5);
-        }, 800);
-    }
+    const timerRing = document.getElementById('timerRing');
 
     function updateUI() {
         const mins = Math.floor(timeLeft / 60);
         const secs = timeLeft % 60;
         display.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        
-        // Update Progress Circle
         const offset = circumference - (timeLeft / totalTime) * circumference;
         progress.style.strokeDashoffset = offset;
     }
 
-    startBtn.onclick = () => {
+    function toggleTimer() {
         if (timerId) {
             clearInterval(timerId);
             timerId = null;
             startBtn.textContent = 'RESUME';
-            startBtn.style.background = '#38bdf8';
         } else {
             startBtn.textContent = 'PAUSE';
-            startBtn.style.background = '#fbbf24'; // Amber for pause
             timerId = setInterval(() => {
                 timeLeft--;
                 updateUI();
                 if (timeLeft <= 0) {
                     clearInterval(timerId);
-                    mainCard.classList.add('urgent');
-                    playBeep();
-                    setTimeout(() => mainCard.classList.remove('urgent'), 4500);
+                    timerId = null;
+                    timerRing.classList.add('urgent');
+                    playBeepLoop();
                 }
             }, 1000);
         }
-    };
+    }
 
-    resetBtn.onclick = () => {
+    function playBeepLoop() {
+        const ctx = new AudioContext();
+        let count = 0;
+        const interval = setInterval(() => {
+            if (count >= 5) { clearInterval(interval); return; }
+            let osc = ctx.createOscillator();
+            let gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.frequency.value = 800;
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            osc.start(); osc.stop(ctx.currentTime + 0.3);
+            count++;
+        }, 800);
+    }
+
+    function resetTimer() {
         clearInterval(timerId);
         timerId = null;
-        timeLeft = 1500;
-        mainCard.classList.remove('urgent');
-        startBtn.textContent = 'START TIMER';
-        startBtn.style.background = '#38bdf8';
+        timeLeft = totalTime;
+        timerRing.classList.remove('urgent');
+        startBtn.textContent = 'START';
         updateUI();
-    };
+    }
 
-    // Initialize stroke
+    // Modal Functions
+    function openSettings() { document.getElementById('settingsModal').style.display = 'flex'; }
+    function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+    function applySettings() {
+        const newSeconds = parseInt(document.getElementById('durationInput').value);
+        if (newSeconds > 0) {
+            totalTime = newSeconds;
+            resetTimer();
+            closeSettings();
+        }
+    }
+
+    // Init
     progress.style.strokeDasharray = circumference;
     updateUI();
 </script>
-
 </body>
 </html>
