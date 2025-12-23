@@ -7,8 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #00f2ff; /* First color of name */
-            --secondary: #ffffff; /* Second color of name */
+            --primary: #00f2ff;
+            --secondary: #ffffff;
             --glass: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.1);
         }
@@ -18,37 +18,46 @@
 
         /* VIDEO BACKGROUND */
         #bg-video { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            z-index: -1; 
-            transition: filter 1.2s ease; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            object-fit: cover; z-index: -1; transition: filter 1.2s ease; 
         }
         .blurred { filter: blur(45px) brightness(0.4); }
 
-        /* LOGO POSITIONING (Fixed Top Left) */
-        .brand-container {
-            position: fixed;
-            top: 30px;
-            left: 40px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 1000;
+        /* HEADER & NAVIGATION */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; padding: 25px 40px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 1000;
         }
+
+        .brand-container { display: flex; align-items: center; gap: 12px; }
         .logo-img { width: 45px; height: 45px; object-fit: contain; }
         .logo-text { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; }
         .logo-text .part1 { color: var(--primary); }
         .logo-text .part2 { color: var(--secondary); }
 
-        /* PAGE 1: LANDING */
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+
+        /* SETTINGS GEAR & DROPDOWN */
+        .settings-menu { position: relative; display: inline-block; }
+        .gear-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; transition: 0.3s; }
+        .gear-btn:hover { transform: rotate(45deg); }
+
+        .dropdown-content {
+            display: none; position: absolute; right: 0; top: 40px;
+            background: rgba(15, 15, 15, 0.95); border: 1px solid var(--border);
+            min-width: 180px; border-radius: 12px; backdrop-filter: blur(10px); overflow: hidden;
+        }
+        .dropdown-content a, .dropdown-content button {
+            color: white; padding: 12px 16px; text-decoration: none; display: block;
+            font-size: 0.9rem; transition: 0.2s; background: none; border: none; width: 100%; text-align: left;
+        }
+        .dropdown-content a:hover, .dropdown-content button:hover { background: var(--glass); color: var(--primary); }
+        .settings-menu:hover .dropdown-content { display: block; }
+
+        /* LANDING & DASHBOARD */
         #landing-page {
             height: 100vh; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; text-align: center;
-            transition: 0.8s ease;
+            justify-content: center; align-items: center; text-align: center; transition: 0.8s ease;
         }
 
         .hero-title { font-size: 4.5rem; font-weight: 800; margin-bottom: 10px; }
@@ -56,7 +65,6 @@
         .hero-title .part2 { color: var(--secondary); }
         .tagline { color: #9aa0a6; font-size: 1.2rem; margin-bottom: 40px; }
 
-        .btn-group { display: flex; gap: 15px; }
         .btn {
             padding: 14px 35px; border-radius: 12px; cursor: pointer;
             font-weight: 600; transition: 0.3s; border: 1px solid var(--border);
@@ -64,30 +72,13 @@
         }
         .btn-primary { background: var(--primary); color: #000; border: none; }
         .btn-primary:hover { box-shadow: 0 0 30px rgba(0, 242, 255, 0.4); transform: scale(1.05); }
-        .btn-outline { background: var(--glass); color: #fff; backdrop-filter: blur(10px); }
-        .btn-outline:hover { background: rgba(255,255,255,0.1); }
 
-        /* PAGE 2: DASHBOARD */
         #dashboard {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             padding: 120px 8% 40px 8%; display: none; opacity: 0; 
             transform: scale(1.1); transition: 0.8s all cubic-bezier(0.4, 0, 0.2, 1);
             overflow-y: auto;
         }
-
-        .dash-header {
-            display: flex; justify-content: flex-end; align-items: center; 
-            margin-bottom: 40px;
-        }
-
-        .user-profile {
-            display: flex; align-items: center; gap: 12px;
-            background: var(--glass); padding: 8px 20px; border-radius: 50px;
-            border: 1px solid var(--border);
-        }
-        .avatar { width: 35px; height: 35px; border-radius: 50%; background: var(--primary); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 800; }
-        .user-info h4 { font-size: 0.9rem; }
-        .user-info p { font-size: 0.7rem; opacity: 0.5; }
 
         .tools-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -101,11 +92,15 @@
         .card:hover { background: var(--primary); color: #000; transform: translateY(-10px); }
         .card-icon { font-size: 2.5rem; margin-bottom: 15px; display: block; }
 
-        /* REMINDER POPUP */
-        #reminder {
-            position: fixed; bottom: 30px; right: 30px; width: 300px;
-            background: #111; padding: 20px; border-radius: 20px;
-            border: 1px solid var(--primary); display: none; z-index: 9999;
+        /* FEEDBACK MODAL */
+        #feedback-modal {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #111; padding: 30px; border-radius: 20px; border: 1px solid var(--primary);
+            z-index: 2000; width: 90%; max-width: 400px; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        #feedback-modal textarea {
+            width: 100%; height: 120px; background: #222; border: 1px solid var(--border);
+            color: white; padding: 12px; border-radius: 10px; margin: 15px 0; outline: none;
         }
 
         .show-page { display: block !important; opacity: 1 !important; transform: scale(1) !important; }
@@ -118,36 +113,32 @@
         <source src="background.mp4" type="video/mp4">
     </video>
 
-    <div class="brand-container">
-        <img src="logo.png" alt="Toolify Logo" class="logo-img">
-        <div class="logo-text">
-            <span class="part1">Tool</span><span class="part2">ify</span>
+    <header>
+        <div class="brand-container">
+            <img src="logo.png" alt="Toolify Logo" class="logo-img">
+            <div class="logo-text"><span class="part1">Tool</span><span class="part2">ify</span></div>
         </div>
-    </div>
+        <div class="nav-right">
+            <div id="auth-header-area"></div>
+            <div class="settings-menu">
+                <button class="gear-btn">⚙️</button>
+                <div class="dropdown-content">
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="terms.html">Terms & Conditions</a>
+                    <div id="feedback-opt-container"></div>
+                    <div id="logout-opt-container"></div>
+                </div>
+            </div>
+        </div>
+    </header>
 
     <section id="landing-page">
-        <h1 class="hero-title">
-            <span class="part1">Tool</span><span class="part2">ify</span>
-        </h1>
+        <h1 class="hero-title"><span class="part1">Tool</span><span class="part2">ify</span></h1>
         <p class="tagline">The futuristic workspace for digital creators.</p>
-        <div class="btn-group">
-            <button class="btn btn-primary" onclick="signIn()">Sign in with Google</button>
-            <button class="btn btn-outline" onclick="enterAsGuest()">Get Started</button>
-        </div>
+        <button class="btn btn-primary" onclick="enterAsGuest()">Get Started</button>
     </section>
 
     <section id="dashboard">
-        <div class="dash-header">
-            <div class="user-profile">
-                <div class="avatar" id="avatar-char">G</div>
-                <div class="user-info">
-                    <h4 id="user-name">Guest</h4>
-                    <p id="user-email">No Account</p>
-                </div>
-                <div id="auth-btn-area"></div>
-            </div>
-        </div>
-
         <div class="tools-grid">
             <a href="alarm.html" class="card"><span class="card-icon">⏰</span><h4>Alarm</h4></a>
             <a href="calculator.html" class="card"><span class="card-icon">🧮</span><h4>Calculator</h4></a>
@@ -160,11 +151,13 @@
         </div>
     </section>
 
-    <div id="reminder">
-        <span style="float:right; cursor:pointer;" onclick="this.parentElement.style.display='none'">✕</span>
-        <h4 style="color:var(--primary)">Security Alert</h4>
-        <p style="font-size:0.8rem; margin:10px 0;">Please sign in to keep your session and tools synchronized.</p>
-        <button onclick="signIn()" style="background:none; border:none; color:var(--primary); font-weight:bold; cursor:pointer;">SIGN IN</button>
+    <div id="feedback-modal">
+        <h3>Submit Feedback</h3>
+        <textarea id="feedback-text" placeholder="Tell us how we can improve..."></textarea>
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-primary" style="flex:1" onclick="submitFeedback()">Send</button>
+            <button class="btn" style="flex:1" onclick="document.getElementById('feedback-modal').style.display='none'">Close</button>
+        </div>
     </div>
 
     <script type="module">
@@ -181,12 +174,10 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // FLOW LOGIC
         window.enterAsGuest = () => {
             document.getElementById('landing-page').classList.add('hide-page');
             document.getElementById('dashboard').classList.add('show-page');
-            document.getElementById('bg-video').classList.add('blurred'); // Blurs the video
-            document.getElementById('auth-btn-area').innerHTML = `<button onclick="signIn()" style="margin-left:15px; background:none; border:1px solid #fff; color:#fff; padding:4px 12px; border-radius:5px; cursor:pointer;">Sign In</button>`;
+            document.getElementById('bg-video').classList.add('blurred');
         };
 
         window.signIn = async () => {
@@ -195,21 +186,29 @@
 
         window.logout = () => signOut(auth).then(() => location.reload());
 
+        window.submitFeedback = () => {
+            const msg = document.getElementById('feedback-text').value;
+            if(!msg) return alert("Please type your feedback first.");
+            window.location.href = `mailto:mohakchoubey@gmail.com?subject=Toolify Feedback&body=${msg}`;
+            document.getElementById('feedback-modal').style.display = 'none';
+        };
+
         onAuthStateChanged(auth, (user) => {
+            const authArea = document.getElementById('auth-header-area');
+            const feedbackArea = document.getElementById('feedback-opt-container');
+            const logoutArea = document.getElementById('logout-opt-container');
+
             if (user) {
-                document.getElementById('landing-page').classList.add('hide-page');
-                document.getElementById('dashboard').classList.add('show-page');
-                document.getElementById('bg-video').classList.add('blurred'); // Blurs the video
-                document.getElementById('user-name').innerText = "Hi, " + user.displayName.split(' ')[0];
-                document.getElementById('user-email').innerText = user.email;
-                document.getElementById('avatar-char').innerText = user.displayName[0];
-                document.getElementById('auth-btn-area').innerHTML = `<button onclick="logout()" style="margin-left:15px; background:none; border:1px solid #ff5f5f; color:#ff5f5f; padding:4px 12px; border-radius:5px; cursor:pointer;">Sign Out</button>`;
+                enterAsGuest();
+                authArea.innerHTML = `<span style="font-weight:600;">Hi, ${user.displayName.split(' ')[0]}</span>`;
+                feedbackArea.innerHTML = `<button onclick="document.getElementById('feedback-modal').style.display='block'">Feedback</button>`;
+                logoutArea.innerHTML = `<button onclick="logout()" style="color:#ff5f5f;">Sign Out</button>`;
+            } else {
+                authArea.innerHTML = `<button class="btn btn-primary" style="padding: 8px 20px;" onclick="signIn()">Sign In / Log In</button>`;
+                feedbackArea.innerHTML = '';
+                logoutArea.innerHTML = '';
             }
         });
-
-        setInterval(() => {
-            if (!auth.currentUser) document.getElementById('reminder').style.display = 'block';
-        }, 30 * 60 * 1000);
     </script>
 </body>
 </html>
