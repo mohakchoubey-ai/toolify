@@ -12,7 +12,28 @@
             --glass: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.1);
         }
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.5);
+    z-index: 1000; /* Keeps it above the video */
+}
 
+.heart {
+    color: #ff0000; /* Makes the heart red */
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+footer:hover .heart {
+    transform: scale(1.3); /* Optional: makes it pop on hover! */
+}
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: #000; color: #fff; overflow: hidden; height: 100vh; }
 
@@ -137,8 +158,9 @@
             </div>
         </div>
     </header> 
-    <div> <footer> DEVELOPED WITH ♥ BY MOHAK </footer></div>
-
+    <footer> 
+    DEVELOPED WITH <span class="heart">♥</span> BY MOHAK 
+</footer>
     <section id="landing-page">
         <h1 class="hero-title"><span class="part1">Tool</span><span class="part2">ify</span></h1>
         <p class="tagline">The futuristic workspace for digital creators.</p>
