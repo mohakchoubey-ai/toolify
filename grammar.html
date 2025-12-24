@@ -1,230 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toolify Grammar Pro AI | Ultimate Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #f5f5f7; --card: #ffffff; --text: #1d1d1f; --p: #0071e3;
-            --sec: #86868b; --border: #d2d2d7; --accent: #f5f5f7;
-        }
-        body.dark-mode {
-            --bg: #000000; --card: #1c1c1e; --text: #f5f5f7; --p: #0a84ff;
-            --sec: #8e8e93; --border: #38383a; --accent: #2c2c2e;
-        }
-        body {
-            margin: 0; font-family: 'Inter', sans-serif; background: var(--bg);
-            color: var(--text); transition: 0.3s; display: flex; flex-direction: column; min-height: 100vh;
-        }
-        header {
-            width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px;
-            display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;
-        }
-        .hub-link {
-            text-decoration: none; color: var(--p); font-weight: 700; font-size: 13px;
-            border: 1px solid var(--p); padding: 8px 16px; border-radius: 20px; transition: 0.3s;
-        }
-        .hub-link:hover { background: var(--p); color: white; }
-        
-        .container { width: 90%; max-width: 800px; margin: 20px auto; flex: 1; }
-        .tool-title { text-align: center; margin-bottom: 30px; }
-        .tool-title h1 { font-size: 3rem; font-weight: 800; letter-spacing: -2px; margin: 0; }
-        
-        .card {
-            background: var(--card); border-radius: 30px; padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.05); border: 1px solid var(--border);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolify Grammar Pro AI</title>
 
-        .controls { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-        select, .btn-small {
-            padding: 10px 15px; border-radius: 12px; border: 1px solid var(--border);
-            background: var(--accent); color: var(--text); font-weight: 600; cursor: pointer; outline: none;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
-        textarea {
-            width: 100%; height: 220px; background: var(--accent);
-            border: 1px solid var(--border); border-radius: 20px; padding: 20px;
-            color: var(--text); font-size: 16px; resize: none; outline: none;
-            box-sizing: border-box; line-height: 1.6; font-family: inherit;
-        }
-
-        .main-btn {
-            width: 100%; background: var(--p); color: white; border: none;
-            padding: 20px; border-radius: 18px; font-weight: 800; font-size: 18px;
-            margin-top: 20px; cursor: pointer; transition: 0.3s;
-        }
-        .main-btn:hover { transform: scale(1.02); box-shadow: 0 10px 30px rgba(0, 113, 227, 0.4); }
-
-        .stats {
-            display: flex; justify-content: space-around; margin-top: 15px;
-            font-size: 12px; font-weight: 700; color: var(--sec); text-transform: uppercase;
-        }
-
-        .result-area {
-            margin-top: 30px; display: none; animation: slideUp 0.5s ease;
-        }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-        .output-box {
-            background: var(--card); border: 2px solid var(--p); padding: 25px;
-            border-radius: 25px; position: relative; font-size: 17px; line-height: 1.8;
-        }
-        .copy-tag {
-            position: absolute; top: 10px; right: 10px; background: var(--p);
-            color: white; padding: 5px 12px; border-radius: 8px; font-size: 10px;
-            font-weight: 800; cursor: pointer; border: none;
-        }
-
-        footer {
-            padding: 40px; text-align: center; font-weight: 600; color: var(--sec);
-            font-size: 13px; border-top: 1px solid var(--border); margin-top: 50px;
-        }
-    </style>
+<style>
+:root{
+--bg:#f5f5f7;--card:#ffffffcc;--text:#1d1d1f;
+--p:#0071e3;--sec:#86868b;--border:#d2d2d7;--err:#ff3b30;
+}
+body.dark{
+--bg:#000;--card:#1c1c1ecc;--text:#f5f5f7;
+--p:#0a84ff;--sec:#8e8e93;--border:#38383a;
+}
+*{box-sizing:border-box}
+body{
+margin:0;font-family:Inter;background:var(--bg);
+color:var(--text);transition:.3s;
+display:flex;flex-direction:column;min-height:100vh;
+}
+header{
+max-width:1100px;margin:auto;width:100%;
+padding:20px;display:flex;justify-content:space-between;align-items:center;
+}
+.hub-link{
+text-decoration:none;font-weight:700;color:var(--p);
+border:1px solid var(--p);padding:8px 16px;border-radius:20px;
+}
+.container{max-width:900px;margin:auto;width:90%;flex:1}
+.card{
+background:var(--card);backdrop-filter:blur(14px);
+padding:30px;border-radius:30px;
+border:1px solid var(--border);
+box-shadow:0 25px 50px rgba(0,0,0,.08);
+}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+.btn{
+padding:10px 16px;border-radius:14px;
+border:1px solid var(--border);background:transparent;
+font-weight:600;cursor:pointer;color:var(--text);
+}
+textarea{
+width:100%;height:200px;border-radius:20px;
+border:1px solid var(--border);
+padding:20px;font-size:16px;
+background:transparent;color:var(--text);
+resize:none;
+}
+.stats{
+display:flex;justify-content:space-between;
+font-size:12px;font-weight:700;color:var(--sec);margin-top:10px;
+}
+.main{
+width:100%;margin-top:20px;padding:18px;
+font-size:18px;border:none;border-radius:18px;
+background:linear-gradient(135deg,#0071e3,#00c6ff);
+color:#fff;font-weight:800;cursor:pointer;
+}
+.output{
+background:var(--card);border-radius:25px;
+padding:25px;border:2px solid var(--p);
+line-height:1.8;
+}
+.error{
+background:rgba(255,59,48,.2);
+color:var(--err);padding:2px 5px;border-radius:6px;
+}
+.section{margin-top:25px}
+.history{
+margin-top:20px;padding:15px;border-radius:20px;
+border:1px solid var(--border);
+}
+.history-item{
+font-size:13px;padding:8px;
+border-bottom:1px solid var(--border);
+cursor:pointer;
+}
+footer{
+padding:30px;text-align:center;
+border-top:1px solid var(--border);
+font-size:13px;color:var(--sec);
+}
+.login{
+max-width:350px;margin:80px auto;
+text-align:center;
+}
+.login input{
+width:100%;padding:12px;border-radius:12px;
+border:1px solid var(--border);margin-bottom:10px;
+}
+</style>
 </head>
+
 <body>
 
 <header>
-    <a href="index.html" class="hub-link">🏠 TOOLIFY HUB</a>
-    <div style="display: flex; gap: 10px; align-items: center;">
-        <span style="font-size: 12px; font-weight: 800; color: var(--sec);">AI ACTIVE</span>
-        <button class="btn-small" onclick="toggleTheme()">🌓</button>
-    </div>
+<a href="index.html" class="hub-link">⬅ TOOLBOX HUB</a>
+<button class="btn" onclick="toggle()">🌓</button>
 </header>
 
-<div class="container">
-    <div class="tool-title">
-        <h1>Grammar <span style="color:var(--p)">Pro AI</span></h1>
-        <p style="color:var(--sec); font-weight: 600;">The ultimate grammar, tone, and vocabulary polisher.</p>
-    </div>
-
-    <div class="card">
-        <div class="controls">
-            <select id="tone">
-                <option value="pro">Professional Tone</option>
-                <option value="casual">Friendly Tone</option>
-                <option value="academic">Academic Tone</option>
-            </select>
-            <button class="btn-small" onclick="clearText()">Clear</button>
-        </div>
-        
-        <textarea id="userInput" placeholder="Paste your paragraph here... (Errors: i dont think they is coming because it are raining...)" oninput="updateStats()"></textarea>
-        
-        <div class="stats">
-            <span id="wordCount">0 Words</span>
-            <span id="charCount">0 Characters</span>
-            <span id="readability">Ready</span>
-        </div>
-
-        <button class="main-btn" onclick="fixAll()">FIX & ENHANCE EVERYTHING</button>
-    </div>
-
-    <div class="result-area" id="resultArea">
-        <div style="font-size: 12px; font-weight: 800; color: var(--p); margin-bottom: 10px; text-transform: uppercase;">✨ Toolify AI Corrected Version</div>
-        <div class="output-box">
-            <button class="copy-tag" onclick="copyText()">COPY TEXT</button>
-            <div id="output"></div>
-        </div>
-    </div>
-</div>
+<div id="app"></div>
 
 <footer>
-    DEVELOPED WITH <span style="color: #ff3b30;">❤</span> BY MOHAK | © 2025 TOOLIFY HUB
+Developed with <span style="color:#ff3b30">❤</span> by Mohak
 </footer>
 
 <script>
-    function toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('t_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-    }
-    if(localStorage.getItem('t_theme') === 'dark') document.body.classList.add('dark-mode');
+/* ---------------- LOGIN ---------------- */
+let user=localStorage.getItem("user");
 
-    function updateStats() {
-        const text = document.getElementById('userInput').value.trim();
-        const words = text ? text.split(/\s+/).length : 0;
-        document.getElementById('wordCount').innerText = `${words} Words`;
-        document.getElementById('charCount').innerText = `${text.length} Characters`;
-    }
+const app=document.getElementById("app");
 
-    function clearText() {
-        document.getElementById('userInput').value = '';
-        document.getElementById('resultArea').style.display = 'none';
-        updateStats();
-    }
+if(!user){
+app.innerHTML=`
+<div class="login card">
+<h2>Login</h2>
+<input id="email" placeholder="Enter email">
+<button class="btn" onclick="login()">Login</button>
+</div>`;
+}else loadTool();
 
-    function fixAll() {
-        let t = document.getElementById('userInput').value;
-        if(!t.trim()) return alert("Please enter text!");
-        const tone = document.getElementById('tone').value;
+function login(){
+const e=document.getElementById("email").value.trim();
+if(!e)return alert("Enter email");
+localStorage.setItem("user",e);
+location.reload();
+}
 
-        // 1. Basic Formatting
-        t = t.trim().replace(/\s\s+/g, ' ');
+/* ---------------- TOOL ---------------- */
+function loadTool(){
+app.innerHTML=`
+<div class="container">
+<div class="card">
+<div class="controls">
+<button class="btn" onclick="upper()">UPPERCASE</button>
+<button class="btn" onclick="lower()">lowercase</button>
+<button class="btn" onclick="sentence()">Sentence Case</button>
+<button class="btn" onclick="logout()">Logout</button>
+</div>
 
-        // 2. THE MEGA LOGIC ENGINE (Grammar + Subject/Verb + Articles)
-        const rules = [
-            [/\bi(?=['\s]|$)/g, "I"], // Fix standalone 'i'
-            [/\bthey is\b/gi, "they are"],
-            [/\bit are\b/gi, "it is"],
-            [/\bi is\b/gi, "I am"],
-            [/\bwe was\b/gi, "we were"],
-            [/\byou was\b/gi, "you were"],
-            [/\bhe have\b/gi, "he has"],
-            [/\bshe have\b/gi, "she has"],
-            [/\bit have\b/gi, "it has"],
-            [/\bdont\b/gi, "don't"],
-            [/\bdoesnt\b/gi, "doesn't"],
-            [/\bcant\b/gi, "can't"],
-            [/\bwont\b/gi, "won't"],
-            [/\barent\b/gi, "aren't"],
-            [/\bisnt\b/gi, "isn't"],
-            [/\ba hour\b/gi, "an hour"],
-            [/\ba apple\b/gi, "an apple"],
-            [/\ba orange\b/gi, "an orange"],
-            [/\ba egg\b/gi, "an egg"],
-            [/\ba ice\b/gi, "an ice"],
-            [/\breally badly\b/gi, "really bad"],
-            [/\bit never come\b/gi, "it never came"],
-            [/\bno one want\b/gi, "no one wants"],
-            [/\bgonna\b/gi, "going to"],
-            [/\bwanna\b/gi, "want to"],
-            [/\bif i was you\b/gi, "if I were you"],
-            [/\b(he|she|it) don't\b/gi, "$1 doesn't"],
-            [/\bwas waiting for a hour\b/gi, "were waiting for an hour"]
-        ];
+<textarea id="input" placeholder="Paste text here..." oninput="stats()"></textarea>
 
-        // 3. VOCABULARY ENHANCER (Only if Professional Tone)
-        if(tone === 'pro') {
-            const vocab = [
-                [/\bvery good\b/gi, "excellent"],
-                [/\bvery bad\b/gi, "terrible"],
-                [/\bhappy\b/gi, "delighted"],
-                [/\bsad\b/gi, "unfortunate"],
-                [/\bthink\b/gi, "believe"],
-                [/\bwatch movie\b/gi, "watch a movie"],
-                [/\bget wet\b/gi, "become drenched"]
-            ];
-            vocab.forEach(([r, v]) => t = t.replace(r, v));
-        }
+<div class="stats">
+<span id="w">0 Words</span>
+<span id="c">0 Characters</span>
+<span id="e">0 Errors</span>
+</div>
 
-        // Apply rules
-        rules.forEach(([r, v]) => t = t.replace(r, v));
+<button class="main" onclick="process()">ANALYZE & FIX</button>
 
-        // 4. Punctuation Spacing
-        t = t.replace(/,(?!\s)/g, ", ");
-        t = t.replace(/\.(?!\s)/g, ". ");
+<div class="section">
+<h3>❌ Highlighted Errors</h3>
+<div class="output" id="highlight"></div>
+</div>
 
-        // 5. Ultimate Sentence Capitalization
-        t = t.replace(/(^\w|\.\s+\w)/gm, s => s.toUpperCase());
+<div class="section">
+<h3>✅ Corrected Text</h3>
+<div class="output" id="fixed"></div>
+<button class="btn" onclick="savePDF()">Save PDF</button>
+<button class="btn" onclick="saveDOCX()">Save DOCX</button>
+</div>
 
-        document.getElementById('output').innerText = t;
-        document.getElementById('resultArea').style.display = 'block';
-    }
+<div class="history">
+<strong>📜 Cloud History</strong>
+<div id="history"></div>
+</div>
 
-    function copyText() {
-        navigator.clipboard.writeText(document.getElementById('output').innerText);
-        alert("Enhanced text copied to clipboard!");
-    }
+</div>
+</div>`;
+loadHistory();
+}
+
+/* ---------------- FUNCTIONS ---------------- */
+function toggle(){
+document.body.classList.toggle("dark");
+localStorage.setItem("theme",document.body.classList.contains("dark"));
+}
+if(localStorage.getItem("theme")==="true")document.body.classList.add("dark");
+
+function logout(){localStorage.removeItem("user");location.reload();}
+
+const rules=[
+[/\bi\b/g,"I"],[/\bthey is\b/gi,"they are"],
+[/\bit are\b/gi,"it is"],[/\bdont\b/gi,"don't"],
+[/\bdoesnt\b/gi,"doesn't"],[/\bisnt\b/gi,"isn't"],
+[/\ba hour\b/gi,"an hour"],[/\bif i was you\b/gi,"if I were you"]
+];
+
+function stats(){
+let t=document.getElementById("input").value;
+document.getElementById("w").innerText=`${t?t.split(/\s+/).length:0} Words`;
+document.getElementById("c").innerText=`${t.length} Characters`;
+}
+
+function upper(){input.value=input.value.toUpperCase();stats();}
+function lower(){input.value=input.value.toLowerCase();stats();}
+function sentence(){input.value=input.value.toLowerCase().replace(/(^\w|\.\s+\w)/g,s=>s.toUpperCase());stats();}
+
+function process(){
+let t=input.value;if(!t)return;
+let errors=0,highlight=t;
+
+rules.forEach(r=>{
+if(r[0].test(highlight)){
+errors++;
+highlight=highlight.replace(r[0],m=>`<span class="error">${m}</span>`);
+t=t.replace(r[0],r[1]);
+}
+});
+t=t.replace(/(^\w|\.\s+\w)/g,s=>s.toUpperCase());
+
+document.getElementById("highlight").innerHTML=highlight;
+document.getElementById("fixed").innerText=t;
+document.getElementById("e").innerText=`${errors} Errors`;
+
+saveHistory(input.value,t);
+loadHistory();
+}
+
+/* ---------------- SAVE FILES ---------------- */
+function savePDF(){
+let w=window.open("");
+w.document.write(`<pre>${document.getElementById("fixed").innerText}</pre>`);
+w.print();
+}
+
+function saveDOCX(){
+let text=document.getElementById("fixed").innerText;
+let blob=new Blob(
+[`<html><body><pre>${text}</pre></body></html>`],
+{type:"application/msword"}
+);
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="grammar.docx";
+a.click();
+}
+
+/* ---------------- HISTORY ---------------- */
+function saveHistory(o,f){
+let key="history_"+localStorage.getItem("user");
+let h=JSON.parse(localStorage.getItem(key)||"[]");
+h.unshift({o,f,time:new Date().toLocaleString()});
+localStorage.setItem(key,JSON.stringify(h.slice(0,10)));
+}
+
+function loadHistory(){
+let key="history_"+localStorage.getItem("user");
+let h=JSON.parse(localStorage.getItem(key)||"[]");
+let box=document.getElementById("history");
+if(!box)return;
+box.innerHTML="";
+h.forEach(i=>{
+let d=document.createElement("div");
+d.className="history-item";
+d.innerText=i.time;
+d.onclick=()=>{input.value=i.o;document.getElementById("fixed").innerText=i.f;}
+box.appendChild(d);
+});
+}
 </script>
+
 </body>
 </html>
