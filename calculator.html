@@ -1,193 +1,305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pro Calculator | Toolbox Hub</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro Calculator | Toolbox Hub</title>
 
-    <style>
-        :root {
-            --glass: rgba(255, 255, 255, 0.1);
-            --primary: #7efaff;
-            --accent: #e0c3fc;
-        }
+<style>
+:root{
+  --glass: rgba(255, 255, 255, 0.12);
+  --primary: #7efaff;
+  --accent: #e0c3fc;
+}
+*{box-sizing: border-box; margin: 0; padding: 0}
+body{
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(-45deg, #1e3c72, #2a5298, #7b4397);
+  background-size: 400% 400%;
+  animation: bg 15s ease infinite;
+  min-height: 100vh;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+@keyframes bg{
+  0%{background-position: 0% 50%}
+  50%{background-position: 100% 50%}
+  100%{background-position: 0% 50%}
+}
+.app{
+  width: 95%;
+  max-width: 420px;
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 22px;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.35);
+}
+.top{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+.mode button{
+  background: none;
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 5px 10px;
+}
+.mode button.active{opacity: 1; color: var(--primary); border-bottom: 2px solid var(--primary);}
+.display{
+  width: 100%;
+  height: 80px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  color: var(--primary);
+  font-size: 28px;
+  padding: 15px;
+  text-align: right;
+  margin-bottom: 15px;
+}
+.grid{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+button{
+  padding: 18px 10px;
+  border-radius: 15px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+button:hover{background: rgba(255,255,255,0.15);}
+button:active{transform: scale(0.92)}
+.op{color: var(--primary)}
+.eq{
+  background: linear-gradient(135deg, #8ec5fc, #e0c3fc);
+  color: #111;
+}
+.clear{color: #ff6b6b}
+.hidden{display: none !important;}
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            margin: 0; padding: 0;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(-45deg, #1e3c72, #2a5298, #7b4397);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: white;
-            overflow: hidden;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .calculator {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-            width: 90%;
-            max-width: 380px;
-            padding: 25px;
-            border-radius: 30px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-        }
-
-        .display {
-            width: 100%;
-            height: 90px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 15px;
-            color: var(--primary);
-            font-size: 40px;
-            text-align: right;
-            padding: 20px;
-            margin-bottom: 20px;
-            outline: none;
-        }
-
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-
-        button {
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 20px;
-            font-size: 20px;
-            font-weight: 600;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        button:hover { background: rgba(255, 255, 255, 0.15); }
-        button:active { transform: scale(0.92); }
-
-        .operator { color: var(--primary); font-size: 24px; }
-        .clear { background: rgba(255, 77, 77, 0.2); color: #ff4d4d; }
-        .equal { 
-            background: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%); 
-            color: #111; 
-            grid-column: span 1;
-        }
-
-        .back-btn {
-            background: var(--glass);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            padding: 12px 25px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            backdrop-filter: blur(10px);
-            transition: 0.3s;
-        }
-        .back-btn:hover { background: rgba(255,255,255,0.2); }
-    </style>
+select, input.conv{
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+.back{
+  display: block;
+  margin-top: 20px;
+  text-align: center;
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  opacity: 0.8;
+}
+</style>
 </head>
-
 <body>
 
-<div class="calculator">
-    <input id="display" class="display" type="text" readonly placeholder="0">
-
-    <div class="buttons">
-        <button class="clear" onclick="clearDisplay()">AC</button>
-        <button onclick="append('(')">(</button>
-        <button onclick="append(')')">)</button>
-        <button class="operator" onclick="append('/')">÷</button>
-
-        <button onclick="append('7')">7</button>
-        <button onclick="append('8')">8</button>
-        <button onclick="append('9')">9</button>
-        <button class="operator" onclick="append('*')">×</button>
-
-        <button onclick="append('4')">4</button>
-        <button onclick="append('5')">5</button>
-        <button onclick="append('6')">6</button>
-        <button class="operator" onclick="append('-')">−</button>
-
-        <button onclick="append('1')">1</button>
-        <button onclick="append('2')">2</button>
-        <button onclick="append('3')">3</button>
-        <button class="operator" onclick="append('+')">+</button>
-
-        <button onclick="append('0')">0</button>
-        <button onclick="append('.')">.</button>
-        <button onclick="backspace()">⌫</button>
-        <button class="equal" onclick="calculate()">=</button>
+<div class="app">
+  <div class="top">
+    <div class="mode">
+      <button id="btn-calc" onclick="switchMode('calc')" class="active">Calc</button>
+      <button id="btn-sci" onclick="switchMode('sci')">Sci</button>
+      <button id="btn-conv" onclick="switchMode('conv')">Conv</button>
     </div>
+  </div>
+
+  <input id="display" class="display" readonly placeholder="0">
+
+  <div id="calc" class="grid">
+    <button class="clear" onclick="clr()">AC</button>
+    <button onclick="add('(')">(</button>
+    <button onclick="add(')')">)</button>
+    <button class="op" onclick="add('/')">÷</button>
+
+    <button onclick="add('7')">7</button>
+    <button onclick="add('8')">8</button>
+    <button onclick="add('9')">9</button>
+    <button class="op" onclick="add('*')">×</button>
+
+    <button onclick="add('4')">4</button>
+    <button onclick="add('5')">5</button>
+    <button onclick="add('6')">6</button>
+    <button class="op" onclick="add('-')">−</button>
+
+    <button onclick="add('1')">1</button>
+    <button onclick="add('2')">2</button>
+    <button onclick="add('3')">3</button>
+    <button class="op" onclick="add('+')">+</button>
+
+    <button onclick="add('%')">%</button>
+    <button onclick="add('0')">0</button>
+    <button onclick="back()">⌫</button>
+    <button class="eq" onclick="calculate()">=</button>
+  </div>
+
+  <div id="sci" class="grid hidden">
+    <button onclick="fn('Math.sin')">sin</button>
+    <button onclick="fn('Math.cos')">cos</button>
+    <button onclick="fn('Math.tan')">tan</button>
+    <button onclick="fn('Math.sqrt')">√</button>
+
+    <button onclick="add('Math.PI')">π</button>
+    <button onclick="add('Math.E')">e</button>
+    <button onclick="fn('Math.log10')">log</button>
+    <button onclick="fn('Math.log')">ln</button>
+
+    <button onclick="add('**')">xʸ</button>
+    <button onclick="fact()">x!</button>
+    <button onclick="back()">⌫</button>
+    <button class="eq" onclick="calculate()">=</button>
+  </div>
+
+  <div id="conv" class="hidden">
+    <select id="type">
+      <option value="len">Length</option>
+      <option value="wt">Weight</option>
+      <option value="temp">Temperature</option>
+      <option value="speed">Speed</option>
+      <option value="area">Area</option>
+      <option value="vol">Volume</option>
+    </select>
+
+    <input class="conv" id="cval" type="number" placeholder="Enter Value">
+    <select id="from"></select>
+    <select id="to"></select>
+    <input class="conv" id="cres" readonly placeholder="Result">
+  </div>
+
+  <a href="#" class="back">🏠 Back to Toolbox Hub</a>
 </div>
 
-<a href="index.html" class="back-btn">🏠 Back to Toolbox</a>
-
 <script>
-    const display = document.getElementById("display");
+// Element Selectors
+const d = document.getElementById("display");
+const calcDiv = document.getElementById("calc");
+const sciDiv = document.getElementById("sci");
+const convDiv = document.getElementById("conv");
+const typeSel = document.getElementById("type");
+const fromSel = document.getElementById("from");
+const toSel = document.getElementById("to");
+const cvalInp = document.getElementById("cval");
+const cresInp = document.getElementById("cres");
 
-    function append(value) {
-        if (display.value === "Error") display.value = "";
-        display.value += value;
+// Basic Functions
+function add(v){ 
+    if(d.value === "Error") d.value = ""; 
+    d.value += v;
+}
+function clr(){ d.value = ""; }
+function back(){ d.value = d.value.slice(0,-1); }
+
+function calculate(){
+    try { 
+        if(!d.value) return;
+        // Basic sanitization: replace % with /100
+        let expression = d.value.replace(/%/g, '/100');
+        d.value = eval(expression);
+    } catch { 
+        d.value = "Error"; 
     }
+}
 
-    function clearDisplay() {
-        display.value = "";
+function fn(f){ d.value += `${f}(`; }
+
+function fact(){
+    let n = Number(eval(d.value)); // evaluate current display first
+    if(n < 0 || isNaN(n)) return d.value = "Error";
+    let r = 1; 
+    for(let i = 1; i <= n; i++) r *= i;
+    d.value = r;
+}
+
+// Mode Switching
+function switchMode(m){
+    document.querySelectorAll(".mode button").forEach(b => b.classList.remove("active"));
+    document.getElementById(`btn-${m}`).classList.add("active");
+    
+    calcDiv.classList.add("hidden");
+    sciDiv.classList.add("hidden");
+    convDiv.classList.add("hidden");
+
+    if(m === "calc") calcDiv.classList.remove("hidden");
+    if(m === "sci") {
+        sciDiv.classList.remove("hidden");
+        calcDiv.classList.remove("hidden"); // Keep numpad visible for sci mode
     }
+    if(m === "conv") convDiv.classList.remove("hidden");
+}
 
-    function backspace() {
-        display.value = display.value.slice(0, -1);
-    }
+// Conversion Logic
+const units = {
+    len: {m: 1, cm: 0.01, km: 1000, inch: 0.0254, ft: 0.3048, mile: 1609},
+    wt: {kg: 1, g: 0.001, lb: 0.4536, oz: 0.02835},
+    speed: {ms: 1, kmh: 0.2778, mph: 0.447},
+    area: {m2: 1, km2: 1e6, ft2: 0.0929, acre: 4046},
+    vol: {l: 1, ml: 0.001, m3: 1000, gal: 3.785}
+};
 
-    function calculate() {
-        try {
-            // eval() ko safe banane ke liye Error handling zaroori hai
-            if (display.value.trim() === "") return;
-            display.value = eval(display.value);
-        } catch {
-            display.value = "Error";
+function loadUnits(){
+    let t = typeSel.value;
+    fromSel.innerHTML = ""; 
+    toSel.innerHTML = "";
+    
+    if(t === "temp"){
+        ["C", "F", "K"].forEach(u => {
+            fromSel.innerHTML += `<option value="${u}">${u}</option>`;
+            toSel.innerHTML += `<option value="${u}">${u}</option>`;
+        });
+    } else {
+        for(let u in units[t]){
+            fromSel.innerHTML += `<option value="${u}">${u}</option>`;
+            toSel.innerHTML += `<option value="${u}">${u}</option>`;
         }
     }
-</script>
+    convert();
+}
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+function convert(){
+    let v = Number(cvalInp.value);
+    if(cvalInp.value === "") return cresInp.value = "";
+    
+    let t = typeSel.value;
+    let f = fromSel.value;
+    let toU = toSel.value;
+    let r;
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
-        authDomain: "toolbox-hub-98c03.firebaseapp.com",
-        projectId: "toolbox-hub-98c03",
-        appId: "1:321020105472:web:356e7c2903def7b9d859e5"
-    };
+    if(t === "temp"){
+        if(f === "C") r = (toU === "F") ? v * 9/5 + 32 : (toU === "K") ? v + 273.15 : v;
+        if(f === "F") r = (toU === "C") ? (v - 32) * 5/9 : (toU === "K") ? (v - 32) * 5/9 + 273.15 : v;
+        if(f === "K") r = (toU === "C") ? v - 273.15 : (toU === "F") ? (v - 273.15) * 9/5 + 32 : v;
+    } else {
+        r = v * units[t][f] / units[t][toU];
+    }
+    cresInp.value = r.toFixed(4);
+}
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+// Listeners
+typeSel.addEventListener("change", loadUnits);
+fromSel.addEventListener("change", convert);
+toSel.addEventListener("change", convert);
+cvalInp.addEventListener("input", convert);
 
-    onAuthStateChanged(auth, user => {
-        if(!user) window.location.href="login.html";
-    });
+// Init
+loadUnits();
 </script>
 
 </body>
