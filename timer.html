@@ -17,6 +17,7 @@
             background: var(--bg);
             color: white;
             display: flex;
+            flex-direction: column; /* Changed to column to stack card and link */
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -81,6 +82,20 @@
             0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
             100% { box-shadow: 0 0 0 20px rgba(244, 63, 94, 0); }
         }
+
+        /* Styling for your requested hyperlink */
+        .back-link {
+            margin-top: 25px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -109,6 +124,8 @@
     </div>
 </div>
 
+<a href="index.html" class="back-link">Back to toolbox hub</a>
+
 <script>
     let timeLeft = 30;
     let timerId = null;
@@ -118,7 +135,6 @@
     const startBtn = document.getElementById('startBtn');
     const card = document.getElementById('card');
 
-    // Validation: Ensures common sense limits
     function validateInputs() {
         const h = document.getElementById('h');
         const m = document.getElementById('m');
@@ -182,7 +198,7 @@
         isRunning = false;
         card.classList.remove('finished');
         startBtn.textContent = 'START';
-        syncTimeFromInputs(); // This fixes the reset button to pull fresh from your inputs
+        syncTimeFromInputs();
     }
 
     function playAlarm() {
@@ -202,7 +218,6 @@
         }, 500);
     }
 
-    // Initialize display on load
     syncTimeFromInputs();
 </script>
 </body>
