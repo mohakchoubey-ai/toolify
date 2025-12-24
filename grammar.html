@@ -3,236 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toolify | AI Grammar Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Grammar Pro | Toolify Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* DARK MODE (DEFAULT) */
-            --bg: #000000;
-            --surface: #111111;
-            --text: #ffffff;
-            --text-dim: #9aa0a6;
             --primary: #00f2ff;
+            --bg: #0a0a0c;
+            --card: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.1);
-            --error: #ff4757;
-            --success: #00ff88;
+            --text: #ffffff;
         }
 
-        .light-mode {
-            /* LIGHT MODE */
-            --bg: #ffffff;
-            --surface: #f8f9fa;
-            --text: #1a1a1a; /* Changed text color for light mode */
-            --text-dim: #5f6368;
-            --primary: #0071e3;
-            --border: rgba(0, 0, 0, 0.1);
-            --error: #d93025;
-            --success: #188038;
+        body {
+            margin: 0; padding: 0; font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text);
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: background 0.3s ease, color 0.3s ease; }
+        header {
+            width: 100%; padding: 20px 40px; display: flex; justify-content: space-between;
+            align-items: center; box-sizing: border-box;
+        }
+
+        .hub-link {
+            text-decoration: none; color: var(--primary); font-weight: 700;
+            border: 1px solid var(--primary); padding: 8px 16px; border-radius: 12px;
+            font-size: 0.8rem; transition: 0.3s;
+        }
+        .hub-link:hover { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary); }
+
+        .container {
+            width: 90%; max-width: 800px; margin-top: 40px; text-align: center;
+        }
+
+        h1 { font-weight: 800; font-size: 2.5rem; margin-bottom: 10px; }
+        p.subtitle { color: #888; margin-bottom: 30px; }
+
+        .editor-box {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 24px; padding: 25px; backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        textarea {
+            width: 100%; height: 200px; background: transparent; border: none;
+            color: white; font-size: 1.1rem; resize: none; outline: none;
+            line-height: 1.6; font-family: 'Inter', sans-serif;
+        }
+
+        .actions {
+            display: flex; gap: 15px; margin-top: 20px; justify-content: center;
+        }
+
+        .btn {
+            padding: 14px 28px; border-radius: 12px; font-weight: 700;
+            cursor: pointer; transition: 0.3s; border: none; font-size: 1rem;
+        }
+        .btn-fix { background: var(--primary); color: #000; }
+        .btn-fix:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--primary); }
+        .btn-clear { background: rgba(255,255,255,0.1); color: #fff; }
+
+        .result-box {
+            margin-top: 30px; text-align: left; display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .result-label { font-size: 0.8rem; color: var(--primary); text-transform: uppercase; margin-bottom: 10px; font-weight: 800; }
         
-        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-
-        /* Navigation */
-        nav { 
-            position: fixed; top: 0; width: 100%; padding: 20px 5%; 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: var(--bg); border-bottom: 1px solid var(--border); z-index: 100; 
-        }
-        .back-link { color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
-
-        /* Workspace Layout */
-        .workspace { 
-            display: grid; grid-template-columns: 1fr 320px; gap: 25px; 
-            width: 95%; max-width: 1300px; margin: 100px auto 40px; flex-grow: 1; 
+        .fixed-content {
+            background: rgba(0, 242, 255, 0.05); border: 1px solid var(--primary);
+            padding: 20px; border-radius: 16px; line-height: 1.6; position: relative;
         }
 
-        /* Editor Section */
-        .editor-box { 
-            background: var(--surface); border: 1px solid var(--border); 
-            border-radius: 24px; display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        textarea { 
-            width: 100%; height: 500px; background: transparent; border: none; 
-            color: var(--text); /* Dynamically changes with theme */
-            padding: 30px; font-size: 1.15rem; resize: none; outline: none; line-height: 1.7; 
+        .copy-btn {
+            position: absolute; top: 10px; right: 10px; background: var(--primary);
+            border: none; border-radius: 6px; padding: 5px 10px; font-size: 0.7rem;
+            font-weight: bold; cursor: pointer;
         }
 
-        /* Sidebar Section */
-        .sidebar { display: flex; flex-direction: column; gap: 20px; }
-        .panel { 
-            background: var(--surface); border: 1px solid var(--border); 
-            border-radius: 20px; padding: 20px; 
+        footer {
+            margin-top: auto; padding: 40px; color: #555; font-size: 0.8rem;
+            letter-spacing: 2px;
         }
-        h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; color: var(--text-dim); }
-
-        /* Buttons & Actions */
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { 
-            padding: 12px; border-radius: 12px; border: 1px solid var(--border); 
-            cursor: pointer; font-weight: 600; font-size: 0.85rem; 
-            background: var(--bg); color: var(--text); 
-            display: flex; align-items: center; justify-content: center; transition: 0.2s;
-        }
-        .btn:hover { border-color: var(--primary); transform: translateY(-2px); }
-        .btn-check { background: var(--primary); color: #000; border: none; grid-column: span 2; margin-top: 10px; font-size: 1rem; }
-        .btn-fix-all { background: var(--success); color: #fff; border: none; grid-column: span 2; display: none; }
-        .btn-danger:hover { background: var(--error); color: white; border-color: var(--error); }
-
-        /* Suggestion Items */
-        .issue-card { 
-            background: rgba(255, 71, 87, 0.08); border-left: 4px solid var(--error); 
-            padding: 15px; border-radius: 12px; margin-bottom: 12px; font-size: 0.9rem; 
-        }
-        .suggest-pill { 
-            display: inline-block; background: var(--primary); color: #000; 
-            padding: 4px 10px; border-radius: 6px; margin-top: 8px; 
-            font-weight: 700; cursor: pointer; font-size: 0.8rem;
-        }
-
-        /* Stats Bar */
-        .stats-bar { 
-            padding: 15px 30px; background: var(--surface); 
-            border-top: 1px solid var(--border); display: flex; gap: 20px; font-size: 0.85rem; color: var(--text-dim);
-        }
-
-        footer { text-align: center; padding: 30px; font-size: 0.75rem; letter-spacing: 2px; color: var(--text-dim); }
-        .heart { color: #ff4757; }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="index.html" class="back-link">← Go back to Toolbox Hub</a>
-        <button class="btn" onclick="toggleTheme()" id="themeBtn">☀️ Light Mode</button>
-    </nav>
+    <header>
+        <div style="font-weight: 800; font-size: 1.2rem;">Tool<span style="color:var(--primary)">ify</span></div>
+        <a href="index.html" class="hub-link">← BACK TO HUB</a>
+    </header>
 
-    <div class="workspace">
+    <div class="container">
+        <h1>Grammar <span style="color:var(--primary)">Pro</span></h1>
+        <p class="subtitle">Paste your paragraph and let the AI fix it instantly.</p>
+
         <div class="editor-box">
-            <textarea id="editor" placeholder="Start typing or paste your text here..."></textarea>
-            <div class="stats-bar">
-                <span>Words: <b id="wCount">0</b></span>
-                <span>Characters: <b id="cCount">0</b></span>
-                <span>Time: <b id="rTime">0 min</b></span>
+            <textarea id="userInput" placeholder="Type or paste your messy paragraph here..."></textarea>
+            <div class="actions">
+                <button class="btn btn-clear" onclick="clearAll()">Clear</button>
+                <button class="btn btn-fix" onclick="fixGrammar()">FIX EVERYTHING</button>
             </div>
         </div>
 
-        <div class="sidebar">
-            <div class="panel">
-                <h3>Quick Actions</h3>
-                <div class="action-grid">
-                    <button class="btn" onclick="textCase('up')">UPPERCASE</button>
-                    <button class="btn" onclick="textCase('low')">lowercase</button>
-                    <button class="btn" onclick="copyText()">Copy</button>
-                    <button class="btn btn-danger" onclick="clearText()">Clear</button>
-                    <button class="btn btn-check" onclick="runCheck()">Analyze Grammar</button>
-                    <button class="btn btn-fix-all" id="fixAllBtn" onclick="fixAll()">✨ Fix All Errors</button>
-                </div>
-            </div>
-
-            <div class="panel">
-                <h3>Suggestions</h3>
-                <div id="status" style="display:none; color:var(--primary); font-size:0.8rem; margin-bottom:10px;">AI is thinking...</div>
-                <div id="suggestionsBox">
-                    <p style="font-size: 0.85rem; opacity: 0.5;">No issues found yet.</p>
-                </div>
+        <div class="result-box" id="resultBox">
+            <div class="result-label">✨ Polished Version</div>
+            <div class="fixed-content">
+                <p id="fixedText"></p>
+                <button class="copy-btn" onclick="copyText()">COPY</button>
             </div>
         </div>
     </div>
 
-    <footer>DEVELOPED WITH <span class="heart">♥</span> BY MOHAK</footer>
+    <footer>DEVELOPED WITH ♥ BY MOHAK</footer>
 
     <script>
-        const editor = document.getElementById('editor');
-        const suggBox = document.getElementById('suggestionsBox');
-        const fixAllBtn = document.getElementById('fixAllBtn');
-        let matches = [];
+        function fixGrammar() {
+            let text = document.getElementById("userInput").value;
+            if (!text.trim()) return alert("Please enter some text first!");
 
-        // Track stats
-        editor.addEventListener('input', () => {
-            const val = editor.value.trim();
-            const words = val ? val.split(/\s+/).length : 0;
-            document.getElementById('wCount').innerText = words;
-            document.getElementById('cCount').innerText = val.length;
-            document.getElementById('rTime').innerText = Math.ceil(words / 200) + " min";
-        });
+            // 1. Basic Cleaning
+            let fixed = text.trim();
+            
+            // Fix double spaces
+            fixed = fixed.replace(/\s\s+/g, ' ');
+            
+            // Fix Capitalization: Capitalize first letter of every sentence
+            fixed = fixed.replace(/(^\w|\.\s+\w)/gm, m => m.toUpperCase());
 
-        async function runCheck() {
-            if(!editor.value) return;
-            document.getElementById('status').style.display = "block";
-            suggBox.innerHTML = "";
-            fixAllBtn.style.display = "none";
+            // Fix Punctuation: Add space after commas/periods if missing
+            fixed = fixed.replace(/,(?!\s)/g, ", ");
+            fixed = fixed.replace(/\.(?!\s)/g, ". ");
 
-            try {
-                const response = await fetch('https://api.languagetool.org/v2/check', {
-                    method: 'POST',
-                    body: new URLSearchParams({ text: editor.value, language: 'en-US' })
-                });
-                const data = await response.json();
-                matches = data.matches;
-                document.getElementById('status').style.display = "none";
+            // Fix common mistakes (I am -> I'm, wont -> won't, etc)
+            const replacements = {
+                " i ": " I ",
+                " dont ": " don't ",
+                " cant ": " can't ",
+                " wont ": " won't ",
+                " im ": " I'm ",
+                " hes ": " he's ",
+                " shes ": " she's ",
+                " its ": " it's ",
+                " theyre ": " they're ",
+                " youve ": " you've "
+            };
 
-                if (matches.length === 0) {
-                    suggBox.innerHTML = "<p style='color:var(--success)'>✨ Everything looks perfect!</p>";
-                } else {
-                    fixAllBtn.style.display = "flex";
-                    matches.forEach((m, i) => {
-                        const div = document.createElement('div');
-                        div.className = 'issue-card';
-                        const suggestion = m.replacements[0]?.value || "";
-                        div.innerHTML = `
-                            <b>${m.rule.category.name}</b><br>${m.message}<br>
-                            ${suggestion ? `<span class="suggest-pill" onclick="applySingleFix(${m.offset}, ${m.length}, '${suggestion}')">Replace with: ${suggestion}</span>` : ''}
-                        `;
-                        suggBox.appendChild(div);
-                    });
-                }
-            } catch (e) { alert("API Error. Please try again."); }
-        }
-
-        // Logic to fix everything in reverse order
-        function fixAll() {
-            let text = editor.value;
-            const fixable = matches.filter(m => m.replacements.length > 0);
-            fixable.sort((a, b) => b.offset - a.offset);
-
-            fixable.forEach(m => {
-                const replacement = m.replacements[0].value;
-                text = text.substring(0, m.offset) + replacement + text.substring(m.offset + m.length);
-            });
-
-            editor.value = text;
-            runCheck();
-        }
-
-        function applySingleFix(offset, length, replacement) {
-            const text = editor.value;
-            editor.value = text.substring(0, offset) + replacement + text.substring(offset + length);
-            runCheck();
-        }
-
-        function clearText() {
-            if(confirm("Clear everything?")) {
-                editor.value = "";
-                suggBox.innerHTML = "";
-                fixAllBtn.style.display = "none";
+            for (let key in replacements) {
+                let reg = new RegExp(key, 'gi');
+                fixed = fixed.replace(reg, replacements[key]);
             }
+
+            // Display result
+            document.getElementById("fixedText").innerText = fixed;
+            document.getElementById("resultBox").style.display = "block";
+        }
+
+        function clearAll() {
+            document.getElementById("userInput").value = "";
+            document.getElementById("resultBox").style.display = "none";
         }
 
         function copyText() {
-            navigator.clipboard.writeText(editor.value);
+            const text = document.getElementById("fixedText").innerText;
+            navigator.clipboard.writeText(text);
             alert("Copied to clipboard!");
-        }
-
-        function textCase(mode) {
-            editor.value = mode === 'up' ? editor.value.toUpperCase() : editor.value.toLowerCase();
-        }
-
-        function toggleTheme() {
-            const isLight = document.body.classList.toggle('light-mode');
-            document.getElementById('themeBtn').innerText = isLight ? "🌙 Dark Mode" : "☀️ Light Mode";
         }
     </script>
 </body>
