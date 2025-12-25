@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Image Generator | Toolify</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color: #fff;
+}
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+h1 { text-align: center; }
+.card {
+  background: rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 20px;
+}
+textarea, select, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  font-size: 15px;
+}
+button {
+  background: #00d4ff;
+  font-weight: bold;
+  cursor: pointer;
+}
+button:disabled { background:#555; }
+#imageBox { text-align:center; margin-top:20px; }
+#imageBox img { max-width:100%; border-radius:14px; }
+.download-btn {
+  display:inline-block;
+  margin-top:10px;
+  padding:10px 16px;
+  background:#00ff99;
+  color:#000;
+  text-decoration:none;
+  border-radius:10px;
+  font-weight:bold;
+}
+.back-btn {
+  display:inline-block;
+  margin-top:15px;
+  padding:10px 16px;
+  background:#ff5e5e;
+  color:#fff;
+  border-radius:10px;
+  text-decoration:none;
+  font-weight:bold;
+}
+.limit, .loader { text-align:center; margin-top:10px; font-size:14px; }
+.history {
+  margin-top: 15px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+.history span {
+  display:block;
+  cursor:pointer;
+  margin-top:5px;
+  text-decoration: underline;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1>🧠 AI Image Generator</h1>
+
+<div class="card">
+<textarea id="prompt" placeholder="Describe your image..."></textarea>
+
+<select id="style">
+  <option value="">No Style</option>
+  <option value="anime style">Anime</option>
+  <option value="realistic photo">Realistic</option>
+  <option value="cyberpunk futuristic">Cyberpunk</option>
+</select>
+
+<select id="mode">
+  <option value="fast">⚡ Fast Mode</option>
+  <option value="hq">💎 HQ Mode</option>
+</select>
+
+<button id="generateBtn" onclick="generateImage()">Generate Image</button>
+
+<div class="loader" id="loader"></div>
+<div class="limit" id="limitText"></div>
+<div class="history" id="history"></div>
+
+<!-- BACK TO TOOLBOX HUB BUTTON -->
+<a class="back-btn" href="index.html">⬅ Back to Toolbox Hub</a>
+
+</div>
+
+<div id="imageBox"></div>
+</div>
+
+<script>
+const WORKER_URL = "https://wispy-limit-562f.mohakchoubey.workers.dev/";
+const DAILY_LIMIT = 4;
+
+// 🚫 NSFW WORDS
+const bannedWords = [
+  "nude","sex","porn","breast","xxx","adult","erotic","nsfw"
+];
+
+function todayKey(){ return "ai_"+new Date().toISOString().slice(0,10); }
+function getUsage(){ return parseInt(localStorage.getItem(todayKey())||"0"); }
+function incUsage(){ localStorage.setItem(todayKey(),getUsage()+1); }
+function updateLimit(){ limitText.innerText=`Daily limit: ${getUsage()} / ${DAILY_LIMIT}`; }
+updateLimit();
+
+// 🕘 Prompt history
+function saveHistory(text){
+  let h = JSON.parse(localStorage.getItem("history")||"[]");
+  h.unshift(text);
+  h = h.slice(0,5);
+  localStorage.setItem("history",JSON.stringify(h));
+  renderHistory();
+}
+function renderHistory(){
+  let h = JSON.parse(localStorage.getItem("history")||"[]");
+  history.innerHTML = "<b>Prompt History:</b>";
+  h.forEach(p=>{
+    let s=document.createElement("span");
+    s.innerText=p;
+    s.onclick=()=>prompt.value=p;
+    history.appendChild(s);
+  });
+}
+renderHistory();
+
+async function generateImage(){
+  if(getUsage()>=DAILY_LIMIT){ alert("Daily limit reached (4 images)"); return; }
+
+  let p = prompt.value.trim().toLowerCase();
+  if(!p) return alert("Enter prompt");
+
+  for(let w of bannedWords){
+    if(p.includes(w)){ alert("NSFW content not allowed 🚫"); return; }
+  }
+
+  const style = document.getElementById("style").value;
+  const mode = document.getElementById("mode").value;
+
+  let steps = mode==="fast" ? 20 : 40;
+  let size  = mode==="fast" ? "512x512" : "1024x1024";
+
+  let finalPrompt = style ? `${prompt.value}, ${style}` : prompt.value;
+
+  loader.innerText="⏳ Generating...";
+  generateBtn.disabled=true;
+
+  try{
+    const res = await fetch(WORKER_URL,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ prompt: finalPrompt, steps, size })
+    });
+    const data = await res.json();
+
+    imageBox.innerHTML=`
+      <img src="${data.image}">
+      <br>
+      <a class="download-btn" href="${data.image}" download>⬇ Download</a>
+    `;
+
+    incUsage();
+    updateLimit();
+    saveHistory(prompt.value);
+
+  }catch{
+    alert("Error generating image");
+  }
+
+  loader.innerText="";
+  generateBtn.disabled=false;
+}
+</script>
+</body>
+</html>
