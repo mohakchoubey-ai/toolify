@@ -228,93 +228,116 @@ const limitText = document.getElementById("limitText");
 const historyBox = document.getElementById("history");
 const imageBox = document.getElementById("imageBox");
 
+// --- UTILS ---
 function todayKey(){ return "ai_"+new Date().toISOString().slice(0,10); }
 function getUsage(){ return parseInt(localStorage.getItem(todayKey())||"0"); }
 function incUsage(){ localStorage.setItem(todayKey(),getUsage()+1); }
 function updateLimit(){ limitText.innerText=`Daily Uses: ${getUsage()} / ${DAILY_LIMIT}`; }
 
 function saveHistory(text){
-  let h = JSON.parse(localStorage.getItem("history")||"[]");
-  if(!h.includes(text)) {
-    h.unshift(text);
-    h = h.slice(0,5);
-    localStorage.setItem("history",JSON.stringify(h));
-    renderHistory();
-  }
+    let h = JSON.parse(localStorage.getItem("history")||"[]");
+    if(!h.includes(text)) {
+        h.unshift(text);
+        h = h.slice(0,5);
+        localStorage.setItem("history",JSON.stringify(h));
+        renderHistory();
+    }
 }
 
 function renderHistory(){
-  let h = JSON.parse(localStorage.getItem("history")||"[]");
-  if(h.length === 0) return;
-  historyBox.innerHTML = "<b>Recent Prompts:</b>";
-  h.forEach(p=>{
-    let s=document.createElement("span");
-    s.innerText= p.length > 20 ? p.substring(0,20) + "..." : p;
-    s.onclick=()=> promptInput.value=p;
-    historyBox.appendChild(s);
-  });
+    let h = JSON.parse(localStorage.getItem("history")||"[]");
+    if(h.length === 0) return;
+    historyBox.innerHTML = "<b>Recent Prompts:</b>";
+    h.forEach(p=>{
+        let s = document.createElement("span");
+        s.innerText = p.length > 25 ? p.substring(0,25) + "..." : p;
+        s.onclick = () => {
+            promptInput.value = p;
+            promptInput.focus();
+        };
+        historyBox.appendChild(s);
+    });
 }
 
+// --- MAIN GENERATOR ---
 async function generateImage(){
-  const p = promptInput.value.trim();
-  
-  if(!p) { alert("Please enter a description"); return; }
-  if(getUsage() >= DAILY_LIMIT){ alert("Daily limit reached (4 images)"); return; }
-
-  const cleanP = p.toLowerCase();
-  for(let w of bannedWords){
-    if(cleanP.includes(w)){ alert("Content policy violation 🚫"); return; }
-  }
-
-  const style = document.getElementById("style").value;
-  const mode = document.getElementById("mode").value;
-  const finalPrompt = style ? `${p}, ${style}` : p;
-
-  // UI State: Loading
-  generateBtn.disabled = true;
-  generateBtn.innerText = "Creating...";
-  generateBtn.classList.add("loading-pulse");
-  loader.innerText = "✨ Magic is happening...";
-  imageBox.innerHTML = "";
-
-  try {
-    const res = await fetch(WORKER_URL, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ 
-        prompt: finalPrompt, 
-        steps: mode === "fast" ? 20 : 40, 
-        size: mode === "fast" ? "512x512" : "1024x1024" 
-      })
-    });
+    const p = promptInput.value.trim();
     
-    const data = await res.json();
+    // Validations
+    if(!p) { alert("Please enter a description!"); return; }
+    if(getUsage() >= DAILY_LIMIT){ alert("Daily limit reached! Try again tomorrow."); return; }
 
-    if(data.image) {
-      imageBox.innerHTML = `
-        <img src="${data.image}" alt="Generated AI Art">
-        <br>
-        <a class="download-btn" href="${data.image}" target="_blank" download="ai-image.png">⬇ Download Image</a>
-      `;
-      incUsage();
-      updateLimit();
-      saveHistory(p);
-    } else {
-      throw new Error("No image data");
+    const cleanP = p.toLowerCase();
+    if(bannedWords.some(w => cleanP.includes(w))){
+        alert("Policy Violation: NSFW content is not allowed 🚫");
+        return;
     }
 
-  } catch (err) {
-    alert("Generation failed. Please check your Worker URL or connection.");
-    console.error(err);
-  } finally {
-    generateBtn.disabled = false;
-    generateBtn.innerText = "Generate Art";
-    generateBtn.classList.remove("loading-pulse");
-    loader.innerText = "";
-  }
+    const style = document.getElementById("style").value;
+    const mode = document.getElementById("mode").value;
+    const finalPrompt = style ? `${p}, ${style}` : p;
+
+    // UI State: Start Loading
+    generateBtn.disabled = true;
+    generateBtn.innerText = "Connecting to AI...";
+    generateBtn.classList.add("loading-pulse");
+    loader.innerHTML = "<span>✨ Magic is happening (10-15s)...</span>";
+    imageBox.style.opacity = "0.5";
+
+    try {
+        const response = await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                prompt: finalPrompt,
+                mode: mode // Passing mode to worker if needed
+            }),
+            // Timeout handling
+            signal: AbortSignal.timeout(60000) 
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Worker Error: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+
+        if(data.image) {
+            // Success: Render Image
+            imageBox.style.opacity = "1";
+            imageBox.innerHTML = `
+                <div style="margin-top:20px; animation: imgAppear 0.5s ease;">
+                    <img src="${data.image}" alt="Generated AI Art" style="max-width:100%; border-radius:15px; border: 2px solid rgba(255,255,255,0.1);">
+                    <br>
+                    <a class="download-btn" href="${data.image}" download="ai-art-${Date.now()}.png">⬇ Download Masterpiece</a>
+                </div>
+            `;
+            incUsage();
+            updateLimit();
+            saveHistory(p);
+        } else {
+            throw new Error("Invalid response format from Worker");
+        }
+
+    } catch (err) {
+        console.error("Full Error Info:", err);
+        let msg = "Generation failed.";
+        if(err.name === 'TimeoutError') msg = "Request took too long. Try again.";
+        else if(err.message.includes("Failed to fetch")) msg = "Cannot connect to Worker. Check CORS or URL.";
+        else msg = err.message;
+        
+        alert("❌ " + msg);
+        imageBox.innerHTML = `<p style="color:#ff5e5e;">Error: ${msg}</p>`;
+    } finally {
+        generateBtn.disabled = false;
+        generateBtn.innerText = "Generate Art";
+        generateBtn.classList.remove("loading-pulse");
+        loader.innerText = "";
+    }
 }
 
-// Init
+// Initialize
 updateLimit();
 renderHistory();
 </script>
