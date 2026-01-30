@@ -571,11 +571,22 @@ if ("serviceWorker" in navigator) {
         }
         form.addEventListener("submit", handleSubmit);
 
-        // Video handling
-        const video = document.getElementById('bg-video');
-        const fallback = document.getElementById('bg-video-fallback');
-        video.addEventListener('loadeddata', () => fallback.style.display = 'none');
-        video.addEventListener('error', () => { video.style.display = 'none'; fallback.style.display = 'block'; });
+    // Optimized Video handling
+const video = document.getElementById('bg-video');
+const fallback = document.getElementById('bg-video-fallback');
+
+// If the video plays, make sure fallback is hidden
+video.onplay = () => {
+    fallback.style.display = 'none';
+    video.style.opacity = '1';
+};
+
+// If the video fails, show the fallback image immediately
+video.onerror = () => {
+    console.error("Video failed to load.");
+    video.style.display = 'none';
+    fallback.style.display = 'block';
+};
 
         window.toggleMenu = () => {
             const sidebar = document.getElementById('sidebar');
