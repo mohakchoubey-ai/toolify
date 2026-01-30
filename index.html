@@ -137,8 +137,8 @@
     align-items: center; 
     text-align: center;
     padding: 20px 20px 120px;
-    /* THIS IS THE CAUSE: */
-    background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, transparent 70%);
+    /* Removed the radial-gradient background that was causing the black haze */
+    background: transparent; 
 }
 
        .hero-title { 
@@ -175,18 +175,7 @@
                  0 0 5px rgba(0, 0, 0, 1);
 } 
 
-        #landing-page {
-    flex: 1; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: center; 
-    align-items: center; 
-    text-align: center;
-    padding: 20px 20px 120px;
-    /* ADD THIS: Subtle dark glow behind the text area */
-    background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, transparent 70%);
-}
-
+  
         #dashboard { 
             padding: 80px 20px 60px; display: none; opacity: 0; width: 100%; 
         }
