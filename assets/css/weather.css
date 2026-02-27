@@ -1,0 +1,111 @@
+:root {
+    --bg-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-glow: rgba(56, 189, 248, 0.2);
+    --input-bg: rgba(15, 23, 42, 0.5);
+    --border: rgba(255, 255, 255, 0.08);
+    --hr-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] {
+    --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --accent: #0284c7;
+    --input-bg: rgba(241, 245, 249, 0.9);
+    --border: rgba(15, 23, 42, 0.08);
+    --hr-color: rgba(15, 23, 42, 0.1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.4s ease; }
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    padding: 40px 20px;
+}
+
+.theme-switch {
+    position: sticky; top: 20px; align-self: flex-end;
+    background: var(--card-bg); border: 1px solid var(--border);
+    padding: 10px 18px; border-radius: 50px; cursor: pointer;
+    backdrop-filter: blur(10px); display: flex; align-items: center;
+    gap: 8px; font-weight: 500; color: var(--text-main);
+    z-index: 100; margin-bottom: 30px; font-size: 0.9rem;
+}
+
+.hub-link {
+    position: absolute; top: 40px; left: 20px;
+    text-decoration: none; color: var(--text-muted);
+    font-size: 0.8rem; font-weight: 600;
+}
+
+.container { width: 100%; max-width: 800px; }
+
+.search-container { position: relative; margin-bottom: 30px; }
+#searchBox {
+    width: 100%; padding: 16px 25px; border-radius: 15px;
+    border: 1px solid var(--border); background: var(--input-bg);
+    color: var(--text-main); font-size: 1rem; outline: none;
+    backdrop-filter: blur(10px);
+}
+
+.autocomplete-list {
+    position: absolute; top: 65px; left: 0; right: 0;
+    background: var(--card-bg); border-radius: 15px;
+    border: 1px solid var(--border); backdrop-filter: blur(20px);
+    max-height: 250px; overflow-y: auto; z-index: 1000; display: none;
+}
+.suggestion-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid var(--border); }
+.suggestion-item:hover { background: var(--accent); color: white; }
+
+.weather-card {
+    background: var(--card-bg); backdrop-filter: blur(12px);
+    border-radius: 24px; padding: 30px; border: 1px solid var(--border);
+    margin-bottom: 30px; display: none;
+}
+
+.temp-display { font-size: 4rem; font-weight: 800; color: var(--accent); }
+
+.grid-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px; margin-top: 30px;
+}
+.stat-box {
+    background: var(--input-bg); padding: 15px; border-radius: 15px;
+    text-align: center; border: 1px solid var(--border);
+}
+.stat-box p { font-size: 0.75rem; color: var(--text-muted); }
+.stat-box span { font-weight: 700; color: var(--accent); }
+
+.forecast-container { margin-top: 20px; display: none; }
+.forecast-row { display: flex; gap: 12px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+.forecast-card {
+    min-width: 100px; background: var(--card-bg); padding: 15px;
+    border-radius: 18px; text-align: center; border: 1px solid var(--border);
+}
+
+footer { width: 100%; max-width: 600px; text-align: center; margin-top: auto; padding-top: 40px; }
+hr { border: 0; height: 1px; background: var(--hr-color); margin-bottom: 25px; }
+.footer-links { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
+.footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; }
+.footer-links a:hover { color: var(--accent); }
+.branding { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 8px; }
+.other-sites { font-size: 0.85rem; color: var(--text-muted); }
+.other-sites a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+.refresh-btn {
+    background: var(--accent); color: white; border: none;
+    padding: 10px 20px; border-radius: 10px; cursor: pointer;
+    font-weight: 600; margin-bottom: 20px;
+}
