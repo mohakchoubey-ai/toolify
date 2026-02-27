@@ -1,256 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>Weather Pro | Toolbox</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --glass: rgba(255, 255, 255, 0.08);
-            --glass-heavy: rgba(255, 255, 255, 0.18);
-            --primary: #00f2ff;
-            --border: rgba(255, 255, 255, 0.1);
-        }
-
-        body {
-            margin: 0; padding: 0;
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at top right, #1e3c72, #000);
-            color: white;
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh;
-        }
-
-        /* Top Navigation Hub Link */
-        .nav-header {
-            width: 100%; padding: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-sizing: border-box; position: absolute; top: 0;
-        }
-
-        .hub-link {
-            text-decoration: none; color: white;
-            font-size: 14px; font-weight: 600;
-            background: var(--glass); padding: 10px 20px;
-            border-radius: 12px; border: 1px solid var(--border);
-            transition: 0.3s; backdrop-filter: blur(10px);
-        }
-
-        .hub-link:hover { background: var(--primary); color: #000; border-color: var(--primary); }
-
-        /* Search Section */
-        .search-container {
-            position: relative;
-            width: 85%; max-width: 500px;
-            margin: 100px 0 20px 0;
-            z-index: 500;
-        }
-
-        #searchBox {
-            width: 100%; padding: 18px 30px;
-            font-size: 18px; border-radius: 50px;
-            border: 1px solid var(--border);
-            background: rgba(255,255,255,0.05);
-            color: white; outline: none; text-align: center;
-            backdrop-filter: blur(15px); transition: 0.3s;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            box-sizing: border-box;
-        }
-
-        /* Refresh Button Styling */
-        .refresh-btn {
-            background: var(--primary); color: #000;
-            border: none; padding: 8px 18px; border-radius: 50px;
-            font-weight: 800; font-size: 12px; cursor: pointer;
-            margin-bottom: 20px; transition: 0.3s;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .refresh-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--primary); }
-
-        .autocomplete-list {
-            position: absolute; top: 70px; left: 0; right: 0;
-            background: rgba(15, 15, 15, 0.98); border-radius: 20px;
-            max-height: 300px; overflow-y: auto; display: none;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
-        }
-
-        .suggestion-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid var(--border); text-align: left; }
-        .suggestion-item:hover { background: var(--glass-heavy); color: var(--primary); }
-
-        #statusText { font-size: 13px; margin-bottom: 10px; color: var(--primary); opacity: 0.8; }
-
-        /* Weather Panel */
-        .weatherPanel {
-            width: 90%; max-width: 900px;
-            background: var(--glass); backdrop-filter: blur(25px);
-            border: 1px solid var(--border); border-radius: 32px;
-            padding: 40px; box-shadow: 0 25px 50px rgba(0,0,0,0.4);
-            display: none; margin-bottom: 30px;
-        }
-
-        .mainRow { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 30px; }
-        .temp { font-size: 80px; font-weight: 800; color: var(--primary); line-height: 1; }
-        .icon { width: 100px; height: 100px; filter: drop-shadow(0 0 15px var(--primary)); }
-
-        .rightBlock { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex: 1.5; }
-        .infoBox {
-            background: rgba(255, 255, 255, 0.03); padding: 15px 10px;
-            border-radius: 20px; font-size: 11px; text-align: center;
-            border: 1px solid var(--border);
-        }
-        .infoBox span { display: block; font-size: 16px; font-weight: 700; margin-top: 6px; color: var(--primary); }
-
-        #forecast { width: 90%; max-width: 900px; display: none; margin-bottom: 50px; }
-        .forecastRow { display: flex; gap: 15px; overflow-x: auto; padding: 20px 0; scrollbar-width: none; }
-        .dayCard {
-            min-width: 100px; background: var(--glass); padding: 20px;
-            border-radius: 24px; text-align: center; border: 1px solid var(--border);
-        }
-
-        @media (max-width: 768px) {
-            .rightBlock { grid-template-columns: repeat(2, 1fr); }
-            .leftBlock { text-align: center; }
-            .mainRow { justify-content: center; }
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Pro | Toolbox Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/weather.css">
 </head>
-<body>
+<body data-theme="dark">
 
-<header class="nav-header">
-    <a href="index.html" class="hub-link">← TOOLBOX HUB</a>
-</header>
+    <a href="index.html" class="hub-link">← HUB</a>
 
-<div class="search-container">
-    <input type="text" id="searchBox" placeholder="Search City (e.g. Indore)..." autocomplete="off" />
-    <div id="autocompleteList" class="autocomplete-list"></div>
-</div>
+    <button class="theme-switch" onclick="toggleTheme()">
+        <span id="themeIcon">☀️</span> <span id="themeText">Light Mode</span>
+    </button>
 
-<div id="statusText">INITIALIZING WEATHER ENGINE...</div>
-<button class="refresh-btn" onclick="detectLocation()">↻ Refresh My Location</button>
-
-<div class="weatherPanel" id="mainWeather">
-    <div class="mainRow">
-        <div class="leftBlock">
-            <div class="cityName" id="cityName" style="font-size: 2rem; font-weight: 800;"></div>
-            <div id="locationDetails" style="font-size: 14px; opacity: 0.6; margin-bottom: 15px;"></div>
-            <div style="display:flex; align-items: center; gap:20px;">
-                <img id="weatherIcon" class="icon" src="" />
-                <div class="temp" id="temperature"></div>
-            </div>
-            <div id="conditionText" style="font-size: 20px; opacity: 0.7; margin-top: 10px;"></div>
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="searchBox" placeholder="Search city (e.g. Indore)..." autocomplete="off">
+            <div id="autocompleteList" class="autocomplete-list"></div>
         </div>
-        <div class="rightBlock">
-            <div class="infoBox">Feels Like<span id="feelsLike">--</span></div>
-            <div class="infoBox">Humidity<span id="humidity">--</span></div>
-            <div class="infoBox">Wind<span id="wind">--</span></div>
-            <div class="infoBox">Rain<span id="precip">--</span></div>
-            <div class="infoBox">Sunrise<span id="sunrise">--</span></div>
-            <div class="infoBox">Sunset<span id="sunset">--</span></div>
-            <div class="infoBox">Max Temp<span id="maxT">--</span></div>
-            <div class="infoBox">Min Temp<span id="minT">--</span></div>
+
+        <center>
+            <button class="refresh-btn" onclick="detectLocation()">Use My Location</button>
+            <p id="statusText" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; min-height: 1.2rem;"></p>
+        </center>
+
+        <div class="weather-card" id="mainWeather">
+            <div class="main-info">
+                <div>
+                    <h2 id="cityName" style="font-size: 2rem;"></h2>
+                    <p id="locationDetails"></p>
+                    <p id="conditionText"></p>
+                </div>
+                <div style="text-align: right;">
+                    <img id="weatherIcon" src="">
+                    <div id="temperature" class="temp-display"></div>
+                </div>
+            </div>
+
+            <div class="grid-stats">
+                <div class="stat-box"><p>Feels Like</p><span id="feelsLike">--</span></div>
+                <div class="stat-box"><p>Humidity</p><span id="humidity">--</span></div>
+                <div class="stat-box"><p>Wind Speed</p><span id="wind">--</span></div>
+                <div class="stat-box"><p>Rain</p><span id="precip">--</span></div>
+            </div>
+        </div>
+
+        <div class="forecast-container" id="forecastSection">
+            <h3 style="margin-bottom: 15px; font-size: 0.9rem; color: var(--text-muted);">7-DAY FORECAST</h3>
+            <div class="forecast-row" id="forecastRow"></div>
         </div>
     </div>
-</div>
 
-<div id="forecast">
-    <h3 style="margin-left: 10px; font-weight: 300;">7-DAY FORECAST</h3>
-    <div class="forecastRow" id="forecastRow"></div>
-</div>
+    <footer>
+        <hr>
+        <div class="footer-links">
+            <a href="terms.html">Terms & Conditions</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="aboutus.html">About Us</a>
+            <a href="feedback.html">Feedback</a>
+        </div>
+        <p class="branding">Developed with ♥ by mohak 2026</p>
+        <p class="other-sites">
+            Our other sites: 
+            <strong><a href="https://mohakdev1220.github.io/facts">facts</a></strong> & 
+            <strong><a href="https://mohakdev1220.github.io/chromeportal">chromeportal</a></strong>
+        </p>
+    </footer>
 
-<script>
-    const searchBox = document.getElementById("searchBox");
-    const suggestionList = document.getElementById("autocompleteList");
-    const statusText = document.getElementById("statusText");
-
-    function getConditionData(code) {
-        const mapping = {
-            0: ["Clear Skies", "https://img.icons8.com/emoji/96/sun-emoji.png"],
-            1: ["Mainly Clear", "https://img.icons8.com/emoji/96/sun-emoji.png"],
-            2: ["Partly Cloudy", "https://img.icons8.com/emoji/96/sun-behind-cloud.png"],
-            3: ["Overcast", "https://img.icons8.com/emoji/96/cloud-emoji.png"],
-            61: ["Slight Rain", "https://img.icons8.com/emoji/96/cloud-with-rain.png"],
-            95: ["Thunderstorm", "https://img.icons8.com/emoji/96/cloud-with-lightning-and-rain.png"]
-        };
-        return mapping[code] || ["Cloudy", "https://img.icons8.com/emoji/96/cloud-emoji.png"];
-    }
-
-    async function getWeather(lat, lon){
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,rain,wind_speed_10m,apparent_temperature,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto`;
-        const res = await fetch(url);
-        return await res.json();
-    }
-
-    function displayWeather(locName, region, country, w){
-        document.getElementById("cityName").innerText = locName.toUpperCase();
-        document.getElementById("locationDetails").innerText = `${region}, ${country}`;
-        const [condText, condIcon] = getConditionData(w.current.weather_code);
-        document.getElementById("temperature").innerText = Math.round(w.current.temperature_2m) + "°";
-        document.getElementById("conditionText").innerText = condText;
-        document.getElementById("weatherIcon").src = condIcon;
-        document.getElementById("feelsLike").innerText = Math.round(w.current.apparent_temperature) + "°";
-        document.getElementById("humidity").innerText = w.current.relative_humidity_2m + "%";
-        document.getElementById("wind").innerText = Math.round(w.current.wind_speed_10m) + " km/h";
-        document.getElementById("precip").innerText = w.current.rain + "mm";
-        document.getElementById("sunrise").innerText = w.daily.sunrise[0].split("T")[1];
-        document.getElementById("sunset").innerText = w.daily.sunset[0].split("T")[1];
-        document.getElementById("maxT").innerText = Math.round(w.daily.temperature_2m_max[0]) + "°";
-        document.getElementById("minT").innerText = Math.round(w.daily.temperature_2m_min[0]) + "°";
-
-        let row = "";
-        for(let i=0; i<7; i++){
-            let date = new Date(w.daily.time[i]).toLocaleDateString('en-US', {weekday: 'short'});
-            const [fText, fIcon] = getConditionData(w.daily.weather_code[i]);
-            row += `<div class="dayCard">
-                <div style="font-weight:bold; font-size: 11px;">${date}</div>
-                <img src="${fIcon}" width="35">
-                <div style="font-weight:800; color:var(--primary); font-size: 16px;">${Math.round(w.daily.temperature_2m_max[i])}°</div>
-            </div>`;
-        }
-        document.getElementById("forecastRow").innerHTML = row;
-        document.getElementById("mainWeather").style.display = "block";
-        document.getElementById("forecast").style.display = "block";
-        statusText.style.display = "none";
-    }
-
-    // SILENT IP DETECTION
-    async function detectLocation() {
-        statusText.style.display = "block";
-        statusText.innerText = "LOCATING VIA IP...";
-        try {
-            const res = await fetch('http://ip-api.com/json/');
-            const data = await res.json();
-            if(data.status === 'success') {
-                const weather = await getWeather(data.lat, data.lon);
-                displayWeather(data.city, data.regionName, data.country, weather);
-            }
-        } catch (e) { statusText.innerText = "LOCALIZATION FAILED. USE SEARCH."; }
-    }
-
-    searchBox.addEventListener("input", async (e) => {
-        const query = e.target.value;
-        if (query.length < 3) return;
-        const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=5`);
-        const data = await res.json();
-        if (data.results) {
-            suggestionList.innerHTML = "";
-            data.results.forEach(loc => {
-                const div = document.createElement("div");
-                div.className = "suggestion-item";
-                div.innerHTML = `<strong>${loc.name}</strong> <span>${loc.admin1}, ${loc.country}</span>`;
-                div.onclick = async () => {
-                    searchBox.value = loc.name;
-                    suggestionList.style.display = "none";
-                    const w = await getWeather(loc.latitude, loc.longitude);
-                    displayWeather(loc.name, loc.admin1, loc.country, w);
-                };
-                suggestionList.appendChild(div);
-            });
-            suggestionList.style.display = "block";
-        }
-    });
-
-    window.onload = detectLocation;
-</script>
+    <script src="assets/js/weather.js"></script>
 </body>
 </html>
