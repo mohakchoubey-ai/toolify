@@ -268,7 +268,7 @@
         }
 
         .show-page { display: block !important; opacity: 1 !important; }
-        .hide-page { display: none !important; }
+        .hide-page { display: none !important;  opacity: 1 !important; }
         .auth-profile-wrap { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .user-img { 
             width: 38px; height: 38px; border-radius: 50%; 
@@ -448,9 +448,7 @@
             <p class="tagline">The futuristic workspace for digital creators.</p>
             <div id="main-auth-ui"></div>
         </section> 
-      <section id="dashboard" class="show-page">
-
-        <section id="dashboard">
+     <section id="dashboard" class="show-page">
             <div class="tools-grid">
                 <a href="time.html#alarm-section" class="card" aria-label="Alarm Tool">
                     <span class="card-icon">⏰</span><h4>Alarm</h4>
@@ -492,9 +490,7 @@
                     <span class="card-icon">🔒</span><h4>Pass Gen</h4>
                 </a>  
                <a href="https://www.legendoftoys.com/products/flare-2-rc-drift-car?variant=46936532615220" class="card" aria-label="Flare 2.0 RC Drift Car">
-    <span class="card-icon">🏎️</span>
-    <h4>Flare 2.0 RC Drift Car</h4>
-</a>
+ 
          
             </div>
             <footer>DEVELOPED WITH <span style="color:red">♥</span> BY MOHAK @2026  </footer>
@@ -596,13 +592,7 @@ video.onerror = () => {
             document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
         };
 
-        window.enterAsGuest = () => {
-            document.getElementById('landing-page').classList.add('hide-page');
-            document.getElementById('dashboard').classList.add('show-page');
-            document.getElementById('bg-video').classList.add('blurred');
-            document.getElementById('sidebar').classList.remove('active');
-            document.body.style.overflow = '';
-        };
+   
 
         window.signIn = async () => {
             try { 
@@ -653,12 +643,12 @@ video.onerror = () => {
                 addAccountSide.style.display = 'block'; 
             } else {
                 authHeader.innerHTML = `<button class="btn btn-primary" onclick="signIn()">Sign In</button>`;
-                mainAuthUI.innerHTML = `
-                    <div style="display:flex; flex-direction:column; gap:16px; max-width:300px; margin:0 auto;">
-                        <button class="btn btn-primary" onclick="signIn()">Sign In with Google</button>
-                        <button class="btn btn-guest" onclick="enterAsGuest()">Continue as Guest</button>
-                    </div>
-                `;
+               
+          mainAuthUI.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:16px; max-width:300px; margin:0 auto;">
+        <button class="btn btn-primary" onclick="signIn()">Sign In with Google</button>
+    </div>
+`;
                 addAccountSide.style.display = 'none';
             }
         });
