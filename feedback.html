@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Feedback</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 50px; }
+        .form-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { margin-top: 0; color: #333; }
+        label { display: block; margin: 15px 0 5px; color: #666; font-size: 14px; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { margin-top: 20px; width: 100%; background-color: #4A90E2; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #357ABD; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>We value your input</h2>
+   <form
+  action="https://formspree.io/f/xkowpdnv"
+  method="POST"
+>
+  <label>
+    Your email:
+    <input type="email" name="email">
+  </label>
+  <label>
+    Your message:
+    <textarea name="message"></textarea>
+  </label>
+  <!-- your other form fields go here -->
+  <button type="submit">Send</button>
+</form>
+
+</div>
+
+</body>
+</html>
