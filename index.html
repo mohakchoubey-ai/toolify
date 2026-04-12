@@ -1,96 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toolify | Daily 10+ Tools</title>
-    
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <meta name="google-site-verification" content="xrZFu5cpuycZgitIQWcRT0DmD7er9zSVNmzWktTYs10" /> 
-    
-    <link rel="stylesheet" href="assets/Index.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toolify | Productivity Toolkit</title>
+  <meta name="description" content="Toolify is a lightweight collection of productivity tools you can use in your browser." />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/Index.css" />
 </head>
 <body>
-    <img src="background-poster.jpg" id="bg-video-fallback" alt="" style="display: none;">
-    <video autoplay muted loop playsinline poster="background-poster.jpg" id="bg-video">
-        <source src="background.mp4" type="video/mp4">
-    </video>
+  <header class="site-header">
+    <a class="brand" href="#">
+      <img src="logo.png" alt="Toolify logo" width="34" height="34" />
+      <span><span class="brand-accent">tool</span>ify</span>
+    </a>
+    <nav>
+      <a href="#tools">Tools</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
 
-    <div id="feedback-modal" class="feedback-modal">
-        <div class="feedback-overlay" onclick="closeFeedback()"></div>
-        <div class="feedback-box">
-            <div class="feedback-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3>📝 Send Feedback</h3>
-                <button onclick="closeFeedback()" style="background:none; border:none; color:#fff; cursor:pointer; font-size:1.5rem;">✕</button>
-            </div>
-            <form id="my-form" action="https://formspree.io/f/xkowpdnv" method="POST">
-                <input type="email" name="email" placeholder="Your Email *" required style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:1px solid var(--border); background:#222; color:#fff;">
-                <textarea name="message" placeholder="Your feedback..." rows="6" required style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:1px solid var(--border); background:#222; color:#fff;"></textarea>
-                <button type="submit" class="btn btn-primary" style="width:100%;">Send Feedback 🚀</button>
-                <p id="my-form-status"></p>
-            </form>
-        </div>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">All-in-one browser toolkit</p>
+      <h1>Make your workflow faster with one simple website.</h1>
+      <p class="hero-copy">
+        Toolify brings everyday utility tools into one clean interface: calculators, timers,
+        generators, and more — fast, private, and free.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#tools">Explore Tools</a>
+        <a class="btn btn-secondary" href="feedback.html">Send Feedback</a>
+      </div>
+    </section>
+
+    <section id="tools" class="tools-section">
+      <h2>Popular tools</h2>
+      <div class="tools-grid">
+        <a href="calculator.html" class="card"><span>🧮</span><h3>Calculator</h3><p>Quick arithmetic and calculations.</p></a>
+        <a href="time.html" class="card"><span>⏰</span><h3>Time Tools</h3><p>Clock, alarm, timer, and stopwatch.</p></a>
+        <a href="calendar.html" class="card"><span>📅</span><h3>Calendar</h3><p>Simple planning and date tracking.</p></a>
+        <a href="qr.html" class="card"><span>🔳</span><h3>QR Generator</h3><p>Create scannable codes instantly.</p></a>
+        <a href="password.html" class="card"><span>🔐</span><h3>Password Generator</h3><p>Create strong, secure passwords.</p></a>
+        <a href="pdf.html" class="card"><span>📄</span><h3>PDF Maker</h3><p>Convert content into PDFs quickly.</p></a>
+      </div>
+    </section>
+
+    <section id="about" class="about">
+      <h2>Why Toolify?</h2>
+      <ul>
+        <li>⚡ Lightweight and responsive on mobile and desktop.</li>
+        <li>🔒 Privacy-friendly tools that run directly in your browser.</li>
+        <li>🎯 Focused interface with no clutter.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer id="contact" class="site-footer">
+    <p>© 2026 Toolify</p>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms &amp; Conditions</a>
+      <a href="feedback.html">Feedback</a>
     </div>
+  </footer>
 
-    <div class="main-wrapper">
-        <header>
-            <div class="brand-container">
-                <img src="logo.png" alt="Toolify Logo" width="30" height="30">
-                <div class="logo-text"><span class="part1">tool</span>ify</div>
-            </div>
-            <div id="auth-header-area">
-                </div>
-        </header>
-
-        <section id="landing-page">
-            <h1 class="hero-title">toolify</h1>
-            <p class="tagline">The futuristic workspace for digital creators.</p>
-            <div id="main-auth-ui"></div>
-        </section> 
-
-        <section id="dashboard">
-            <div class="tools-grid">
-                <a href="time.html#alarm-section" class="card"><span class="card-icon">⏰</span><h4>Alarm</h4></a>
-                <a href="calculator.html" class="card"><span class="card-icon">🧮</span><h4>Calculator</h4></a>
-                <a href="weather.html" class="card"><span class="card-icon">☀️</span><h4>Weather</h4></a>
-                <a href="qr.html" class="card"><span class="card-icon">🔍</span><h4>QR Maker</h4></a> 
-                <a href="colour.html" class="card"><span class="card-icon">🎨</span><h4>Colors</h4></a>
-                <a href="time.html" class="card"><span class="card-icon">🕓</span><h4>Clock</h4></a>
-                <a href="time.html#timer-section" class="card"><span class="card-icon">⌛</span><h4>Timer</h4></a>
-                <a href="speech.html" class="card"><span class="card-icon">🗣️</span><h4>Speech</h4></a>
-                <a href="calendar.html" class="card"><span class="card-icon">📅</span><h4>Calendar</h4></a>
-                <a href="pdf.html" class="card"><span class="card-icon">📄</span><h4>PDF Maker</h4></a>
-                <a href="time.html#stopwatch-section" class="card"><span class="card-icon">⏱️</span><h4>Stopwatch</h4></a>
-                <a href="grammar.html" class="card"><span class="card-icon">✍️</span><h4>Grammar</h4></a>
-                <a href="password.html" class="card"><span class="card-icon">🔒</span><h4>Pass Gen</h4></a>   
-            </div>
-        </section> 
-
-        <footer class="site-footer">
-            <div class="footer-content">
-                <div class="footer-links">
-                    <a href="privacy.html">Privacy Policy</a>
-                    <a href="terms.html">Terms & Conditions</a>
-                    <a href="javascript:void(0)" onclick="openFeedback()">Send Feedback</a>
-                </div>
-                <div class="other-sites">
-                    <span>Our other sites:</span>
-                    <a href="https://mohakdev1220.github.io/Facts/">Facts</a>
-                    <a href="https://mohakdev1220.github.io/ChromePortal/">ChromePortal</a>
-                </div>
-                <p class="made-by">DEVELOPED WITH <span style="color:red">♥</span> BY MOHAK @2026</p>
-            </div>
-        </footer>
-
-        <a href="https://www.youtube.com/@MOHAKCHOUBEY?sub_confirmation=1" target="_blank" rel="noopener" class="yt-floating-btn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
-            </svg>
-        </a> 
-    </div>
-
-    <script type="module" src="assets/Index.js"></script>
+  <script src="assets/Index.js" defer></script>
 </body>
 </html>
