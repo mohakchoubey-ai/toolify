@@ -82,26 +82,30 @@ header {
     -webkit-text-fill-color: transparent;
 }
 
-/* --- DASHBOARD TOOLS GRID --- */
-#dashboard {
-    padding: 60px 5% 80px;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
+/* --- UPDATED DASHBOARD TOOLS GRID --- */
+
+.card-icon { 
+    /* Increased from 2.5rem to 3.5rem */
+    font-size: 3.5rem; 
+    margin-bottom: 15px; 
+    transition: transform 0.3s ease;
 }
 
-.tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 20px;
+.card h4 {
+    /* Increased font size and adjusted spacing */
+    font-size: 1.4rem;
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 .card {
     background: var(--glass);
     backdrop-filter: blur(20px);
     border: 1px solid var(--border);
-    padding: 35px 20px;
-    border-radius: 24px;
+    /* Increased padding for a larger click area/look */
+    padding: 45px 25px; 
+    border-radius: 28px;
     text-decoration: none;
     color: #fff;
     display: flex;
@@ -110,14 +114,10 @@ header {
     transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.card:hover {
-    background: var(--primary);
-    color: #000;
-    transform: translateY(-8px);
-    box-shadow: 0 15px 35px var(--primary-glow);
+/* Subtle animation to make the emoji pop more on hover */
+.card:hover .card-icon {
+    transform: scale(1.1);
 }
-
-.card-icon { font-size: 2.5rem; margin-bottom: 10px; }
 
 /* --- NEW BOTTOM BAR (FOOTER) --- */
 .site-footer {
