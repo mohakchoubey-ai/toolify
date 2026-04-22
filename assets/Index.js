@@ -48,7 +48,6 @@ onAuthStateChanged(auth, (user) => {
     const authHeader = document.getElementById('auth-header-area');
     const landingPage = document.getElementById('landing-page');
     const dashboard = document.getElementById('dashboard');
-    const bgVideo = document.getElementById('bg-video');
 
     if (user) {
         // Update Header with Profile Info
@@ -63,18 +62,18 @@ onAuthStateChanged(auth, (user) => {
         `;
         
         // Navigation Logic
-        landingPage.classList.add('hide-page');
-        dashboard.classList.add('show-page');
-        if(bgVideo) bgVideo.classList.add('blurred');
+        landingPage.style.display = 'none';
+        dashboard.style.display = 'block';
         
     } else {
         // Show Sign In Button if Logged Out
         authHeader.innerHTML = `<button class="btn btn-primary" onclick="signIn()">Sign In</button>`;
-        mainAuthUI.innerHTML = `<button class="btn btn-primary" onclick="signIn()" style="padding: 15px 40px; font-size: 1.1rem;">Get Started with Google</button>`;
+        if(mainAuthUI) {
+            mainAuthUI.innerHTML = `<button class="btn btn-primary" onclick="signIn()" style="padding: 15px 40px; font-size: 1.1rem;">Get Started with Google</button>`;
+        }
         
-        landingPage.classList.remove('hide-page');
-        dashboard.classList.remove('show-page');
-        if(bgVideo) bgVideo.classList.remove('blurred');
+        landingPage.style.display = 'flex';
+        dashboard.style.display = 'none';
     }
 });
 
@@ -108,16 +107,8 @@ if(form) {
     });
 }
 
-// --- VIDEO INITIALIZATION ---
-const video = document.getElementById('bg-video');
-const fallback = document.getElementById('bg-video-fallback');
-if(video) {
-    video.onplay = () => { 
-        if(fallback) fallback.style.display = 'none'; 
-        video.style.opacity = '0.5'; 
-    };
-    video.onerror = () => { 
-        video.style.display = 'none'; 
-        if(fallback) fallback.style.display = 'block'; 
-    };
-}
+// --- MOUSE TRACKING FOR GRADIENT GLOW ---
+document.addEventListener('mousemove', e => {
+    document.body.style.setProperty('--mouse-x', (e.clientX) + 'px');
+    document.body.style.setProperty('--mouse-y', (e.clientY) + 'px');
+});
