@@ -13,30 +13,40 @@
     box-sizing: border-box; 
     font-family: 'Inter', sans-serif; 
 }
-
+/* --- UPDATED DYNAMIC GRADIENT BACKGROUND --- */
 body {
-    background: #000;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%), 
+                linear-gradient(135deg, #000000, #001a1d, #000b1a, #000000);
+    background-size: 400% 400%;
+    animation: gradientFlow 15s ease infinite;
     color: #fff;
     overflow-x: hidden;
     min-height: 100vh;
     display: flex;
-    flex-direction: column; /* Footer ko bottom mein rakhne ke liye */
+    flex-direction: column;
 }
 
-/* --- BACKGROUND VIDEO --- */
-#bg-video, #bg-video-fallback {
+/* This creates the "mixture of white" or "glow" that follows the mouse/center */
+body::before {
+    content: "";
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+                rgba(0, 242, 255, 0.06), 
+                transparent 40%);
     z-index: -1;
+    pointer-events: none;
 }
 
-#bg-video { opacity: 0.5; transition: filter 1.2s ease; }
-.blurred { filter: blur(25px) brightness(0.3) !important; }
-
+/* The Animation Logic */
+@keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 /* --- TOP HEADER (Logo aur Profile) --- */
 header {
     width: 100%;
