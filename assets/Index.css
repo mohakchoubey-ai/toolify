@@ -101,13 +101,10 @@ header {
 
 .tools-grid {
     display: grid;
-    /* Yeh line cards ko rows aur columns mein divide karegi */
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+    grid-template-columns: repeat(3, 1fr); /* FIXED 3 columns */
     gap: 20px;
     width: 100%;
-    justify-content: center; /* Grid ko center mein rakhne ke liye */
 }
-
 .card {
     background: var(--glass);
     backdrop-filter: blur(20px);
@@ -182,11 +179,6 @@ header {
     }
 }
 
-/* Entry Animation Logic */
-@keyframes cardAppear {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
 
 /* --- FOOTER --- */
 .site-footer {
@@ -255,14 +247,21 @@ header {
     box-shadow: 0 0 15px var(--primary-glow);
 }
 
-/* --- MOBILE VIEW --- */
 @media (max-width: 768px) {
-    .tools-grid { 
-        grid-template-columns: repeat(2, 1fr); /* Force 2 columns on mobile */
-        gap: 15px; 
+    .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
     }
-    .hero-title { font-size: 2.8rem; }
-    .card { padding: 20px 10px; }
-    .card-icon { font-size: 2.2rem; }
-    .card h4 { font-size: 0.9rem; }
+
+    .card {
+        padding: 15px;
+    }
+
+    .card-icon {
+        font-size: 2rem;
+    }
+
+    .card h4 {
+        font-size: 0.85rem;
+    }
 }
