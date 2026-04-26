@@ -13,7 +13,7 @@
     box-sizing: border-box; 
     font-family: 'Inter', sans-serif; 
 }
-/* --- UPDATED DYNAMIC GRADIENT BACKGROUND --- */
+
 body {
     background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%), 
                 linear-gradient(135deg, #000000, #001a1d, #000b1a, #000000);
@@ -26,7 +26,6 @@ body {
     flex-direction: column;
 }
 
-/* This creates the "mixture of white" or "glow" that follows the mouse/center */
 body::before {
     content: "";
     position: fixed;
@@ -41,13 +40,13 @@ body::before {
     pointer-events: none;
 }
 
-/* The Animation Logic */
 @keyframes gradientFlow {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
-/* --- TOP HEADER (Logo aur Profile) --- */
+
+/* --- TOP HEADER --- */
 header {
     width: 100%;
     padding: 15px 5%;
@@ -92,50 +91,79 @@ header {
     -webkit-text-fill-color: transparent;
 }
 
-/* --- UPDATED DASHBOARD TOOLS GRID --- */
-
-.card-icon { 
-    /* Increased from 2.5rem to 3.5rem */
-    font-size: 3.5rem; 
-    margin-bottom: 15px; 
-    transition: transform 0.3s ease;
+/* --- UPDATED TOOLS GRID (FIXED LONG CARDS) --- */
+#dashboard {
+    padding: 40px 5%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: none; /* JS handle karega display */
 }
 
-.card h4 {
-    /* Increased font size and adjusted spacing */
-    font-size: 1.4rem;
-    margin: 0;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+.tools-grid {
+    display: grid;
+    /* Auto-fit ensures it works on all screens without stretching */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+    gap: 20px;
+    width: 100%;
 }
 
 .card {
     background: var(--glass);
     backdrop-filter: blur(20px);
     border: 1px solid var(--border);
-    /* Increased padding for a larger click area/look */
-    padding: 45px 25px; 
-    border-radius: 28px;
+    padding: 25px 15px; 
+    border-radius: 24px;
     text-decoration: none;
     color: #fff;
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    justify-content: center;
+    text-align: center;
+    aspect-ratio: 1 / 1; /* Makes cards perfect squares */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: cardAppear 0.6s backwards;
 }
 
-/* Subtle animation to make the emoji pop more on hover */
+/* Hover Animations */
+.card:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--primary);
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 10px 25px rgba(0, 242, 255, 0.2);
+}
+
+.card-icon { 
+    font-size: 2.8rem; 
+    margin-bottom: 12px; 
+    transition: transform 0.3s ease;
+}
+
 .card:hover .card-icon {
-    transform: scale(1.1);
+    transform: scale(1.15) rotate(5deg);
 }
 
-/* --- NEW BOTTOM BAR (FOOTER) --- */
+.card h4 {
+    font-size: 1rem;
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Entry Animation Logic */
+@keyframes cardAppear {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- FOOTER --- */
 .site-footer {
     background: var(--glass-heavy);
     backdrop-filter: blur(20px);
     border-top: 1px solid var(--border);
     padding: 40px 5%;
-    margin-top: auto; /* Hamesha page ke end mein rahega */
+    margin-top: auto;
 }
 
 .footer-content {
@@ -144,40 +172,34 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 25px;
+    gap: 20px;
 }
 
 .footer-links {
     display: flex;
-    gap: 25px;
+    gap: 20px;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
 }
 
-.footer-links a, .other-sites a {
+.footer-links a {
     color: rgba(255, 255, 255, 0.6);
     text-decoration: none;
     font-size: 0.9rem;
     transition: 0.3s;
 }
 
-.footer-links a:hover, .other-sites a:hover { color: var(--primary); }
+.footer-links a:hover { color: var(--primary); }
 
-.other-sites {
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 50px;
-    border: 1px solid var(--border);
-    display: flex;
-    gap: 15px;
-    align-items: center;
+.made-by { 
+    font-weight: 600; 
+    font-size: 1rem; 
+    color: #fff; 
+    margin-top: 10px;
 }
 
-.other-sites span { color: #777; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
-
-.made-by { font-weight: 600; font-size: 1rem; color: #fff; }
-
-/* --- PROFILE IMAGE STYLES --- */
+/* --- UTILS --- */
 .user-img { 
     width: 40px; 
     height: 40px; 
@@ -186,7 +208,6 @@ header {
     object-fit: cover; 
 }
 
-/* --- BUTTONS --- */
 .btn-primary {
     background: var(--primary);
     color: #000;
@@ -195,11 +216,22 @@ header {
     font-weight: 700;
     border: none;
     cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px var(--primary-glow);
 }
 
 /* --- MOBILE VIEW --- */
 @media (max-width: 768px) {
-    .tools-grid { grid-template-columns: repeat(2, 1fr); }
+    .tools-grid { 
+        grid-template-columns: repeat(2, 1fr); /* Force 2 columns on mobile */
+        gap: 15px; 
+    }
     .hero-title { font-size: 2.8rem; }
-    .other-sites { flex-direction: column; border-radius: 15px; }
+    .card { padding: 20px 10px; }
+    .card-icon { font-size: 2.2rem; }
+    .card h4 { font-size: 0.9rem; }
 }
