@@ -14,19 +14,6 @@
 </head>
 <body>
 
-    <div id="feedback-modal" class="feedback-modal">
-        <div class="feedback-overlay" onclick="closeFeedback()"></div>
-        <div class="feedback-box">
-            <div class="feedback-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3>📝 Send Feedback</h3>
-                <button onclick="closeFeedback()" style="background:none; border:none; color:#fff; cursor:pointer; font-size:1.5rem;">✕</button>
-            </div>
-            <form id="my-form" action="https://formspree.io/f/xkowpdnv" method="POST">
-                <input type="email" name="email" placeholder="Your Email *" required style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:1px solid var(--border); background:#222; color:#fff;">
-                <textarea name="message" placeholder="Your feedback..." rows="6" required style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:1px solid var(--border); background:#222; color:#fff;"></textarea>
-                <button type="submit" class="btn btn-primary" style="width:100%;">Send Feedback 🚀</button>
-                <p id="my-form-status"></p>
-            </form>
         </div>
     </div>
 
@@ -70,13 +57,12 @@
                 <div class="footer-links">
                     <a href="privacy.html">Privacy Policy</a>
                     <a href="terms.html">Terms & Conditions</a>
-                    <a href="javascript:void(0)" onclick="openFeedback()">Send Feedback</a>
+                    <a href="feedback.html"> Feedback </a> 
                 </div>
                 <div class="other-sites">
                     <span>Our other sites:</span>
                     <a href="https://mohakdev1220.github.io/Facts/">Facts</a>
                     <a href="https://mohakdev1220.github.io/ChromePortal/">ChromePortal</a>
-                </div>
                 <p class="made-by">DEVELOPED WITH <span style="color:red">♥</span> BY MOHAK @2026</p>
             </div>
         </footer>
