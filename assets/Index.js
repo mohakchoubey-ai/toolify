@@ -68,10 +68,10 @@ onAuthStateChanged(auth, (user) => {
     } else {
         // Show Sign In Button if Logged Out
         authHeader.innerHTML = `<button class="btn btn-primary" onclick="signIn()">Sign In</button>`;
-        if(mainAuthUI) {
-            mainAuthUI.innerHTML = `<button class="btn btn-primary" onclick="signIn()" style="padding: 15px 40px; font-size: 1.1rem;">Get Started with Google</button>`;
-        }
-        
+       // Center button removed intentionally
+if(mainAuthUI) {
+    mainAuthUI.innerHTML = "";
+}
         landingPage.style.display = 'flex';
         dashboard.style.display = 'none';
     }
