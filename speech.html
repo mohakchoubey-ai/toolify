@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toolify | TTS Final</title>
+    <title>Toolify | TTS Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #00f2ff; --glass: rgba(255, 255, 255, 0.08); --border: rgba(255, 255, 255, 0.15); }
@@ -25,28 +25,27 @@
 <body>
 
 <div class="nav-header">
-    <a href="index.html" class="back-btn">← HOME</a>
+    <a href="#" class="back-btn">← HOME</a>
     <div style="font-weight: 800; color: var(--primary);">TOOLIFY</div>
 </div>
 
 <div class="container">
     <h2 style="margin-bottom: 10px;">🎙️ TTS Master</h2>
     <p style="font-size: 11px; margin-bottom: 20px; opacity: 0.6;">
-        <span id="dot" class="status-dot"></span> Engine: <span id="engine-status">Loading...</span>
+        <span id="dot" class="status-dot"></span> Engine: <span id="engine-status">Searching for Voices...</span>
     </p>
     
     <textarea id="tts-input" placeholder="Yahan likhein (Hindi ya English)..."></textarea>
     
     <select id="voice-choice">
-        <option value="hi-male">🇮🇳 Hindi - Male</option>
-        <option value="hi-female">🇮🇳 Hindi - Female</option>
-        <option value="en-male">🇺🇸 English - Male</option>
-        <option value="en-female">🇺🇸 English - Female</option>
+        <option value="hi-IN">🇮🇳 Hindi - Native</option>
+        <option value="en-US">🇺🇸 English - US</option>
+        <option value="en-GB">🇬🇧 English - UK</option>
     </select>
 
     <div class="btn-group">
         <button class="btn btn-play" onclick="speak()">▶️ Play</button>
-        <button class="btn btn-dl" onclick="download()">📥 Download</button>
+        <button class="btn btn-dl" onclick="downloadAudio()">📥 Download</button>
     </div>
 </div>
 
@@ -56,73 +55,69 @@
     const statusText = document.getElementById('engine-status');
     let voices = [];
 
-    function initVoices() {
+    function loadVoices() {
+        // Filter for unique languages to keep the UI clean
         voices = synth.getVoices();
         if (voices.length > 0) {
             dot.classList.add('ready');
-            statusText.innerText = "System Ready";
+            statusText.innerText = "System Ready (" + voices.length + " voices)";
         }
     }
 
-    // Chrome/Edge/Safari support for voice loading
-    initVoices();
+    // Initialize voices (needed for different browser behaviors)
+    loadVoices();
     if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = initVoices;
+        speechSynthesis.onvoiceschanged = loadVoices;
     }
 
     function speak() {
         if (synth.speaking) synth.cancel();
         
         const text = document.getElementById('tts-input').value;
-        const choice = document.getElementById('voice-choice').value;
-        if (!text.trim()) return alert("Pehle kuch likho!");
+        const selectedLang = document.getElementById('voice-choice').value;
+        
+        if (!text.trim()) {
+            alert("Pehle kuch likho!");
+            return;
+        }
 
         const utter = new SpeechSynthesisUtterance(text);
         
-        // --- HARD FILTERING LOGIC ---
-        let selectedVoice = null;
-
-        if (choice.startsWith('hi')) {
-            // Hindi target: Pehle asli Hindi voice dhundo
-            selectedVoice = voices.find(v => v.lang.includes('hi-IN'));
-            utter.lang = 'hi-IN';
-            
-            // Voice Hack: Agar native Hindi male nahi hai, toh female ko heavy pitch mein badlo
-            if (choice === 'hi-male') {
-                utter.pitch = 0.55; 
-                utter.rate = 0.9;
-            } else {
-                utter.pitch = 1.2;
-                utter.rate = 1.0;
-            }
+        // Find the best matching voice for the selected language
+        const voice = voices.find(v => v.lang.startsWith(selectedLang));
+        
+        if (voice) {
+            utter.voice = voice;
+            utter.lang = voice.lang;
         } else {
-            // English target: David (Male) ya Zira (Female) dhundo
-            utter.lang = 'en-US';
-            if (choice === 'en-male') {
-                selectedVoice = voices.find(v => (v.name.includes('David') || v.name.includes('Male')) && v.lang.includes('en'));
-                utter.pitch = 0.8;
-            } else {
-                selectedVoice = voices.find(v => (v.name.includes('Zira') || v.name.includes('Female')) && v.lang.includes('en'));
-                utter.pitch = 1.1;
-            }
+            // Fallback to basic lang setting if specific voice isn't found
+            utter.lang = selectedLang;
         }
 
-        // Force selection to prevent "English Male" default bug
-        if (selectedVoice) {
-            utter.voice = selectedVoice;
-        }
+        // Adjust speed for a more natural feel
+        utter.rate = 1.0;
+        utter.pitch = 1.0;
 
         synth.speak(utter);
     }
 
-    function download() {
+    function downloadAudio() {
         const text = document.getElementById('tts-input').value;
-        const lang = document.getElementById('voice-choice').value.split('-')[0];
-        if (!text) return alert("Kuch toh likho!");
+        const lang = document.getElementById('voice-choice').value.split('-')[0]; // gets 'hi' or 'en'
         
-        // Simple download link using Google's engine
-        const dlUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
-        window.open(dlUrl, '_blank');
+        if (!text.trim()) return alert("Pehle kuch likho!");
+
+        // Using a public TTS API for the download functionality
+        const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
+        
+        // To force download instead of just opening a tab:
+        const link = document.createElement('a');
+        link.href = audioUrl;
+        link.target = '_blank';
+        link.download = 'toolify-speech.mp3';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 </script>
 </body>
