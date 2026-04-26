@@ -105,7 +105,7 @@
         const text = document.getElementById('tts-input').value;
         const lang = document.getElementById('voice-choice').value.split('-')[0]; // gets 'hi' or 'en'
         
-        if (!text.trim()) return alert("Pehle kuch likho!");
+        if (!text.trim()) return alert("Pehle kuch likho!, Write something first! ");
 
         // Using a public TTS API for the download functionality
         const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
