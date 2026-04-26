@@ -3,27 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toolify | TTS Ultra</title>
+    <title>Toolify | TTS Final</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #00f2ff; --glass: rgba(255, 255, 255, 0.08); --border: rgba(255, 255, 255, 0.15); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background: radial-gradient(circle at top right, #001a1d, #000000); color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        
+        body { background: #080808; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         .nav-header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .back-btn { text-decoration: none; color: var(--primary); font-weight: 600; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 12px; border: 1px solid var(--border); transition: 0.3s; }
-        .back-btn:hover { background: var(--primary); color: #000; }
-
         .container { background: var(--glass); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 30px; padding: 30px; width: 100%; max-width: 500px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); text-align: center; }
-        
         textarea { width: 100%; height: 160px; padding: 15px; border-radius: 18px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: white; outline: none; margin-bottom: 20px; font-size: 16px; resize: none; }
-        
-        select { width: 100%; padding: 15px; border-radius: 15px; background: #111; color: white; border: 1px solid var(--border); margin-bottom: 20px; cursor: pointer; font-weight: 600; }
-
+        select { width: 100%; padding: 15px; border-radius: 15px; background: #111; color: white; border: 1px solid var(--border); margin-bottom: 20px; cursor: pointer; font-weight: 600; outline: none; }
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .btn { border: none; padding: 18px; border-radius: 50px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
         .btn-play { background: var(--primary); color: #000; }
         .btn-dl { background: #fff; color: #000; }
+        .status-dot { width: 8px; height: 8px; background: #ff4444; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .ready { background: #00ff00; }
     </style>
 </head>
 <body>
@@ -34,10 +30,14 @@
 </div>
 
 <div class="container">
-    <h2 style="margin-bottom: 20px;">🎙️ TTS Ultra Engine</h2>
-    <textarea id="tts-input" placeholder="Hindi ya English mein likhein..."></textarea>
+    <h2 style="margin-bottom: 10px;">🎙️ TTS Master</h2>
+    <p style="font-size: 11px; margin-bottom: 20px; opacity: 0.6;">
+        <span id="dot" class="status-dot"></span> Engine: <span id="engine-status">Loading...</span>
+    </p>
     
-    <select id="voice-type">
+    <textarea id="tts-input" placeholder="Yahan likhein (Hindi ya English)..."></textarea>
+    
+    <select id="voice-choice">
         <option value="hi-male">🇮🇳 Hindi - Male</option>
         <option value="hi-female">🇮🇳 Hindi - Female</option>
         <option value="en-male">🇺🇸 English - Male</option>
@@ -45,63 +45,84 @@
     </select>
 
     <div class="btn-group">
-        <button class="btn btn-play" onclick="speakNow()">▶️ Play</button>
-        <button class="btn btn-dl" onclick="downloadNow()">📥 Download</button>
+        <button class="btn btn-play" onclick="speak()">▶️ Play</button>
+        <button class="btn btn-dl" onclick="download()">📥 Download</button>
     </div>
 </div>
 
 <script>
     const synth = window.speechSynthesis;
+    const dot = document.getElementById('dot');
+    const statusText = document.getElementById('engine-status');
     let voices = [];
 
-    function getVoices() {
+    function initVoices() {
         voices = synth.getVoices();
-    }
-    getVoices();
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = getVoices;
+        if (voices.length > 0) {
+            dot.classList.add('ready');
+            statusText.innerText = "System Ready";
+        }
     }
 
-    function speakNow() {
+    // Chrome/Edge/Safari support for voice loading
+    initVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = initVoices;
+    }
+
+    function speak() {
         if (synth.speaking) synth.cancel();
         
         const text = document.getElementById('tts-input').value;
-        const type = document.getElementById('voice-type').value;
-        if (!text) return alert("Pehle kuch likho!");
+        const choice = document.getElementById('voice-choice').value;
+        if (!text.trim()) return alert("Pehle kuch likho!");
 
         const utter = new SpeechSynthesisUtterance(text);
         
-        // --- Smart Voice Selection ---
+        // --- HARD FILTERING LOGIC ---
         let selectedVoice = null;
-        if (type.startsWith('hi')) {
-            // Try to find natural Microsoft Hindi voices first
-            selectedVoice = voices.find(v => v.lang.includes('hi-IN') && v.name.includes(type.includes('male') ? 'Madhur' : 'Swara')) || 
-                            voices.find(v => v.lang.includes('hi-IN'));
+
+        if (choice.startsWith('hi')) {
+            // Hindi target: Pehle asli Hindi voice dhundo
+            selectedVoice = voices.find(v => v.lang.includes('hi-IN'));
+            utter.lang = 'hi-IN';
             
-            // Extreme Pitch Adjust if native male isn't found
-            if (type === 'hi-male') {
+            // Voice Hack: Agar native Hindi male nahi hai, toh female ko heavy pitch mein badlo
+            if (choice === 'hi-male') {
                 utter.pitch = 0.55; 
-                utter.rate = 0.88;
+                utter.rate = 0.9;
             } else {
-                utter.pitch = 1.15;
+                utter.pitch = 1.2;
+                utter.rate = 1.0;
             }
         } else {
-            selectedVoice = voices.find(v => v.lang.includes('en') && v.name.includes(type.includes('male') ? 'David' : 'Zira'));
-            utter.pitch = type.includes('male') ? 0.75 : 1.1;
+            // English target: David (Male) ya Zira (Female) dhundo
+            utter.lang = 'en-US';
+            if (choice === 'en-male') {
+                selectedVoice = voices.find(v => (v.name.includes('David') || v.name.includes('Male')) && v.lang.includes('en'));
+                utter.pitch = 0.8;
+            } else {
+                selectedVoice = voices.find(v => (v.name.includes('Zira') || v.name.includes('Female')) && v.lang.includes('en'));
+                utter.pitch = 1.1;
+            }
         }
 
-        if (selectedVoice) utter.voice = selectedVoice;
+        // Force selection to prevent "English Male" default bug
+        if (selectedVoice) {
+            utter.voice = selectedVoice;
+        }
+
         synth.speak(utter);
     }
 
-    function downloadNow() {
+    function download() {
         const text = document.getElementById('tts-input').value;
-        const lang = document.getElementById('voice-type').value.split('-')[0];
-        if (!text) return alert("Kuch likho toh!");
-
-        // Google TTS is reliable for one-click download/open
-        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
-        window.open(url, '_blank');
+        const lang = document.getElementById('voice-choice').value.split('-')[0];
+        if (!text) return alert("Kuch toh likho!");
+        
+        // Simple download link using Google's engine
+        const dlUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
+        window.open(dlUrl, '_blank');
     }
 </script>
 </body>
