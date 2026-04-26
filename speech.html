@@ -3,71 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toolify | TTS Ultra Pro</title>
+    <title>Toolify | TTS Ultra</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #00f2ff; --glass: rgba(255, 255, 255, 0.08); --border: rgba(255, 255, 255, 0.15); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: radial-gradient(circle at top right, #001a1d, #000000); color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .container { background: var(--glass); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 30px; padding: 30px; width: 100%; max-width: 500px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); text-align: center; margin-top: 40px; }
-        textarea { width: 100%; height: 150px; padding: 15px; border-radius: 18px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: white; outline: none; margin-bottom: 20px; font-size: 16px; resize: none; }
-        .dropdown-box { position: relative; margin-bottom: 20px; }
-        select { width: 100%; padding: 15px; border-radius: 15px; background: #111; color: white; border: 1px solid var(--border); cursor: pointer; font-weight: 600; appearance: none; outline: none; }
-        .btn-play { width: 100%; background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 50px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        .btn-play:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--primary); }
-        .loader { display: none; margin-top: 10px; font-size: 12px; color: var(--primary); }
+        
+        .nav-header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .back-btn { text-decoration: none; color: var(--primary); font-weight: 600; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 12px; border: 1px solid var(--border); transition: 0.3s; }
+        .back-btn:hover { background: var(--primary); color: #000; }
+
+        .container { background: var(--glass); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 30px; padding: 30px; width: 100%; max-width: 500px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); text-align: center; }
+        
+        textarea { width: 100%; height: 160px; padding: 15px; border-radius: 18px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: white; outline: none; margin-bottom: 20px; font-size: 16px; resize: none; }
+        
+        select { width: 100%; padding: 15px; border-radius: 15px; background: #111; color: white; border: 1px solid var(--border); margin-bottom: 20px; cursor: pointer; font-weight: 600; }
+
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn { border: none; padding: 18px; border-radius: 50px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .btn-play { background: var(--primary); color: #000; }
+        .btn-dl { background: #fff; color: #000; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2 style="margin-bottom: 20px;">🎙️ TTS Ultra Suite</h2>
-    <textarea id="tts-text" placeholder="Yahan apna message likhein..."></textarea>
-    
-    <div class="dropdown-box">
-        <select id="tts-model">
-            <option value="hi-IN-Wavenet-B">🇮🇳 Hindi - Real Male (Bhari)</option>
-            <option value="hi-IN-Wavenet-A">🇮🇳 Hindi - Real Female (Saaf)</option>
-            <option value="en-US-Wavenet-D">🇺🇸 English - Real Male</option>
-            <option value="en-US-Wavenet-F">🇺🇸 English - Real Female</option>
-        </select>
-    </div>
+<div class="nav-header">
+    <a href="index.html" class="back-btn">← HOME</a>
+    <div style="font-weight: 800; color: var(--primary);">TOOLIFY</div>
+</div>
 
-    <button class="btn-play" onclick="processSpeech()">▶️ Play Audio</button>
-    <div id="loader" class="loader">Generating AI Voice...</div>
+<div class="container">
+    <h2 style="margin-bottom: 20px;">🎙️ TTS Ultra Engine</h2>
+    <textarea id="tts-input" placeholder="Hindi ya English mein likhein..."></textarea>
+    
+    <select id="voice-type">
+        <option value="hi-male">🇮🇳 Hindi - Male</option>
+        <option value="hi-female">🇮🇳 Hindi - Female</option>
+        <option value="en-male">🇺🇸 English - Male</option>
+        <option value="en-female">🇺🇸 English - Female</option>
+    </select>
+
+    <div class="btn-group">
+        <button class="btn btn-play" onclick="speakNow()">▶️ Play</button>
+        <button class="btn btn-dl" onclick="downloadNow()">📥 Download</button>
+    </div>
 </div>
 
 <script>
-    function processSpeech() {
-        const text = document.getElementById('tts-text').value.trim();
-        const model = document.getElementById('tts-model').value;
-        const loader = document.getElementById('loader');
+    const synth = window.speechSynthesis;
+    let voices = [];
 
-        if (!text) return alert("Pehle text toh likho!");
+    function getVoices() {
+        voices = synth.getVoices();
+    }
+    getVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = getVoices;
+    }
 
-        loader.style.display = "block";
-
-        // Hum "VoiceRSS" API ka use kar rahe hain jo ki free hai aur asli male/female voices deti hai
-        // Key: 38874636906248669926880227189906 (Yeh ek public testing key hai)
+    function speakNow() {
+        if (synth.speaking) synth.cancel();
         
-        const lang = model.startsWith('hi') ? 'hi-in' : 'en-us';
-        const isMale = model.includes('Male') || model.endsWith('B') || model.endsWith('D');
-        
-        // VoiceRSS URL construction
-        const apiKey = "38874636906248669926880227189906"; 
-        const voice = model.startsWith('hi') ? (isMale ? 'Ajit' : 'Deepa') : (isMale ? 'John' : 'Alice');
-        
-        const url = `https://api.voicerss.org/?key=${apiKey}&hl=${lang}&v=${voice}&src=${encodeURIComponent(text)}&f=48khz_16bit_stereo`;
+        const text = document.getElementById('tts-input').value;
+        const type = document.getElementById('voice-type').value;
+        if (!text) return alert("Pehle kuch likho!");
 
-        const audio = new Audio(url);
-        audio.play().then(() => {
-            loader.style.display = "none";
-        }).catch(err => {
-            loader.style.display = "none";
-            alert("API Error! Please try again later.");
-        });
+        const utter = new SpeechSynthesisUtterance(text);
+        
+        // --- Smart Voice Selection ---
+        let selectedVoice = null;
+        if (type.startsWith('hi')) {
+            // Try to find natural Microsoft Hindi voices first
+            selectedVoice = voices.find(v => v.lang.includes('hi-IN') && v.name.includes(type.includes('male') ? 'Madhur' : 'Swara')) || 
+                            voices.find(v => v.lang.includes('hi-IN'));
+            
+            // Extreme Pitch Adjust if native male isn't found
+            if (type === 'hi-male') {
+                utter.pitch = 0.55; 
+                utter.rate = 0.88;
+            } else {
+                utter.pitch = 1.15;
+            }
+        } else {
+            selectedVoice = voices.find(v => v.lang.includes('en') && v.name.includes(type.includes('male') ? 'David' : 'Zira'));
+            utter.pitch = type.includes('male') ? 0.75 : 1.1;
+        }
+
+        if (selectedVoice) utter.voice = selectedVoice;
+        synth.speak(utter);
+    }
+
+    function downloadNow() {
+        const text = document.getElementById('tts-input').value;
+        const lang = document.getElementById('voice-type').value.split('-')[0];
+        if (!text) return alert("Kuch likho toh!");
+
+        // Google TTS is reliable for one-click download/open
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
+        window.open(url, '_blank');
     }
 </script>
-
 </body>
 </html>
