@@ -1,377 +1,356 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toolify | Professional PDF Architect</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toolify Pro PDF</title>
 
-    <style>
-        :root {
-            --bg: #0a0a0b; --surface: #141416; --text: #ffffff; --text-dim: #9aa0a6;
-            --primary: #00f2ff; --primary-glow: rgba(0, 242, 255, 0.15);
-            --border: rgba(255, 255, 255, 0.08); --danger: #ff4d4d; --card-bg: #1c1c1e;
-            --glass: rgba(255, 255, 255, 0.03);
-        }
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script> 
+      <link rel="stylesheet" href="assets/pdf.css">
 
-        [data-theme="light"] {
-            --bg: #f8fafc; --surface: #ffffff; --text: #0f172a; --text-dim: #64748b;
-            --primary: #0ea5e9; --primary-glow: rgba(14, 165, 233, 0.1);
-            --border: rgba(0, 0, 0, 0.05); --danger: #ef4444; --card-bg: #ffffff;
-            --glass: rgba(0, 0, 0, 0.02);
-        }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: background 0.2s, transform 0.2s; }
-        body { background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 120px; overflow-x: hidden; }
-
-        /* Modern Header */
-        header {
-            position: fixed; top: 0; width: 100%; height: 75px; padding: 0 40px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: var(--surface); border-bottom: 1px solid var(--border);
-            backdrop-filter: blur(15px); z-index: 1000;
-        }
-        .nav-left { display: flex; align-items: center; gap: 30px; }
-        .logo { font-weight: 800; font-size: 1.5rem; letter-spacing: -1.5px; text-decoration: none; color: var(--text); }
-        .logo span { color: var(--primary); }
-        .back-link { text-decoration: none; color: var(--text-dim); font-size: 0.85rem; display: flex; align-items: center; gap: 8px; font-weight: 500; }
-        .back-link:hover { color: var(--primary); }
-
-        .workspace { max-width: 1200px; margin: 110px auto 40px; padding: 0 25px; }
-
-        /* Enhaced Drafts Panel */
-        #drafts-panel {
-            background: var(--glass); border: 1px solid var(--border);
-            border-radius: 24px; padding: 20px; margin-bottom: 30px; display: none;
-        }
-        .draft-chip {
-            display: inline-flex; align-items: center; gap: 10px;
-            background: var(--surface); border: 1px solid var(--border);
-            padding: 10px 18px; border-radius: 12px; margin: 6px;
-            font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .draft-chip:hover { border-color: var(--primary); transform: translateY(-2px); }
-
-        /* Minimalist Upload Zone */
-        .drop-zone {
-            border: 2px dashed var(--border); border-radius: 32px;
-            padding: 100px 20px; text-align: center; cursor: pointer;
-            background: var(--surface); transition: 0.4s;
-        }
-        .drop-zone:hover { border-color: var(--primary); background: var(--primary-glow); }
-
-        /* Dynamic Toolbar */
-        .toolbar {
-            display: none; justify-content: space-between; align-items: center;
-            background: var(--surface); padding: 20px 30px; border-radius: 24px;
-            margin-bottom: 35px; border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .pdf-input {
-            background: var(--bg); border: 1px solid var(--border);
-            color: var(--text); padding: 12px 20px; border-radius: 12px; outline: none; width: 350px; font-weight: 500;
-        }
-
-        /* Image Grid */
-        #image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 30px; }
-        .img-card {
-            background: var(--card-bg); border: 1px solid var(--border);
-            border-radius: 24px; padding: 15px; position: relative; cursor: grab;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-        .img-card:hover { border-color: var(--primary); }
-        .img-card img { width: 100%; height: 180px; object-fit: contain; border-radius: 16px; background: #000; pointer-events: none; }
-
-        /* Filter & Button Styling */
-        .btn { padding: 12px 28px; border-radius: 14px; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .btn-primary { background: var(--primary); color: #000; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-        
-        /* Modal & Editor */
-        #crop-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.98); z-index: 2000; padding: 40px;
-        }
-        .editor-container { display: flex; gap: 30px; height: 75vh; max-width: 1200px; margin: 0 auto; }
-        .filter-panel { width: 300px; background: var(--surface); border-radius: 20px; padding: 25px; border: 1px solid var(--border); }
-        .filter-group { margin-bottom: 25px; }
-        .filter-group label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 10px; }
-        input[type="range"] { width: 100%; accent-color: var(--primary); }
-
-        footer {
-            position: fixed; bottom: 0; width: 100%; padding: 25px;
-            text-align: center; font-size: 0.85rem; color: var(--text-dim);
-            background: var(--surface); border-top: 1px solid var(--border); z-index: 1001;
-        }
-        .heart { color: #ff3333; }
-
-        .floating-bar {
-            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-            background: var(--surface); border: 1px solid var(--primary);
-            padding: 15px 40px; border-radius: 100px; display: none;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6); z-index: 999; gap: 25px;
-        }
-    </style>
 </head>
-<body data-theme="dark">
-
-    <header>
-        <div class="nav-left">
-            <a href="index.html" class="logo">Tool<span>ify</span></a>
-            <a href="index.html" class="back-link">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                Back to Tools Hub
-            </a>
-        </div>
-        <div style="display:flex; gap:15px;">
-            <button class="btn btn-outline" onclick="handleCreateNew()">+ New PDF</button>
-            <button class="btn btn-outline" style="width:48px; padding:0; justify-content:center;" onclick="toggleTheme()">🌓</button>
-        </div>
-    </header>
-
-    <main class="workspace">
-        <div id="drafts-panel">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                <p style="font-size:0.75rem; font-weight:800; color:var(--text-dim); text-transform:uppercase;">Draft Archives</p>
-                <button onclick="clearAllDrafts()" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.75rem;">Clear All</button>
-            </div>
-            <div id="drafts-container"></div>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="hero-top">
+        <div class="title">
+          <h1>Toolify Pro PDF</h1>
+          <p>
+            Add images, edit them, split oversized pages, preview the PDF layout, and export with high-quality settings.
+            Project state is saved locally and restored automatically.
+          </p>
         </div>
 
-        <div class="drop-zone" id="drop-zone">
-            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5" style="margin-bottom:20px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-            <h2 style="margin-bottom: 10px;">PDF Architect Pro</h2>
-            <p style="color: var(--text-dim);">Import images to generate high-resolution PDF documents</p>
-            <input type="file" id="file-input" multiple accept="image/*" hidden onchange="processFiles(this.files)">
+        <div class="btn-row">
+          <button class="btn-secondary" id="homeBtn">← Back to Home</button>
+          <button class="btn-secondary" id="themeBtn">🌙 Dark</button>
+          <button class="btn-secondary" id="addImagesBtn">Add Images</button>
+          <button class="btn-secondary" id="saveNowBtn">Save Project</button>
+          <button class="btn-secondary" id="clearSaveBtn">Clear Save</button>
+          <button class="btn-success" id="downloadBtn">Download PDF</button>
         </div>
+      </div>
 
-        <div class="toolbar" id="main-toolbar">
-            <input type="text" id="pdf-name" class="pdf-input" placeholder="Project Name (e.g., Marketing_Flyer)">
-            <div style="display:flex; gap:25px; align-items: center;">
-                <label style="font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="select-all" onclick="toggleSelectAll()" style="width:18px; height:18px;"> Select All
-                </label>
-                <button onclick="deleteSelected()" style="color: var(--danger); font-weight: 700; background:none; border:none; cursor:pointer;">Delete</button>
-            </div>
-        </div>
+      <div id="status" class="status"></div>
 
-        <div id="image-grid"></div>
-    </main>
+      <div id="dropzone" class="dropzone" aria-label="Drop images area">
+        <strong>Drop images here</strong>
+        <small>or click to browse. Multiple files supported.</small>
+      </div>
 
-    <div class="floating-bar" id="float-bar">
-        <button class="btn btn-outline" onclick="document.getElementById('file-input').click()">+ Add Images</button>
-        <button class="btn btn-primary" onclick="generatePDF()">Download PDF</button>
+      <input id="fileInput" type="file" accept="image/*" multiple />
     </div>
 
-    <footer>DEVELOPED WITH <span class="heart">❤</span> BY MOHAK</footer>
+    <div class="grid-layout">
+      <div class="panel">
+        <h2>Images</h2>
+        <div class="hint">Drag cards to reorder. Edit opens crop and filters. Delete removes an image.</div>
+        <div id="thumbs" class="thumbs"></div>
+      </div>
 
-    <div id="crop-modal">
-        <div class="editor-container">
-            <div style="flex:1; background:#000; border-radius:20px; overflow:hidden;">
-                <img id="crop-img" style="max-width:100%;">
+      <div class="panel">
+        <h2>PDF & Editor Settings</h2>
+
+        <div class="section">
+          <h3>Layout</h3>
+          <div class="controls">
+            <div class="control">
+              <label for="pageSize">Page size</label>
+              <select id="pageSize">
+                <option value="a4">A4</option>
+                <option value="letter">Letter</option>
+                <option value="legal">Legal</option>
+              </select>
             </div>
-            <div class="filter-panel">
-                <h3 style="margin-bottom:20px; font-size:1.1rem;">Enhancements</h3>
-                
-                <div class="filter-group">
-                    <button class="btn btn-outline" style="width:100%; font-size:0.8rem;" onclick="applyPreset('grayscale')">📄 Grayscale (Document Mode)</button>
-                </div>
 
-                <div class="filter-group">
-                    <label>Brightness</label>
-                    <input type="range" id="bright-range" min="0" max="200" value="100" oninput="applyFilters()">
-                </div>
-
-                <div class="filter-group">
-                    <label>Contrast</label>
-                    <input type="range" id="contrast-range" min="0" max="200" value="100" oninput="applyFilters()">
-                </div>
-
-                <div style="margin-top:40px; display:flex; flex-direction:column; gap:10px;">
-                    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="saveEditorChanges()">Save Changes</button>
-                    <button class="btn btn-outline" style="width:100%; justify-content:center; color:white;" onclick="closeCrop()">Cancel</button>
-                    <button class="btn-ghost" style="margin-top:10px; color:var(--text-dim); font-size:0.7rem; background:none; border:none; cursor:pointer;" onclick="resetFilters()">Reset All Filters</button>
-                </div>
+            <div class="control">
+              <label for="orientation">Orientation</label>
+              <select id="orientation">
+                <option value="portrait">Portrait</option>
+                <option value="landscape">Landscape</option>
+              </select>
             </div>
+
+            <div class="control">
+              <label for="margin">Margin (mm)</label>
+              <input id="margin" type="number" min="0" max="30" step="1" value="8" />
+            </div>
+
+            <div class="control">
+              <label for="fitMode">Fit mode</label>
+              <select id="fitMode">
+                <option value="contain">Contain</option>
+                <option value="cover">Cover</option>
+                <option value="fill">Fill</option>
+              </select>
+            </div>
+
+            <div class="control full">
+              <label class="toggle">
+                <input id="splitLongImages" type="checkbox" checked />
+                Split oversized images across multiple pages
+              </label>
+            </div>
+
+            <div class="control">
+              <label for="outputQuality">Export quality</label>
+              <input id="outputQuality" type="range" min="0.55" max="1" step="0.01" value="0.95" />
+              <div class="hint"><span id="qualityLabel">0.95</span></div>
+            </div>
+
+            <div class="control">
+              <label for="previewScale">Preview scale</label>
+              <input id="previewScale" type="range" min="180" max="340" step="10" value="260" />
+              <div class="hint"><span id="previewScaleLabel">260</span> px</div>
+            </div>
+          </div>
         </div>
+
+        <div class="section">
+          <h3>Watermark</h3>
+          <label class="toggle" style="margin-bottom:12px;">
+            <input id="wmEnabled" type="checkbox" />
+            Enable watermark
+          </label>
+
+          <div class="controls">
+            <div class="control">
+              <label for="wmType">Type</label>
+              <select id="wmType">
+                <option value="text">Text</option>
+                <option value="image">Image</option>
+              </select>
+            </div>
+
+            <div class="control">
+              <label for="wmPosition">Position</label>
+              <select id="wmPosition">
+                <option value="center">Center</option>
+                <option value="top-left">Top left</option>
+                <option value="top-right">Top right</option>
+                <option value="bottom-left">Bottom left</option>
+                <option value="bottom-right">Bottom right</option>
+              </select>
+            </div>
+
+            <div class="control full" id="wmTextBox">
+              <label for="wmText">Watermark text</label>
+              <input id="wmText" type="text" value="Toolify Pro" placeholder="Toolify Pro" />
+            </div>
+
+            <div class="control full" id="wmImageBox" style="display:none;">
+              <label>Watermark image</label>
+              <div class="inline">
+                <button class="btn-secondary" id="wmImageBtn" type="button">Upload watermark image</button>
+                <button class="btn-danger" id="wmImageClearBtn" type="button">Remove</button>
+              </div>
+              <input id="wmImageInput" type="file" accept="image/*" />
+              <div class="hint" id="wmImageName">No watermark image selected</div>
+            </div>
+
+            <div class="control">
+              <label for="wmSize">Watermark size</label>
+              <input id="wmSize" type="range" min="8" max="80" value="24" />
+              <div class="hint"><span id="wmSizeLabel">24</span></div>
+            </div>
+
+            <div class="control">
+              <label for="wmOpacity">Opacity</label>
+              <input id="wmOpacity" type="range" min="5" max="100" value="18" />
+              <div class="hint"><span id="wmOpacityLabel">18%</span></div>
+            </div>
+
+            <div class="control">
+              <label for="wmRotation">Rotation</label>
+              <input id="wmRotation" type="range" min="-180" max="180" value="-12" />
+              <div class="hint"><span id="wmRotationLabel">-12°</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Signature</h3>
+          <div class="signature-wrap">
+            <canvas id="sign-pad"></canvas>
+
+            <div class="signature-tools">
+              <div class="control">
+                <label for="strokeWidth">Stroke width</label>
+                <input id="strokeWidth" type="range" min="1" max="12" value="3" />
+                <div class="hint"><span id="strokeWidthLabel">3</span> px</div>
+              </div>
+
+              <div class="control">
+                <label for="signatureSize">Signature size</label>
+                <input id="signatureSize" type="range" min="40" max="220" value="110" />
+                <div class="hint"><span id="signatureSizeLabel">110</span> mm wide</div>
+              </div>
+
+              <div class="control">
+                <label for="signaturePosition">Signature position</label>
+                <select id="signaturePosition">
+                  <option value="bottom-right">Bottom right</option>
+                  <option value="bottom-left">Bottom left</option>
+                  <option value="center">Center</option>
+                </select>
+              </div>
+
+              <div class="control">
+                <label>&nbsp;</label>
+                <div class="btn-row" style="margin-top:0;">
+                  <button class="btn-secondary" id="undoSignBtn" type="button">Undo</button>
+                  <button class="btn-danger" id="clearSignBtn" type="button">Clear</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="hint">Draw using mouse or finger. Undo removes the last stroke.</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Digital Signature File</h3>
+
+          <div id="sigDropzone" class="dropzone" style="margin-bottom:12px;">
+            <strong>Drop signature image here</strong>
+            <small>or click to upload PNG / JPG / WEBP</small>
+          </div>
+
+          <input id="sigFileInput" type="file" accept="image/*" />
+
+          <div class="btn-row">
+            <button class="btn-secondary" id="sigFileBtn" type="button">Upload Signature File</button>
+            <button class="btn-danger" id="sigClearBtn" type="button">Remove Signature File</button>
+          </div>
+
+          <div class="hint" id="sigFileName">No digital signature selected</div>
+
+          <div id="sigPreviewWrap" class="signature-wrap" style="margin-top:12px; display:none;">
+            <img id="sigPreview" alt="Digital signature preview"
+                 style="max-width:100%; max-height:120px; display:block; margin:auto; object-fit:contain;" />
+          </div>
+
+          <div class="hint">
+            If a signature file is uploaded, it is used in the PDF. Otherwise the hand-drawn signature pad is used.
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Image Editor</h3>
+          <div class="controls">
+            <div class="control">
+              <label for="editorQuality">Editor output quality</label>
+              <input id="editorQuality" type="range" min="0.70" max="1" step="0.01" value="0.96" />
+              <div class="hint"><span id="editorQualityLabel">0.96</span></div>
+            </div>
+
+            <div class="control full">
+              <div class="hint">Crop, rotate, flip, and apply filters before saving the image back into the project.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Project Save</h3>
+          <div class="btn-row">
+            <span class="save-badge" id="saveBadge">Auto-save ready</span>
+            <button class="btn-secondary" id="saveProjectBtn" type="button">Save Now</button>
+            <button class="btn-ghost" id="wipeStorageBtn" type="button">Reset Stored Project</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <script>
-        let currentImages = [];
-        let sortable = null;
-        let activeIndex = null;
-        let cropper = null;
+    <div class="preview-panel">
+      <div class="preview-header">
+        <div>
+          <h2 style="margin:0 0 6px;">PDF Preview</h2>
+          <div class="hint">This preview follows the same layout rules used during export.</div>
+        </div>
+        <div class="save-badge" id="previewInfo">No pages yet</div>
+      </div>
+      <div id="pdfPreview" class="preview-grid"></div>
+    </div>
+  </div>
 
-        window.onload = () => {
-            renderDrafts();
-            const saved = localStorage.getItem('toolify_session_v4');
-            if (saved) {
-                currentImages = JSON.parse(saved);
-                document.getElementById('pdf-name').value = localStorage.getItem('toolify_name_v4') || "";
-                updateUI();
-            }
-        };
+  <div id="cropModal" class="modal" aria-hidden="true">
+    <div class="modal-inner">
+      <div class="modal-card">
+        <h2 style="margin-top:0;">Edit image</h2>
+        <div class="split">
+          <div>
+            <div class="crop-stage">
+              <img id="cropImage" alt="Crop preview" />
+            </div>
+            <div class="crop-actions">
+              <button class="btn-secondary" id="cropRotateLeftBtn" type="button">Rotate left</button>
+              <button class="btn-secondary" id="cropRotateRightBtn" type="button">Rotate right</button>
+              <button class="btn-secondary" id="cropFlipXBtn" type="button">Flip X</button>
+              <button class="btn-secondary" id="cropFlipYBtn" type="button">Flip Y</button>
+              <button class="btn-secondary" id="cropZoomInBtn" type="button">Zoom in</button>
+              <button class="btn-secondary" id="cropZoomOutBtn" type="button">Zoom out</button>
+              <button class="btn-secondary" id="cropResetBtn" type="button">Reset</button>
+            </div>
+          </div>
 
-        const dz = document.getElementById('drop-zone');
-        dz.onclick = () => document.getElementById('file-input').click();
-        dz.ondragover = (e) => { e.preventDefault(); dz.style.borderColor = "var(--primary)"; };
-        dz.ondrop = (e) => { e.preventDefault(); processFiles(e.dataTransfer.files); };
+          <div>
+            <div class="controls">
+              <div class="control">
+                <label for="editBrightness">Brightness</label>
+                <input id="editBrightness" type="range" min="50" max="150" value="100" />
+                <div class="hint"><span id="editBrightnessLabel">100</span>%</div>
+              </div>
 
-        function processFiles(files) {
-            Array.from(files).forEach(file => {
-                if(!file.type.startsWith('image/')) return;
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    currentImages.push({ 
-                        id: Math.random().toString(36).substr(2, 9), 
-                        src: e.target.result, 
-                        selected: false,
-                        filters: { brightness: 100, contrast: 100, grayscale: 0 }
-                    });
-                    updateUI();
-                };
-                reader.readAsDataURL(file);
-            });
-        }
+              <div class="control">
+                <label for="editContrast">Contrast</label>
+                <input id="editContrast" type="range" min="50" max="150" value="100" />
+                <div class="hint"><span id="editContrastLabel">100</span>%</div>
+              </div>
 
-        function updateUI() {
-            const hasImages = currentImages.length > 0;
-            dz.style.display = hasImages ? 'none' : 'block';
-            document.getElementById('main-toolbar').style.display = hasImages ? 'flex' : 'none';
-            document.getElementById('float-bar').style.display = hasImages ? 'flex' : 'none';
+              <div class="control">
+                <label for="editSaturation">Saturation</label>
+                <input id="editSaturation" type="range" min="0" max="200" value="100" />
+                <div class="hint"><span id="editSaturationLabel">100</span>%</div>
+              </div>
 
-            const grid = document.getElementById('image-grid');
-            grid.innerHTML = '';
+              <div class="control">
+                <label for="editGrayscale">Grayscale</label>
+                <input id="editGrayscale" type="range" min="0" max="100" value="0" />
+                <div class="hint"><span id="editGrayscaleLabel">0</span>%</div>
+              </div>
 
-            currentImages.forEach((img, idx) => {
-                const card = document.createElement('div');
-                card.className = 'img-card';
-                card.setAttribute('data-id', img.id);
-                card.innerHTML = `
-                    <input type="checkbox" style="position:absolute; top:18px; left:18px; z-index:10;" ${img.selected ? 'checked' : ''} onchange="toggleCheck(${idx})">
-                    <img src="${img.src}" style="filter: brightness(${img.filters.brightness}%) contrast(${img.filters.contrast}%) grayscale(${img.filters.grayscale}%)">
-                    <button class="btn btn-outline" style="width:100%; margin-top:12px; font-size:0.7rem; justify-content:center;" onclick="openEditor(${idx})">Edit & Filter</button>
-                `;
-                grid.appendChild(card);
-            });
+              <div class="control">
+                <label for="editHue">Hue rotate</label>
+                <input id="editHue" type="range" min="0" max="360" value="0" />
+                <div class="hint"><span id="editHueLabel">0</span>°</div>
+              </div>
 
-            if (sortable) sortable.destroy();
-            sortable = new Sortable(grid, { 
-                animation: 250, 
-                onEnd: () => {
-                    const newOrder = [];
-                    document.querySelectorAll('.img-card').forEach(el => {
-                        newOrder.push(currentImages.find(i => i.id === el.getAttribute('data-id')));
-                    });
-                    currentImages = newOrder;
-                    saveSession();
-                }
-            });
-            saveSession();
-        }
+              <div class="control">
+                <label for="editBlur">Blur</label>
+                <input id="editBlur" type="range" min="0" max="8" value="0" />
+                <div class="hint"><span id="editBlurLabel">0</span>px</div>
+              </div>
+            </div>
 
-        // Editor Functions
-        function openEditor(idx) {
-            activeIndex = idx;
-            const img = currentImages[idx];
-            document.getElementById('crop-img').src = img.src;
-            document.getElementById('bright-range').value = img.filters.brightness;
-            document.getElementById('contrast-range').value = img.filters.contrast;
-            
-            document.getElementById('crop-modal').style.display = 'block';
-            if (cropper) cropper.destroy();
-            cropper = new Cropper(document.getElementById('crop-img'), { viewMode: 1 });
-            applyFilters();
-        }
+            <div class="hint" style="margin-top:12px;">
+              Filters are baked into the saved image when you click Save.
+            </div>
+          </div>
+        </div>
 
-        function applyFilters() {
-            const b = document.getElementById('bright-range').value;
-            const c = document.getElementById('contrast-range').value;
-            const cropperImg = document.querySelector('.cropper-view-box img');
-            if(cropperImg) {
-                cropperImg.style.filter = `brightness(${b}%) contrast(${c}%) grayscale(${currentImages[activeIndex].filters.grayscale}%)`;
-            }
-        }
+        <div class="crop-actions" style="margin-top:14px;">
+          <button class="btn-success" id="cropSaveBtn" type="button">Save image</button>
+          <button class="btn-danger" id="cropCancelBtn" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        function applyPreset(type) {
-            if(type === 'grayscale') {
-                currentImages[activeIndex].filters.grayscale = currentImages[activeIndex].filters.grayscale === 100 ? 0 : 100;
-                applyFilters();
-            }
-        }
 
-        function saveEditorChanges() {
-            const b = document.getElementById('bright-range').value;
-            const c = document.getElementById('contrast-range').value;
-            
-            // Render the final filtered + cropped version to a permanent dataURL
-            const canvas = cropper.getCroppedCanvas();
-            const ctx = canvas.getContext('2d');
-            
-            // Draw filters onto canvas
-            ctx.filter = `brightness(${b}%) contrast(${c}%) grayscale(${currentImages[activeIndex].filters.grayscale}%)`;
-            ctx.drawImage(canvas, 0, 0);
-
-            currentImages[activeIndex].src = canvas.toDataURL('image/jpeg', 0.95);
-            currentImages[activeIndex].filters = { brightness: 100, contrast: 100, grayscale: 0 }; // Reset filters since they are "baked in"
-            
-            closeCrop();
-            updateUI();
-        }
-
-        function resetFilters() {
-            document.getElementById('bright-range').value = 100;
-            document.getElementById('contrast-range').value = 100;
-            currentImages[activeIndex].filters.grayscale = 0;
-            applyFilters();
-        }
-
-        // Project Management
-        function handleCreateNew() {
-            if (currentImages.length > 0 && confirm("Save current project to Drafts and start new?")) {
-                const drafts = JSON.parse(localStorage.getItem('toolify_drafts_v4') || '[]');
-                drafts.push({ name: (document.getElementById('pdf-name').value || "Draft") + " (" + new Date().toLocaleDateString() + ")", data: currentImages });
-                localStorage.setItem('toolify_drafts_v4', JSON.stringify(drafts));
-                currentImages = [];
-                updateUI();
-                renderDrafts();
-            }
-        }
-
-        function renderDrafts() {
-            const drafts = JSON.parse(localStorage.getItem('toolify_drafts_v4') || '[]');
-            const container = document.getElementById('drafts-container');
-            document.getElementById('drafts-panel').style.display = drafts.length ? 'block' : 'none';
-            container.innerHTML = drafts.map((d, i) => `<div class="draft-chip" onclick="loadDraft(${i})">📄 ${d.name}</div>`).join('');
-        }
-
-        function loadDraft(i) {
-            const drafts = JSON.parse(localStorage.getItem('toolify_drafts_v4') || '[]');
-            currentImages = drafts[i].data;
-            updateUI();
-        }
-
-        function clearAllDrafts() { if(confirm("Clear all archived drafts?")) { localStorage.removeItem('toolify_drafts_v4'); renderDrafts(); } }
-        function closeCrop() { document.getElementById('crop-modal').style.display = 'none'; }
-        function toggleCheck(idx) { currentImages[idx].selected = !currentImages[idx].selected; }
-        function toggleSelectAll() { const s = document.getElementById('select-all').checked; currentImages.forEach(i => i.selected = s); updateUI(); }
-        function deleteSelected() { currentImages = currentImages.filter(i => !i.selected); updateUI(); }
-        function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
-        function saveSession() { localStorage.setItem('toolify_session_v4', JSON.stringify(currentImages)); localStorage.setItem('toolify_name_v4', document.getElementById('pdf-name').value); }
-
-        async function generatePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            currentImages.forEach((img, i) => {
-                if (i > 0) doc.addPage();
-                doc.addImage(img.src, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
-            });
-            doc.save(`${document.getElementById('pdf-name').value || 'toolify'}.pdf`);
-        }
-    </script>
+<script type="module" src="assets/pdf.js"></script>
 </body>
 </html>
