@@ -101,7 +101,7 @@ header {
 
 .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* ↓ from 180px */
+    grid-template-columns: repeat(3, minmax(150px, 1fr)); /* ↓ from 180px */
     gap: 16px; /* ↓ from 20px */
     width: 100%;
 }
