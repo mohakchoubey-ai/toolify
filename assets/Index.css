@@ -91,27 +91,27 @@ header {
     -webkit-text-fill-color: transparent;
 }
 
-/* --- UPDATED TOOLS GRID (FIXED LONG CARDS) --- */
+/* --- DASHBOARD GRID SYSTEM --- */
 #dashboard {
-    padding: 40px 5%;
+    padding: 30px 5%;
     max-width: 1200px;
     margin: 0 auto;
-    display: none; /* JS handle karega display */
+    width: 100%; /* Ensure full width */
 }
 
 .tools-grid {
     display: grid;
-    /* Auto-fit ensures it works on all screens without stretching */
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+    /* Yeh line cards ko rows aur columns mein divide karegi */
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
     gap: 20px;
     width: 100%;
+    justify-content: center; /* Grid ko center mein rakhne ke liye */
 }
 
 .card {
     background: var(--glass);
     backdrop-filter: blur(20px);
     border: 1px solid var(--border);
-    padding: 25px 15px; 
     border-radius: 24px;
     text-decoration: none;
     color: #fff;
@@ -120,35 +120,66 @@ header {
     align-items: center;
     justify-content: center;
     text-align: center;
-    aspect-ratio: 1 / 1; /* Makes cards perfect squares */
+    
+    /* Card ko square rakhne ke liye */
+    aspect-ratio: 1 / 1; 
+    padding: 20px;
+    
+    /* Animation & Hover */
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    animation: cardAppear 0.6s backwards;
+    animation: cardAppear 0.6s ease-out backwards;
 }
 
-/* Hover Animations */
+/* Hover Effect */
 .card:hover {
     background: rgba(255, 255, 255, 0.12);
     border-color: var(--primary);
-    transform: translateY(-8px) scale(1.03);
-    box-shadow: 0 10px 25px rgba(0, 242, 255, 0.2);
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(0, 242, 255, 0.2);
 }
 
 .card-icon { 
-    font-size: 2.8rem; 
-    margin-bottom: 12px; 
-    transition: transform 0.3s ease;
+    font-size: 2.5rem; 
+    margin-bottom: 10px; 
+    transition: 0.3s;
 }
 
 .card:hover .card-icon {
-    transform: scale(1.15) rotate(5deg);
+    transform: scale(1.2) rotate(5deg);
 }
 
 .card h4 {
     font-size: 1rem;
-    margin: 0;
     font-weight: 600;
-    letter-spacing: 0.3px;
+    margin: 0;
     color: rgba(255, 255, 255, 0.9);
+}
+
+/* Animations */
+@keyframes cardAppear {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 768px) {
+    .tools-grid {
+        /* Mobile par hamesha 2 columns dikhenge */
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .card {
+        padding: 15px;
+    }
+    
+    .card-icon {
+        font-size: 2rem;
+    }
+    
+    .card h4 {
+        font-size: 0.85rem;
+    }
 }
 
 /* Entry Animation Logic */
