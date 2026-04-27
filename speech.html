@@ -1,124 +1,110 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toolify | TTS Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary: #00f2ff; --glass: rgba(255, 255, 255, 0.08); --border: rgba(255, 255, 255, 0.15); }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background: #080808; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .nav-header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .back-btn { text-decoration: none; color: var(--primary); font-weight: 600; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 12px; border: 1px solid var(--border); transition: 0.3s; }
-        .container { background: var(--glass); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 30px; padding: 30px; width: 100%; max-width: 500px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); text-align: center; }
-        textarea { width: 100%; height: 160px; padding: 15px; border-radius: 18px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: white; outline: none; margin-bottom: 20px; font-size: 16px; resize: none; }
-        select { width: 100%; padding: 15px; border-radius: 15px; background: #111; color: white; border: 1px solid var(--border); margin-bottom: 20px; cursor: pointer; font-weight: 600; outline: none; }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn { border: none; padding: 18px; border-radius: 50px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .btn-play { background: var(--primary); color: #000; }
-        .btn-dl { background: #fff; color: #000; }
-        .status-dot { width: 8px; height: 8px; background: #ff4444; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .ready { background: #00ff00; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Speech Generator</title>
+      <link rel="stylesheet" href="assets/speech.css">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  
 </head>
-<body>
+<body class="min-h-screen text-slate-100 antialiased">
+  <main class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+    <section class="glass w-full max-w-3xl rounded-[28px] p-5 sm:p-8">
+      <div class="mb-6">
+        <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.28em] text-indigo-300/90">
+          <span class="h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_18px_rgba(99,102,241,0.95)]"></span>
+          AI Speech Generator
+        </div>
+        <h1 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-white">
+          Text to voice, clean and focused
+        </h1>
+        <p class="mt-2 text-sm sm:text-base text-slate-300 max-w-2xl">
+          Choose a preset, type your text, and play it instantly. Voice selection uses strict language matching for Hindi and English.
+        </p>
+      </div>
 
-<div class="nav-header">
-    <a href="#" class="back-btn">← HOME</a>
-    <div style="font-weight: 800; color: var(--primary);">TOOLIFY</div>
-</div>
+      <div class="grid gap-5">
+        <div class="grid gap-2">
+          <label for="voiceSelect" class="text-sm font-medium text-slate-200">Voice preset</label>
+          <div class="relative">
+            <select id="voiceSelect" class="soft-ring w-full rounded-2xl bg-slate-950/70 border border-slate-700/70 px-4 py-3 text-slate-100 shadow-lg appearance-none">
+              <option value="hi-male">Hindi Male</option>
+              <option value="hi-female">Hindi Female</option>
+              <option value="en-male">English Male</option>
+              <option value="en-female">English Female</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-slate-400">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <p id="voiceStatus" class="text-xs text-slate-400"></p>
+        </div>
 
-<div class="container">
-    <h2 style="margin-bottom: 10px;">🎙️ TTS Master</h2>
-    <p style="font-size: 11px; margin-bottom: 20px; opacity: 0.6;">
-        <span id="dot" class="status-dot"></span> Engine: <span id="engine-status">Searching for Voices...</span>
-    </p>
-    
-    <textarea id="tts-input" placeholder="Yahan likhein (Hindi ya English)..."></textarea>
-    
-    <select id="voice-choice">
-        <option value="hi-IN">🇮🇳 Hindi - Native</option>
-        <option value="en-US">🇺🇸 English - US</option>
-        <option value="en-GB">🇬🇧 English - UK</option>
-    </select>
+        <div class="grid gap-2">
+          <div class="flex items-center justify-between gap-3">
+            <label for="textInput" class="text-sm font-medium text-slate-200">Text to speak</label>
+            <div class="w-full max-w-[190px]">
+              <div class="h-2 rounded-full bg-slate-800 overflow-hidden border border-slate-700">
+                <div id="progressBar" class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 transition-all duration-150" style="width: 0%;"></div>
+              </div>
+              <div class="mt-2 inline-flex items-center rounded-full border border-slate-700 bg-slate-950/60 px-3 py-1 text-xs text-slate-300">
+                <span id="charCount">0</span><span class="mx-1">/</span><span>1000</span>
+              </div>
+            </div>
+          </div>
 
-    <div class="btn-group">
-        <button class="btn btn-play" onclick="speak()">▶️ Play</button>
-        <button class="btn btn-dl" onclick="downloadAudio()">📥 Download</button>
-    </div>
-</div>
+          <div class="relative">
+            <textarea
+              id="textInput"
+              maxlength="1000"
+              rows="8"
+              class="soft-ring w-full resize-none rounded-[22px] border border-slate-700/70 bg-slate-950/70 px-4 py-4 pr-12 text-slate-100 placeholder:text-slate-500 shadow-inner"
+              placeholder="Type or paste your text here..."
+            ></textarea>
 
-<script>
-    const synth = window.speechSynthesis;
-    const dot = document.getElementById('dot');
-    const statusText = document.getElementById('engine-status');
-    let voices = [];
+            <button
+              id="clearBtn"
+              type="button"
+              aria-label="Clear text"
+              class="hidden absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-red-500/30 bg-red-500/10 text-red-300 transition hover:bg-red-500 hover:text-white hover:scale-105 active:scale-95"
+              title="Clear text"
+            >
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
 
-    function loadVoices() {
-        // Filter for unique languages to keep the UI clean
-        voices = synth.getVoices();
-        if (voices.length > 0) {
-            dot.classList.add('ready');
-            statusText.innerText = "System Ready (" + voices.length + " voices)";
-        }
-    }
+        <div class="grid gap-3">
+          <button
+            id="playBtn"
+            type="button"
+            class="soft-ring inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-500 px-5 py-3.5 font-semibold text-white shadow-lg shadow-indigo-500/20 transition hover:bg-indigo-400 active:scale-[0.99]"
+          >
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M6 4.75C6 4.32 6.47 4.05 6.84 4.25L15.28 9.5C15.64 9.72 15.64 10.28 15.28 10.5L6.84 15.75C6.47 15.95 6 15.68 6 15.25V4.75Z" fill="currentColor"/>
+            </svg>
+            Generate / Play
+          </button>
+        </div>
 
-    // Initialize voices (needed for different browser behaviors)
-    loadVoices();
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = loadVoices;
-    }
+        <div class="grid gap-3 rounded-2xl border border-slate-700/70 bg-slate-950/55 p-4">
+          <div class="flex flex-wrap items-center gap-2 text-sm">
+            <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-300 border border-emerald-500/20">Speech synthesis</span>
+            <span class="rounded-full bg-slate-800/70 px-3 py-1 text-slate-300 border border-slate-700">Strict voice matching</span>
+            <span class="rounded-full bg-slate-800/70 px-3 py-1 text-slate-300 border border-slate-700">1000 characters</span>
+          </div>
+          <p id="status" class="text-sm text-slate-300">Ready.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+        <script type="module" src="assets/speech.js"></script>
 
-    function speak() {
-        if (synth.speaking) synth.cancel();
-        
-        const text = document.getElementById('tts-input').value;
-        const selectedLang = document.getElementById('voice-choice').value;
-        
-        if (!text.trim()) {
-            alert("Pehle kuch likho!");
-            return;
-        }
-
-        const utter = new SpeechSynthesisUtterance(text);
-        
-        // Find the best matching voice for the selected language
-        const voice = voices.find(v => v.lang.startsWith(selectedLang));
-        
-        if (voice) {
-            utter.voice = voice;
-            utter.lang = voice.lang;
-        } else {
-            // Fallback to basic lang setting if specific voice isn't found
-            utter.lang = selectedLang;
-        }
-
-        // Adjust speed for a more natural feel
-        utter.rate = 1.0;
-        utter.pitch = 1.0;
-
-        synth.speak(utter);
-    }
-
-    function downloadAudio() {
-        const text = document.getElementById('tts-input').value;
-        const lang = document.getElementById('voice-choice').value.split('-')[0]; // gets 'hi' or 'en'
-        
-        if (!text.trim()) return alert("Pehle kuch likho!, Write something first! ");
-
-        // Using a public TTS API for the download functionality
-        const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
-        
-        // To force download instead of just opening a tab:
-        const link = document.createElement('a');
-        link.href = audioUrl;
-        link.target = '_blank';
-        link.download = 'toolify-speech.mp3';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-</script>
 </body>
 </html>
