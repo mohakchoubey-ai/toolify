@@ -1,4 +1,4 @@
-    const SYSTEM_PROMPT = `You are MohakGPT — a smart, friendly AI assistant created by Mohak Choubey. You help users with:
+const SYSTEM_PROMPT = `You are MohakGPT — a smart, friendly AI assistant created by Mohak Choubey. You help users with:
 1. Basic and advanced Maths, Science, and general education topics
 2. Everything about the website Toolify by Mohak
 
@@ -17,80 +17,104 @@ TOOLIFY WEBSITE KNOWLEDGE:
 - Tools: Activities Tracker, Alarm, Calculator, Paragraph Editor, Weather, QR Maker, Colors, Clock, Timer, Speech, Calendar, PDF Maker, Stopwatch, Password Generator
 - Pages: Privacy Policy, Terms & Conditions, Feedback, Other Sites by Mohak`;
 
-    let history = [];
-    let loading = false;
+let history = [];
+let loading = false;
 
-    async function sendMsg(text) {
-      const box = document.getElementById('inputBox');
-      const msg = (text || box.value).trim();
-      if (!msg || loading) return;
+async function sendMsg(text) {
+  const box = document.getElementById('inputBox');
+  const msg = (text || box.value).trim();
+  if (!msg || loading) return;
 
-      document.getElementById('suggestions').style.display = 'none';
+  document.getElementById('suggestions').style.display = 'none';
 
-      if (msg.split(' ').length > 60) {
-        appendMsg('user', msg);
-        appendMsg('bot', 'Arre bhai! 😅 Itna lamba mat likho. Short mein pooch — main better help kar paunga! 🙏');
-        box.value = ''; box.style.height = 'auto'; return;
+  if (msg.split(' ').length > 60) {
+    appendMsg('user', msg);
+    appendMsg('bot', 'Arre bhai! 😅 Itna lamba mat likho. Short mein pooch — main better help kar paunga! 🙏');
+    box.value = '';
+    box.style.height = 'auto';
+    return;
+  }
+
+  appendMsg('user', msg);
+  box.value = '';
+  box.style.height = 'auto';
+  history.push({ role: "user", parts: [{ text: msg }] });
+
+  loading = true;
+  document.getElementById('sendBtn').disabled = true;
+  const typingEl = showTyping();
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents: history,
+          generationConfig: { maxOutputTokens: 300 }
+        })
       }
+    );
+    const data = await res.json();
+    console.log("Gemini response:", JSON.stringify(data));
 
-      appendMsg('user', msg);
-      box.value = ''; box.style.height = 'auto';
-      history.push({ role: "user", parts: [{ text: msg }] });
-
-      loading = true;
-      document.getElementById('sendBtn').disabled = true;
-      const typingEl = showTyping();
-
-      try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-              contents: history,
-              generationConfig: { maxOutputTokens: 300 }
-            })
-          }
-        );
-        const data = await res.json();
-        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Kuch gadbad ho gayi! Phir try kar. 😅";
-        history.push({ role: "model", parts: [{ text: reply }] });
-        typingEl.remove();
-        appendMsg('bot', reply);
-      } catch {
-        typingEl.remove();
-        appendMsg('bot', 'Connection issue! Ek baar phir try kar yaar. 🙏');
-      }
-
-      loading = false;
-      document.getElementById('sendBtn').disabled = false;
+    if (data.error) {
+      typingEl.remove();
+      appendMsg('bot', `API Error: ${data.error.message}`);
+    } else {
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Kuch gadbad ho gayi! Phir try kar. 😅";
+      history.push({ role: "model", parts: [{ text: reply }] });
+      typingEl.remove();
+      appendMsg('bot', reply);
     }
+  } catch (e) {
+    typingEl.remove();
+    appendMsg('bot', 'Connection issue: ' + e.message);
+  }
 
-    function appendMsg(type, text) {
-      const msgs = document.getElementById('messages');
-      const div = document.createElement('div');
-      div.className = `msg ${type === 'user' ? 'user' : ''}`;
-      const bubble = document.createElement('div');
-      bubble.className = `bubble ${type === 'user' ? 'user' : 'bot'}`;
-      bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-      if (type === 'bot') {
-        const av = document.createElement('div');
-        av.className = 'avatar'; av.textContent = '🧠';
-        div.appendChild(av);
-      }
-      div.appendChild(bubble);
-      msgs.appendChild(div);
-      msgs.scrollTop = msgs.scrollHeight;
-    }
+  loading = false;
+  document.getElementById('sendBtn').disabled = false;
+}
 
-    function showTyping() {
-      const msgs = document.getElementById('messages');
-      const div = document.createElement('div');
-      div.className = 'msg';
-      div.innerHTML = `<div class="avatar">🧠</div><div class="bubble bot"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
-      msgs.appendChild(div);
-      msgs.scrollTop = msgs.scrollHeight;
-      return div;
-    }
+function appendMsg(type, text) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${type === 'user' ? 'user' : ''}`;
+
+  const bubble = document.createElement('div');
+  bubble.className = `bubble ${type === 'user' ? 'user' : 'bot'}`;
+  bubble.innerHTML = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+
+  if (type === 'bot') {
+    const av = document.createElement('div');
+    av.className = 'avatar';
+    av.textContent = '🧠';
+    div.appendChild(av);
+  }
+
+  div.appendChild(bubble);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.innerHTML = `
+    <div class="avatar">🧠</div>
+    <div class="bubble bot">
+      <div class="typing">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
