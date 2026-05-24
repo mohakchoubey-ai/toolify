@@ -2,39 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MohakGPT - Home</title>
-  
-    <link rel="stylesheet" href="assets/chatbot.css">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MohakGPT</title>
+      <link rel="stylesheet" href="assets/chatbot.css"> 
 </head>
-<body>
+<body> 
+  <script> 
+    const API_KEY = "AIzaSyDGLs_Hb1T2fmKK-inyHve-YifbnGGLtlA";
+  </script>
 
-  <header>
-    <div class="logo">MohakGPT</div>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="othersitesofmohak.html">About Us</a>
-    </nav>
-  </header>
-
-  <section class="hero">
-    <h1>Welcome to MohakGPT</h1>
-    <p> Chatbot now on toolify! </p>
-  </section>
-
-  <div class="chatbox">
-    <iframe
-      src="https://claude.site/public/artifacts/50d862ab-3a97-4398-8b74-2983fe4f8d52/embed"
-      title="MohakGPT - Study & Toolify Assistant"
-      allow="clipboard-write"
-      allowfullscreen>     
-    </iframe>
+  <div class="header">
+    <div class="logo">🧠</div>
+    <div>
+      <div class="header-title">MohakGPT</div>
+      <div class="header-sub">by <a href="https://mohakdev1220.github.io/toolify/" target="_blank">Toolify</a> • Maths, Science & More</div>
+    </div>
+    <a class="toolify-btn" href="https://mohakdev1220.github.io/toolify/" target="_blank">🔗 Toolify</a>
   </div>
 
-  <footer>
-    © 2026 MohakGPT | Built by Mohak Choubey using claude model
-  </footer>
+  <div id="messages">
+    <div class="msg">
+      <div class="avatar">🧠</div>
+      <div class="bubble bot">Hey! 👋 Main hoon <strong>MohakGPT</strong> — Mohak ka apna AI!<br>Maths, Science, ya Toolify ke baare mein kuch bhi pooch. Short mein poochoge toh better! 🎯</div>
+    </div>
+  </div>
 
+  <div id="suggestions">
+    <button class="suggestion" onclick="sendMsg('What is photosynthesis?')">What is photosynthesis?</button>
+    <button class="suggestion" onclick="sendMsg('Toolify mein kya tools hain?')">Toolify tools kya hain?</button>
+    <button class="suggestion" onclick="sendMsg('Who made Toolify?')">Who made Toolify?</button>
+    <button class="suggestion" onclick="sendMsg('What is 12 x 12?')">12 x 12 = ?</button>
+  </div>
+
+  <div class="input-area">
+    <div class="input-row">
+      <textarea id="inputBox" rows="1" placeholder="Kuch pooch — maths, science, Toolify... 🎯"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <button id="sendBtn" onclick="sendMsg()">➤</button>
+    </div>
+    <div class="hint">Short questions = better answers • Enter to send</div>
+  </div>
+   <script type="module" src="assets/chatbot.js"></script>
 </body>
 </html>
