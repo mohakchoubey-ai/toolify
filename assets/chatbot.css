@@ -1,78 +1,107 @@
- * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
+* ===== RESET ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      background: #0f172a;
-      color: #fff;
-    }
+/* ===== BODY ===== */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0d0d0d 0%, #1a0533 60%, #0d1a3a 100%);
+  min-height: 100vh;
+  color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+}
 
-    header {
-      background: #111827;
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #1f2937;
-    }
+/* ===== HEADER ===== */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 28px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(130, 80, 255, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
 
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: #38bdf8;
-    }
+.logo {
+  font-size: 22px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #a78bfa, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.5px;
+}
 
-    nav a {
-      color: #fff;
-      text-decoration: none;
-      margin-left: 18px;
-    }
+nav a {
+  color: #c4b5fd;
+  text-decoration: none;
+  margin-left: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
 
-    nav a:hover {
-      color: #38bdf8;
-    }
+nav a:hover {
+  color: #fff;
+}
 
-    .hero {
-      text-align: center;
-      padding: 50px 20px 25px;
-    }
+/* ===== HERO ===== */
+.hero {
+  text-align: center;
+  padding: 48px 20px 24px;
+}
 
-    .hero h1 {
-      font-size: 42px;
-      margin-bottom: 12px;
-    }
+.hero h1 {
+  font-size: clamp(26px, 5vw, 42px);
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 10px;
+}
 
-    .hero p {
-      color: #cbd5e1;
-      max-width: 700px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
+.hero h1 span {
+  background: linear-gradient(135deg, #a78bfa, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
-    .chatbox {
-      width: 92%;
-      max-width: 1100px;
-      margin: 30px auto 50px;
-      background: #111827;
-      border: 1px solid #1f2937;
-      border-radius: 16px;
-      overflow: hidden;
-    }
+.hero p {
+  font-size: 15px;
+  color: #a78bfa;
+  letter-spacing: 0.3px;
+}
 
-    iframe {
-      width: 100%;
-      height: 650px;
-      border: 0;
-      display: block;
-    }
+/* ===== CHATBOX (iframe wrapper) ===== */
+.chatbox {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px 16px 30px;
+}
 
-    footer {
-      text-align: center;
-      padding: 18px 12px;
-      background: #111827;
-      color: #94a3b8;
-      border-top: 1px solid #1f2937;
-    }
+.chatbox iframe {
+  width: 100%;
+  max-width: 780px;
+  height: 620px;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(124, 58, 237, 0.35);
+}
+
+/* ===== FOOTER ===== */
+footer {
+  text-align: center;
+  padding: 16px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+  border-top: 1px solid rgba(124, 58, 237, 0.15);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  header { padding: 12px 16px; }
+  .hero { padding: 32px 16px 16px; }
+  .chatbox iframe { height: 520px; border-radius: 14px; }
+}
