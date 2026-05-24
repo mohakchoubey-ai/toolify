@@ -1,114 +1,120 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+const SYSTEM_PROMPT = `You are MohakGPT — a smart, friendly AI assistant created by Mohak Choubey. You help users with:
+1. Basic and advanced Maths, Science, and general education topics
+2. Everything about the website Toolify by Mohak
 
-// FIREBASE CONFIGURATION
-const firebaseConfig = {
-    apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
-    authDomain: "toolbox-hub-98c03.firebaseapp.com",
-    projectId: "toolbox-hub-98c03",
-    appId: "1:321020105472:web:356e7c2903def7b9d859e5"
-};
+STRICT RULES:
+- Keep ALL responses SHORT (max 3-4 lines or bullet points). No long paragraphs.
+- If user asks something too broad, ask them to be more specific.
+- Be friendly and slightly fun. Use simple language.
+- Refuse long essay requests politely. Say "Short mein pooch bhai!" or similar.
+- You can use Hinglish casually.
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+TOOLIFY WEBSITE KNOWLEDGE:
+- Website: https://mohakdev1220.github.io/toolify/
+- Tagline: "The futuristic workspace for digital creators"
+- Developed by: Mohak Choubey (@2026) with love
+- YouTube: https://www.youtube.com/@MOHAKCHOUBEY
+- Tools: Activities Tracker, Alarm, Calculator, Paragraph Editor, Weather, QR Maker, Colors, Clock, Timer, Speech, Calendar, PDF Maker, Stopwatch, Password Generator
+- Pages: Privacy Policy, Terms & Conditions, Feedback, Other Sites by Mohak`;
 
-// --- UI EXPOSED FUNCTIONS ---
+let history = [];
+let loading = false;
 
-window.signIn = async () => {
-    try { 
-        await signInWithPopup(auth, provider); 
-    } catch(e) { 
-        console.error('Sign in error:', e); 
-    }
-};
+async function sendMsg(text) {
+  const box = document.getElementById('inputBox');
+  const msg = (text || box.value).trim();
+  if (!msg || loading) return;
 
-window.logout = async () => {
-    try { 
-        await signOut(auth); 
-        location.reload(); 
-    } catch(e) { 
-        console.error('Logout error:', e); 
-    }
-};
+  document.getElementById('suggestions').style.display = 'none';
 
-window.openFeedback = () => {
-    document.getElementById('feedback-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-};
+  if (msg.split(' ').length > 60) {
+    appendMsg('user', msg);
+    appendMsg('bot', 'Arre bhai! 😅 Itna lamba mat likho. Short mein pooch — main better help kar paunga! 🙏');
+    box.value = '';
+    box.style.height = 'auto';
+    return;
+  }
 
-window.closeFeedback = () => {
-    document.getElementById('feedback-modal').classList.remove('active');
-    document.body.style.overflow = '';
-};
+  appendMsg('user', msg);
+  box.value = '';
+  box.style.height = 'auto';
+  history.push({ role: "user", parts: [{ text: msg }] });
 
-// --- AUTH STATE OBSERVER ---
-onAuthStateChanged(auth, (user) => {
-    const mainAuthUI = document.getElementById('main-auth-ui');
-    const authHeader = document.getElementById('auth-header-area');
-    const landingPage = document.getElementById('landing-page');
-    const dashboard = document.getElementById('dashboard');
+  loading = true;
+  document.getElementById('sendBtn').disabled = true;
+  const typingEl = showTyping();
 
-    if (user) {
-        // Update Header with Profile Info
-        authHeader.innerHTML = `
-            <div class="auth-profile-wrap" style="display: flex; align-items: center; gap: 12px;">
-                <div style="text-align: right; line-height: 1.2;">
-                    <div style="font-weight: 800; font-size: 0.85rem; color: var(--primary);">${user.displayName || 'User'}</div>
-                    <span onclick="logout()" style="font-size: 0.7rem; cursor: pointer; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px;">Sign Out</span>
-                </div>
-                <img src="${user.photoURL || ''}" alt="Profile" class="user-img" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary);">
-            </div>
-        `;
-        
-        // Navigation Logic
-        landingPage.style.display = 'none';
-        dashboard.style.display = 'block';
-        
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents: history,
+          generationConfig: { maxOutputTokens: 300 }
+        })
+      }
+    );
+    const data = await res.json();
+    console.log("Gemini response:", JSON.stringify(data));
+
+    if (data.error) {
+      typingEl.remove();
+      appendMsg('bot', `API Error: ${data.error.message}`);
     } else {
-        // Show Sign In Button if Logged Out
-        authHeader.innerHTML = `<button class="btn btn-primary" onclick="signIn()">Sign In</button>`;
-       // Center button removed intentionally
-if(mainAuthUI) {
-    mainAuthUI.innerHTML = "";
-}
-        landingPage.style.display = 'flex';
-        dashboard.style.display = 'none';
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Kuch gadbad ho gayi! Phir try kar. 😅";
+      history.push({ role: "model", parts: [{ text: reply }] });
+      typingEl.remove();
+      appendMsg('bot', reply);
     }
-});
+  } catch (e) {
+    typingEl.remove();
+    appendMsg('bot', 'Connection issue: ' + e.message);
+  }
 
-// --- FEEDBACK FORM HANDLING ---
-const form = document.getElementById("my-form");
-if(form) {
-    form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const status = document.getElementById("my-form-status");
-        const data = new FormData(event.target);
-        
-        try {
-            const response = await fetch(event.target.action, {
-                method: 'POST',
-                body: data,
-                headers: { 'Accept': 'application/json' }
-            });
-            if (response.ok) {
-                status.innerHTML = "Thanks for your feedback! 🎉";
-                status.style.color = "var(--primary)";
-                form.reset();
-                setTimeout(() => window.closeFeedback(), 2000);
-            } else {
-                status.innerHTML = "Oops! Problem submitting form.";
-                status.style.color = "#ff4444";
-            }
-        } catch (error) {
-            status.innerHTML = "Connection Error!";
-            status.style.color = "#ff4444";
-        }
-    });
+  loading = false;
+  document.getElementById('sendBtn').disabled = false;
 }
 
-// --- MOUSE TRACKING FOR GRADIENT GLOW ---
-document.addEventListener('mousemove', e => {
-    document.body.style.setProperty('--mouse-x', (e.clientX) + 'px');
-    document.body.style.setProperty('--mouse-y', (e.clientY) + 'px');
-});
+function appendMsg(type, text) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${type === 'user' ? 'user' : ''}`;
+
+  const bubble = document.createElement('div');
+  bubble.className = `bubble ${type === 'user' ? 'user' : 'bot'}`;
+  bubble.innerHTML = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+
+  if (type === 'bot') {
+    const av = document.createElement('div');
+    av.className = 'avatar';
+    av.textContent = '🧠';
+    div.appendChild(av);
+  }
+
+  div.appendChild(bubble);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.innerHTML = `
+    <div class="avatar">🧠</div>
+    <div class="bubble bot">
+      <div class="typing">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
