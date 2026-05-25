@@ -27,7 +27,7 @@ async function sendMsg(text) {
 
   document.getElementById('suggestions').style.display = 'none';
 
-  if (msg.split(' ').length > 60) {
+  if (msg.split(' ').length > 150) {
     appendMsg('user', msg);
     appendMsg('bot', 'Arre bhai! 😅 Itna lamba mat likho. Short mein pooch — main better help kar paunga! 🙏');
     box.value = '';
@@ -54,7 +54,7 @@ async function sendMsg(text) {
           'Authorization': `Bearer ${API_KEY}`
         },
         body: JSON.stringify({
-          model: "llama3-8b-8192",
+          model: " llama-3.1-8b-instant",
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             ...history
