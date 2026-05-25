@@ -6,43 +6,71 @@
   <title>MohakGPT</title>
   <link rel="stylesheet" href="assets/chatbot.css">
 </head>
-<body>
+<body class="theme-light">
 
   <script>
-    const API_KEY = "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";
+    const API_KEY = "const API_KEY = "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";";
   </script>
 
-  <div class="header">
-          <div class="logo">⚡</div>
-    <div>
-      <div class="header-title">MohakGPT</div>
-      <div class="header-sub">by <a href="https://mohakdev1220.github.io/toolify/" target="_blank">Toolify</a> • Maths, Science & More</div>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <button class="new-chat-btn" onclick="createNewChat()">＋ New Chat</button>
+      <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
     </div>
-    <a class="toolify-btn" href="https://mohakdev1220.github.io/toolify/" target="_blank">🔗 Toolify</a>
+    <div class="chat-list" id="chatList"></div>
+    <div class="sidebar-footer">
+      <div class="theme-row">
+        <span class="theme-label">Theme</span>
+        <div class="theme-options">
+          <button class="theme-btn" data-theme="light" onclick="setTheme('light')">☀️ Light</button>
+          <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')">🌙 Dark</button>
+        </div>
+      </div>
+      <div class="sidebar-links">
+        <a href="privacy.html" target="_blank">Privacy Policy</a>
+        <a href="terms.html" target="_blank">Terms</a>
+      </div>
+    </div>
   </div>
 
-  <div id="messages">
-    <div class="msg">
-      <div class="avatar">🧠</div>
-      <div class="bubble bot">Namaste! 🙏 Main hoon <strong>MohakGPT</strong> — tumhara smart AI dost!<br>Maths, Science ya kuch bhi pooch. Main hoon na! ⚡</div>
-    </div>
-  </div>
+  <!-- Mobile overlay -->
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-  <div id="suggestions">
-    <button class="suggestion" onclick="sendMsg('What is ARTIFICIAL INTELLIGENCE?')">What is ARTIFICIAL INTELLIGENCE?</button>
-    <button class="suggestion" onclick="sendMsg('Toolify mein kya tools hain?')">Toolify tools kya hain?</button>
-    <button class="suggestion" onclick="sendMsg('Who made Toolify?')">Who made Toolify?</button>
-    <button class="suggestion" onclick="sendMsg('Full form of IPL')"> What is the Full form of IPL? = ?</button>
-  </div>
-
-  <div class="input-area">
-    <div class="input-row">
-      <textarea id="inputBox" rows="1" placeholder="Kuch bhi pooch — maths, science, Toolify... 🎯"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
-        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-      <button id="sendBtn" onclick="sendMsg()">➤</button>
+  <!-- Main -->
+  <div class="main">
+    <div class="header">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="logo">⚡</div>
+      <div>
+        <div class="header-title">MohakGPT</div>
+        <div class="header-sub">by <a href="https://mohakdev1220.github.io/toolify/" target="_blank">Toolify</a> • AI Assistant</div>
+      </div>
+      <a class="toolify-btn" href="https://mohakdev1220.github.io/toolify/" target="_blank">🔗 Toolify</a>
     </div>
-    <div class="hint">Short questions = better answers • Enter to send</div>
+
+    <div id="messages"></div>
+
+    <div id="suggestions">
+      <button class="suggestion" onclick="sendMsg('What is photosynthesis?')">What is photosynthesis?</button>
+      <button class="suggestion" onclick="sendMsg('Toolify mein kya tools hain?')">Toolify tools?</button>
+      <button class="suggestion" onclick="sendMsg('Who made Toolify?')">Who made Toolify?</button>
+      <button class="suggestion" onclick="sendMsg('What is 12 x 12?')">12 × 12 = ?</button>
+    </div>
+
+    <div class="input-area">
+      <div class="input-row">
+        <textarea id="inputBox" rows="1"
+          placeholder="Kuch bhi pooch... ⚡"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+          oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <button id="sendBtn" onclick="sendMsg()">➤</button>
+      </div>
+      <div class="hint">
+        ⚠️ MohakGPT can make mistakes, double check it &nbsp;|&nbsp;
+        <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a>
+      </div>
+    </div>
   </div>
 
   <script src="assets/chatbot.js"></script>
