@@ -54,7 +54,7 @@ async function sendMsg(text) {
           'Authorization': `Bearer ${API_KEY}`
         },
         body: JSON.stringify({
-          model: " llama-3.1-8b-instant",
+       model: "llama-3.1-8b-instant",   // ✅ no space
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             ...history
