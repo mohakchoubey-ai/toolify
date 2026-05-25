@@ -18,6 +18,11 @@ MOHAK'S WEBSITES (mention ONLY if asked):
 - YouTube: https://www.youtube.com/@MOHAKCHOUBEY — IMPORTANT: You do NOT know what videos Mohak has made. Never suggest or assume any specific video. Just share the link.
 - All by Mohak Choubey (@2026)`;
 
+const SEARCH_SYSTEM = `You are a search decision engine. Given a user question, decide if it needs a live Google search.
+Reply ONLY with JSON: {"search": true/false, "query": "search query or empty"}
+Search needed for: current events, news, recent facts, prices, scores, live data, anything after 2024.
+No search needed for: maths, basic science, coding help, general knowledge, Toolify website info.`;
+
 const EXPIRY_MS = 15 * 24 * 60 * 60 * 1000;
 let chats = [];
 let activeChatId = null;
@@ -171,15 +176,50 @@ async function sendMsg(text) {
   document.getElementById('sendBtn').disabled = true;
   const typingEl = showTyping();
 
-  const history = chat.messages.map(m => ({ role: m.role, content: m.content }));
-
   try {
+    // Step 1: Decide if search is needed
+    let searchContext = '';
+    const decisionRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages: [
+          { role: 'system', content: SEARCH_SYSTEM },
+          { role: 'user', content: msg }
+        ],
+        max_tokens: 60
+      })
+    });
+    const decisionData = await decisionRes.json();
+    const decisionText = decisionData.choices?.[0]?.message?.content || '{"search":false}';
+
+    let decision = { search: false, query: '' };
+    try { decision = JSON.parse(decisionText.replace(/```json|```/g, '').trim()); } catch(e) {}
+
+    // Step 2: If search needed, fetch from SerpAPI
+    if (decision.search && decision.query) {
+      const serpRes = await fetch(
+        `https://serpapi.com/search.json?q=${encodeURIComponent(decision.query)}&api_key=${SERP_KEY}&num=3&hl=en`
+      );
+      const serpData = await serpRes.json();
+      const results = serpData.organic_results?.slice(0, 3)
+        .map(r => `${r.title}: ${r.snippet}`)
+        .join('\n') || '';
+      if (results) searchContext = `\n\nWeb search results for "${decision.query}":\n${results}\n\nUse these results to answer accurately.`;
+    }
+
+    // Step 3: Final answer with Groq
+    const history = chat.messages.map(m => ({ role: m.role, content: m.content }));
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
-        messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history],
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT + searchContext },
+          ...history
+        ],
         max_tokens: 400
       })
     });
@@ -193,6 +233,7 @@ async function sendMsg(text) {
     chat.messages.push({ role: 'assistant', content: reply, ts: Date.now() });
     saveChats();
     appendMsgUI('bot', reply, chat.messages.length - 1);
+
   } catch(e) {
     typingEl.remove();
     const err = 'Connection issue: ' + e.message;
