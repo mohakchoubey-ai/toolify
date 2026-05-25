@@ -27,7 +27,7 @@ async function sendMsg(text) {
 
   document.getElementById('suggestions').style.display = 'none';
 
-  if (msg.split(' ').length > 150) {
+  if (msg.split(' ').length > 60) {
     appendMsg('user', msg);
     appendMsg('bot', 'Arre bhai! 😅 Itna lamba mat likho. Short mein pooch — main better help kar paunga! 🙏');
     box.value = '';
@@ -54,7 +54,7 @@ async function sendMsg(text) {
           'Authorization': `Bearer ${API_KEY}`
         },
         body: JSON.stringify({
-       model: "llama-3.1-8b-instant",   // ✅ no space
+          model: "llama-3.1-8b-instant",
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             ...history
@@ -98,7 +98,7 @@ function appendMsg(type, text) {
   if (type === 'bot') {
     const av = document.createElement('div');
     av.className = 'avatar';
-    av.textContent = '🧠';
+    av.textContent = '⚡';
     div.appendChild(av);
   }
 
@@ -112,7 +112,7 @@ function showTyping() {
   const div = document.createElement('div');
   div.className = 'msg';
   div.innerHTML = `
-    <div class="avatar">🧠</div>
+    <div class="avatar">⚡</div>
     <div class="bubble bot">
       <div class="typing">
         <div class="dot"></div>
