@@ -38,7 +38,7 @@ async function sendMsg(text) {
   appendMsg('user', msg);
   box.value = '';
   box.style.height = 'auto';
-  history.push({ role: "user", parts: [{ text: msg }] });
+  history.push({ role: "user", content: msg });
 
   loading = true;
   document.getElementById('sendBtn').disabled = true;
@@ -46,26 +46,32 @@ async function sendMsg(text) {
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${API_KEY}`,
+      `https://api.groq.com/openai/v1/chat/completions`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_KEY}`
+        },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: history,
-          generationConfig: { maxOutputTokens: 300 }
+          model: "llama3-8b-8192",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            ...history
+          ],
+          max_tokens: 300
         })
       }
     );
     const data = await res.json();
-    console.log("Gemini response:", JSON.stringify(data));
+    console.log("Groq response:", JSON.stringify(data));
 
     if (data.error) {
       typingEl.remove();
       appendMsg('bot', `API Error: ${data.error.message}`);
     } else {
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Kuch gadbad ho gayi! Phir try kar. 😅";
-      history.push({ role: "model", parts: [{ text: reply }] });
+      const reply = data.choices?.[0]?.message?.content || "Kuch gadbad ho gayi! Phir try kar. 😅";
+      history.push({ role: "assistant", content: reply });
       typingEl.remove();
       appendMsg('bot', reply);
     }
