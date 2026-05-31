@@ -15,12 +15,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "YOUR_AUTH_DOMAIN",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId:             "YOUR_APP_ID"
+  apiKey: "AIzaSyAoj4yHcaRW4wdOPA7SrZhGQZqAobHDdB0",
+  authDomain: "toolbox-hub-98c03.firebaseapp.com",
+  projectId: "toolbox-hub-98c03",
+  storageBucket: "toolbox-hub-98c03.firebasestorage.app",
+  messagingSenderId: "321020105472",
+  appId: "1:321020105472:web:698ba3bf9dfe75add859e5"
 };
 
 const app      = initializeApp(firebaseConfig);
