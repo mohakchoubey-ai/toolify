@@ -1,120 +1,130 @@
-const SYSTEM_PROMPT = `You are MohakGPT — a smart, friendly AI assistant created by Mohak Choubey. You help users with:
-1. Basic and advanced Maths, Science, and general education topics
-2. Everything about the website Toolify by Mohak
+// ══════════════════════════════════════════
+//  TOOLIFY — Index.js
+//  Firebase Auth Gate + Dashboard Logic
+// ══════════════════════════════════════════
 
-STRICT RULES:
-- Keep ALL responses SHORT (max 3-4 lines or bullet points). No long paragraphs.
-- If user asks something too broad, ask them to be more specific.
-- Be friendly and slightly fun. Use simple language.
-- Refuse long essay requests politely. Say "Short mein pooch bhai!" or similar.
-- You can use Hinglish casually.
+// ─── 1. FIREBASE CONFIG ──────────────────
+// Replace these values with your own Firebase project config
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-TOOLIFY WEBSITE KNOWLEDGE:
-- Website: https://mohakdev1220.github.io/toolify/
-- Tagline: "The futuristic workspace for digital creators"
-- Developed by: Mohak Choubey (@2026) with love
-- YouTube: https://www.youtube.com/@MOHAKCHOUBEY
-- Tools: Activities Tracker, Alarm, Calculator, Paragraph Editor, Weather, QR Maker, Colors, Clock, Timer, Speech, Calendar, PDF Maker, Stopwatch, Password Generator
-- Pages: Privacy Policy, Terms & Conditions, Feedback, Other Sites by Mohak`;
+const firebaseConfig = {
+  apiKey:            "YOUR_API_KEY",
+  authDomain:        "YOUR_AUTH_DOMAIN",
+  projectId:         "YOUR_PROJECT_ID",
+  storageBucket:     "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId:             "YOUR_APP_ID"
+};
 
-let history = [];
-let loading = false;
+const app      = initializeApp(firebaseConfig);
+const auth     = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-async function sendMsg(text) {
-  const box = document.getElementById('inputBox');
-  const msg = (text || box.value).trim();
-  if (!msg || loading) return;
+// ─── 2. DOM REFS ─────────────────────────
+const landingScreen   = document.getElementById("landing-screen");
+const dashboardScreen = document.getElementById("dashboard-screen");
+const googleSignInBtn = document.getElementById("googleSignIn");
+const signOutBtn      = document.getElementById("signOutBtn");
+const userAvatar      = document.getElementById("userAvatar");
+const userNameEl      = document.getElementById("userName");
+const greetNameEl     = document.getElementById("greetName");
+const timeOfDayEl     = document.getElementById("timeOfDay");
+const cursorGlow      = document.getElementById("cursorGlow");
 
-  document.getElementById('suggestions').style.display = 'none';
+// ─── 3. CURSOR GLOW ──────────────────────
+document.addEventListener("mousemove", (e) => {
+  cursorGlow.style.left = `${e.clientX}px`;
+  cursorGlow.style.top  = `${e.clientY}px`;
+});
 
-  if (msg.split(' ').length > 60) {
-    appendMsg('user', msg);
-    appendMsg('bot', 'Arre bhai! 😅 Itna lamba mat likho. Short mein pooch — main better help kar paunga! 🙏');
-    box.value = '';
-    box.style.height = 'auto';
-    return;
+// ─── 4. AUTH STATE LISTENER ──────────────
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    showDashboard(user);
+  } else {
+    showLanding();
   }
+});
 
-  appendMsg('user', msg);
-  box.value = '';
-  box.style.height = 'auto';
-  history.push({ role: "user", parts: [{ text: msg }] });
-
-  loading = true;
-  document.getElementById('sendBtn').disabled = true;
-  const typingEl = showTyping();
+// ─── 5. SIGN IN ──────────────────────────
+googleSignInBtn.addEventListener("click", async () => {
+  googleSignInBtn.disabled = true;
+  googleSignInBtn.textContent = "Signing in…";
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: history,
-          generationConfig: { maxOutputTokens: 300 }
-        })
-      }
-    );
-    const data = await res.json();
-    console.log("Gemini response:", JSON.stringify(data));
+    await signInWithPopup(auth, provider);
+    // onAuthStateChanged handles the transition
+  } catch (err) {
+    console.error("Sign-in error:", err);
+    googleSignInBtn.disabled = false;
+    googleSignInBtn.innerHTML = `
+      <svg viewBox="0 0 24 24" width="20" height="20">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Continue with Google`;
 
-    if (data.error) {
-      typingEl.remove();
-      appendMsg('bot', `API Error: ${data.error.message}`);
-    } else {
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Kuch gadbad ho gayi! Phir try kar. 😅";
-      history.push({ role: "model", parts: [{ text: reply }] });
-      typingEl.remove();
-      appendMsg('bot', reply);
+    if (err.code !== "auth/popup-closed-by-user") {
+      alert("Sign-in failed. Please try again.");
     }
-  } catch (e) {
-    typingEl.remove();
-    appendMsg('bot', 'Connection issue: ' + e.message);
+  }
+});
+
+// ─── 6. SIGN OUT ─────────────────────────
+signOutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+  // onAuthStateChanged handles the transition
+});
+
+// ─── 7. SHOW LANDING ─────────────────────
+function showLanding() {
+  dashboardScreen.classList.add("hidden");
+  landingScreen.classList.remove("hidden");
+}
+
+// ─── 8. SHOW DASHBOARD ───────────────────
+function showDashboard(user) {
+  landingScreen.classList.add("hidden");
+  dashboardScreen.classList.remove("hidden");
+
+  // Populate user info
+  const firstName = (user.displayName || "Creator").split(" ")[0];
+  userNameEl.textContent  = firstName;
+  greetNameEl.textContent = firstName;
+
+  if (user.photoURL) {
+    userAvatar.src = user.photoURL;
+    userAvatar.style.display = "block";
+  } else {
+    userAvatar.style.display = "none";
   }
 
-  loading = false;
-  document.getElementById('sendBtn').disabled = false;
+  // Time-of-day greeting
+  const hour = new Date().getHours();
+  if (hour < 12)       timeOfDayEl.textContent = "morning";
+  else if (hour < 17)  timeOfDayEl.textContent = "afternoon";
+  else if (hour < 21)  timeOfDayEl.textContent = "evening";
+  else                 timeOfDayEl.textContent  = "night";
 }
 
-function appendMsg(type, text) {
-  const msgs = document.getElementById('messages');
-  const div = document.createElement('div');
-  div.className = `msg ${type === 'user' ? 'user' : ''}`;
-
-  const bubble = document.createElement('div');
-  bubble.className = `bubble ${type === 'user' ? 'user' : 'bot'}`;
-  bubble.innerHTML = text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br>');
-
-  if (type === 'bot') {
-    const av = document.createElement('div');
-    av.className = 'avatar';
-    av.textContent = '🧠';
-    div.appendChild(av);
-  }
-
-  div.appendChild(bubble);
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
-function showTyping() {
-  const msgs = document.getElementById('messages');
-  const div = document.createElement('div');
-  div.className = 'msg';
-  div.innerHTML = `
-    <div class="avatar">🧠</div>
-    <div class="bubble bot">
-      <div class="typing">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-      </div>
-    </div>`;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-  return div;
-}
+// ─── 9. TOOL LINK GUARD ──────────────────
+// Any card click checks auth before navigating.
+// If user is somehow not logged in, redirect to index (this page).
+document.querySelectorAll("#dashboard-screen .card").forEach((card) => {
+  card.addEventListener("click", (e) => {
+    if (!auth.currentUser) {
+      e.preventDefault();
+      showLanding();
+    }
+    // Otherwise navigation proceeds naturally
+  });
+});
