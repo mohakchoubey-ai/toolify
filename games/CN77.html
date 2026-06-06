@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neon Survival</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:#020617;
+overflow:hidden;
+font-family:Arial,sans-serif;
+touch-action:none;
+}
+
+canvas{
+display:block;
+}
+
+#ui{
+position:fixed;
+top:15px;
+left:15px;
+color:white;
+font-size:20px;
+font-weight:bold;
+z-index:10;
+}
+
+#menu{
+position:fixed;
+inset:0;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+background:rgba(0,0,0,.8);
+color:white;
+gap:20px;
+z-index:20;
+}
+
+button{
+padding:15px 35px;
+font-size:20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div id="ui">
+Score: <span id="score">0</span><br>
+Best: <span id="best">0</span>
+</div>
+
+<div id="menu">
+<h1>⚡ NEON SURVIVAL ⚡</h1>
+<p>Move and survive as long as possible</p>
+<button onclick="startGame()">PLAY</button>
+</div>
+
+<canvas id="game"></canvas>
+
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+function resize(){
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+}
+resize();
+addEventListener("resize",resize);
+
+let player;
+let enemies=[];
+let particles=[];
+let score=0;
+let running=false;
+let difficulty=1;
+
+const bestDisplay=document.getElementById("best");
+const scoreDisplay=document.getElementById("score");
+
+let best=localStorage.neonBest||0;
+bestDisplay.textContent=best;
+
+function startGame(){
+
+document.getElementById("menu").style.display="none";
+
+player={
+x:canvas.width/2,
+y:canvas.height/2,
+r:18,
+speed:6
+};
+
+enemies=[];
+particles=[];
+score=0;
+difficulty=1;
+running=true;
+
+spawnEnemy();
+animate();
+}
+
+const keys={};
+
+onkeydown=e=>keys[e.key]=true;
+onkeyup=e=>keys[e.key]=false;
+
+let touchX=null;
+let touchY=null;
+
+canvas.addEventListener("touchstart",e=>{
+touchX=e.touches[0].clientX;
+touchY=e.touches[0].clientY;
+});
+
+canvas.addEventListener("touchmove",e=>{
+touchX=e.touches[0].clientX;
+touchY=e.touches[0].clientY;
+});
+
+canvas.addEventListener("touchend",()=>{
+touchX=null;
+touchY=null;
+});
+
+function spawnEnemy(){
+
+if(!running)return;
+
+let side=Math.floor(Math.random()*4);
+
+let x,y;
+
+if(side===0){
+x=Math.random()*canvas.width;
+y=-30;
+}
+else if(side===1){
+x=canvas.width+30;
+y=Math.random()*canvas.height;
+}
+else if(side===2){
+x=Math.random()*canvas.width;
+y=canvas.height+30;
+}
+else{
+x=-30;
+y=Math.random()*canvas.height;
+}
+
+enemies.push({
+x,y,
+r:12+Math.random()*10,
+speed:2+difficulty*0.35
+});
+
+setTimeout(spawnEnemy,700-Math.min(difficulty*20,500));
+}
+
+function particle(x,y){
+for(let i=0;i<12;i++){
+particles.push({
+x,y,
+vx:(Math.random()-0.5)*8,
+vy:(Math.random()-0.5)*8,
+life:40
+});
+}
+}
+
+function gameOver(){
+
+running=false;
+
+if(score>best){
+best=score;
+localStorage.neonBest=best;
+}
+
+bestDisplay.textContent=best;
+
+document.getElementById("menu").innerHTML=`
+<h1>Game Over</h1>
+<h2>Score: ${score}</h2>
+<h2>Best: ${best}</h2>
+<button onclick="location.reload()">Play Again</button>
+`;
+
+document.getElementById("menu").style.display="flex";
+}
+
+function animate(){
+
+if(!running)return;
+
+requestAnimationFrame(animate);
+
+ctx.fillStyle="rgba(2,6,23,.25)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+score++;
+difficulty+=0.002;
+
+scoreDisplay.textContent=Math.floor(score/10);
+
+if(keys["ArrowLeft"]||keys["a"]) player.x-=player.speed;
+if(keys["ArrowRight"]||keys["d"]) player.x+=player.speed;
+if(keys["ArrowUp"]||keys["w"]) player.y-=player.speed;
+if(keys["ArrowDown"]||keys["s"]) player.y+=player.speed;
+
+if(touchX!==null){
+let dx=touchX-player.x;
+let dy=touchY-player.y;
+
+player.x+=dx*0.08;
+player.y+=dy*0.08;
+}
+
+player.x=Math.max(player.r,Math.min(canvas.width-player.r,player.x));
+player.y=Math.max(player.r,Math.min(canvas.height-player.r,player.y));
+
+for(let e of enemies){
+
+let dx=player.x-e.x;
+let dy=player.y-e.y;
+let dist=Math.hypot(dx,dy);
+
+e.x+=(dx/dist)*e.speed;
+e.y+=(dy/dist)*e.speed;
+
+ctx.beginPath();
+ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
+ctx.fillStyle="#ff0055";
+ctx.shadowBlur=25;
+ctx.shadowColor="#ff0055";
+ctx.fill();
+
+if(dist<player.r+e.r){
+particle(player.x,player.y);
+gameOver();
+}
+}
+
+ctx.beginPath();
+ctx.arc(player.x,player.y,player.r,0,Math.PI*2);
+ctx.fillStyle="#00f7ff";
+ctx.shadowBlur=30;
+ctx.shadowColor="#00f7ff";
+ctx.fill();
+
+for(let i=particles.length-1;i>=0;i--){
+
+let p=particles[i];
+
+p.x+=p.vx;
+p.y+=p.vy;
+p.life--;
+
+ctx.beginPath();
+ctx.arc(p.x,p.y,3,0,Math.PI*2);
+ctx.fillStyle="white";
+ctx.fill();
+
+if(p.life<=0)
+particles.splice(i,1);
+}
+
+ctx.shadowBlur=0;
+}
+</script>
+
+</body>
+</html>
