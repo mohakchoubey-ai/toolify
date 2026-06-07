@@ -42,6 +42,7 @@ body {
   background: var(--bg-page);
   color: var(--text-primary);
   overflow: hidden;
+  visibility:hidden;
 }
 
 /* ===== SIDEBAR ===== */
