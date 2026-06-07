@@ -432,7 +432,26 @@
   const retryBtn = document.getElementById('retryBtn');
 const exitBtn = document.getElementById('exitBtn');
   const applyOptions = document.getElementById('applyOptions');
-  const closeOptions = document.getElementById('closeOptions');
+  const closeOptions = document.getElementById('closeOptions'); 
+
+  retryBtn.addEventListener('click', () => {
+  startGame();
+
+  primaryBtn.style.display = 'block';
+  retryBtn.style.display = 'none';
+  exitBtn.style.display = 'none';
+});
+
+exitBtn.addEventListener('click', () => {
+  state = 'menu';
+
+  primaryBtn.style.display = 'block';
+  retryBtn.style.display = 'none';
+  exitBtn.style.display = 'none';
+
+  syncMenu('menu');
+  menu.style.display = 'flex';
+});
 
   const difficultySel = document.getElementById('difficulty');
   const themeSel = document.getElementById('theme');
@@ -804,20 +823,47 @@ const DIFFICULTY = {
       : 'Press SPACE, ↑, or click to flap. ESC pauses.';
   }
 
-  function syncMenu(kind){
-    if(kind === 'menu'){
-      menuTitle.textContent = 'NEON FLAP';
-      menuText.textContent = 'Fly through the neon pipes. Stay alive. Score every gate.';
-      menuStats.textContent = `Best: ${best}\nDifficulty: ${profile.name}`;
-      primaryBtn.textContent = 'PLAY';
-    }else if(kind === 'pause'){
-      menuTitle.textContent = 'PAUSED';
-      menuText.textContent = 'Game is paused. Resume when you are ready.';
-      menuStats.textContent = `Score: ${score}\nBest: ${best}\nDifficulty: ${profile.name}`;
-      primaryBtn.textContent = 'RESUME';
-  }else{
+function syncMenu(kind){
+
+  primaryBtn.style.display = 'block';
+  retryBtn.style.display = 'none';
+  exitBtn.style.display = 'none';
+
+  if(kind === 'menu'){
+
+    menuTitle.textContent = 'NEON FLAP';
+
+    menuText.textContent =
+      'Fly through the neon pipes. Stay alive. Score every gate.';
+
+    menuStats.textContent =
+`Best: ${best}
+Difficulty: ${profile.name}`;
+
+    primaryBtn.textContent = 'PLAY';
+  }
+
+  else if(kind === 'pause'){
+
+    menuTitle.textContent = 'PAUSED';
+
+    menuText.textContent =
+      'Game is paused. Resume when you are ready.';
+
+    menuStats.textContent =
+`Score: ${score}
+Best: ${best}
+Difficulty: ${profile.name}`;
+
+    primaryBtn.textContent = 'RESUME';
+  }
+
+  else if(kind === 'gameover'){
+
     menuTitle.textContent = 'GAME OVER';
-    menuText.textContent = 'You crashed. Try again or return to Toolify.';
+
+    menuText.textContent =
+      'You crashed. Try again or return to menu.';
 
     menuStats.textContent =
 `Score: ${score}
@@ -827,8 +873,8 @@ Difficulty: ${profile.name}`;
     primaryBtn.style.display = 'none';
     retryBtn.style.display = 'block';
     exitBtn.style.display = 'block';
-}
   }
+}
 
   function syncHUD(){
     scoreEl.textContent = score;
