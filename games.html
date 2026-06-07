@@ -439,48 +439,47 @@ footer a{
     <a href="index.html">Home</a>
 </footer>
 
-<script>
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
 import {
-    getAuth,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+   auth,
+   onAuthStateChanged
+}
+from "./firebase-auth.js";
 
-const firebaseConfig = {
-    // your config here
-};
+const cards =
+document.querySelectorAll(".card");
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const observer =
+new IntersectionObserver(entries => {
 
-const cards = document.querySelectorAll('.card');
-
-const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('show');
+
+        if(entry.isIntersecting){
+            entry.target.classList.add("show");
         }
+
     });
-}, {
-    threshold: 0.1
-});
 
-cards.forEach(card => observer.observe(card));
+},{threshold:0.1});
 
-onAuthStateChanged(auth, (user) => {
+cards.forEach(card =>
+    observer.observe(card)
+);
 
-    if (!user) {
+onAuthStateChanged(auth, user => {
 
-        const currentPage = encodeURIComponent(
+    if(!user){
+
+        const currentPage =
+        encodeURIComponent(
             window.location.pathname +
             window.location.search
         );
 
         window.location.href =
-            `login.html?redirect=${currentPage}`;
+        `login.html?redirect=${currentPage}`;
+
     }
 
 });
