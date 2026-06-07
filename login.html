@@ -1,298 +1,459 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Login | Toolify Project</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        :root {
-            --primary: #7efaff;
-            --glass: rgba(255, 255, 255, 0.1);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | Toolify</title>
 
-        body {
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0f172a; 
-            color: white; 
-            margin: 0;
-        }
+<style>
+:root{
+    --bg:#0f172a;
+    --card:#1e293bcc;
+    --primary:#3b82f6;
+    --primary-hover:#2563eb;
+    --text:#ffffff;
+    --muted:#94a3b8;
+    --border:rgba(255,255,255,.08);
+    --success:#10b981;
+    --error:#ef4444;
+}
 
-        .card {
-            background: rgba(30, 41, 59, 0.7);
-            padding: 40px;
-            border-radius: 24px; 
-            width: 360px; 
-            text-align: center; 
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-        .logo-area { font-size: 3.5rem; margin-bottom: 10px; }
-        h2 { margin: 0; font-weight: 700; font-size: 1.8rem; color: #fff; }
-        .project-tag { font-size: 0.7rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; display: block; }
-        p { color: #94a3b8; margin-bottom: 30px; font-size: 0.95rem; line-height: 1.5; }
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#020617,#0f172a,#1e293b);
+    font-family:Segoe UI,system-ui,sans-serif;
+    color:var(--text);
+    padding:20px;
+}
 
-        /* Buttons & Inputs */
-        .auth-btn, .phone-btn, .email-btn { 
-            width: 100%; 
-            padding: 14px; 
-            border: none; 
-            border-radius: 12px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            transition: 0.2s;
-            background: #3b82f6;
-            color: white; 
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
+.card{
+    width:100%;
+    max-width:420px;
+    background:var(--card);
+    backdrop-filter:blur(16px);
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:35px;
+    text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,.35);
+}
 
-        .auth-btn:hover, .phone-btn:hover, .email-btn:hover { background: #2563eb; transform: scale(1.02); }
-        .email-btn.success { background: #10b981; }
-        .email-btn.error { background: #ef4444; }
+.logo{
+    font-size:56px;
+    margin-bottom:10px;
+}
 
-        .divider { margin: 20px 0; color: #64748b; font-size: 0.8rem; position: relative; }
-        
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(15, 23, 42, 0.5);
-            color: white;
-            box-sizing: border-box;
-        }
+.tag{
+    display:block;
+    color:#7efaff;
+    font-size:.72rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-bottom:14px;
+}
 
-        input::placeholder { color: #64748b; }
+h1{
+    font-size:1.9rem;
+    margin-bottom:10px;
+}
 
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(126, 250, 255, 0.1);
-        }
+.subtitle{
+    color:var(--muted);
+    margin-bottom:28px;
+    line-height:1.5;
+}
 
-        .auth-section {
-            display: none;
-        }
+button{
+    width:100%;
+    border:none;
+    cursor:pointer;
+    transition:.2s;
+    font-weight:700;
+}
 
-        .auth-section.active {
-            display: block;
-        }
+.google-btn,
+.primary-btn{
+    padding:14px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    font-size:.95rem;
+}
 
-        .toggle-auth {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: 0.2s;
-        }
+.google-btn{
+    background:var(--primary);
+    color:white;
+}
 
-        .toggle-auth:hover {
-            background: rgba(255,255,255,0.2);
-        }
+.google-btn:hover,
+.primary-btn:hover{
+    transform:translateY(-2px);
+}
 
-        .status {
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-size: 0.85rem;
-            display: none;
-        }
+.google-btn:hover{
+    background:var(--primary-hover);
+}
 
-        .status.success { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .status.error { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+.divider{
+    margin:24px 0;
+    color:#64748b;
+    font-size:.8rem;
+}
 
-        .disclaimer {
-            margin-top: 25px;
-            font-size: 0.7rem;
-            color: #64748b;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
+input{
+    width:100%;
+    padding:13px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:rgba(15,23,42,.7);
+    color:white;
+    margin-bottom:12px;
+}
 
-        @media (max-width: 480px) {
-            .card { width: 90%; padding: 30px 20px; margin: 20px; }
-        }
-    </style>
+input:focus{
+    outline:none;
+    border-color:#7efaff;
+}
+
+.primary-btn{
+    background:var(--success);
+    color:white;
+    margin-top:4px;
+}
+
+.signin-btn{
+    background:var(--primary);
+    margin-top:10px;
+}
+
+.status{
+    display:none;
+    margin:12px 0;
+    padding:10px;
+    border-radius:10px;
+    font-size:.85rem;
+}
+
+.status.success{
+    display:block;
+    background:rgba(16,185,129,.15);
+    color:var(--success);
+}
+
+.status.error{
+    display:block;
+    background:rgba(239,68,68,.15);
+    color:var(--error);
+}
+
+.footer{
+    margin-top:24px;
+    padding-top:18px;
+    border-top:1px solid rgba(255,255,255,.05);
+    color:#64748b;
+    font-size:.75rem;
+}
+
+.loading{
+    opacity:.7;
+    pointer-events:none;
+}
+
+@media(max-width:480px){
+    .card{
+        padding:28px 22px;
+    }
+}
+</style>
 </head>
 <body>
 
-    <div class="card">
-        <div class="logo-area">🛠️</div>
-        <span class="project-tag">Personal Portfolio Project</span>
-        <h2>Toolify Login</h2>
-        <p>Sign in to sync your tools & settings.</p>
-        
-        <!-- Google Sign In -->
-        <button class="auth-btn" id="google-login-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/></svg>
-            Continue with Google
-        </button>
+<div class="card">
 
-        <div class="divider">OR CONTINUE WITH</div>
+    <div class="logo">🛠️</div>
 
-        <!-- Phone Authentication -->
-        <div class="auth-section active" id="phone-auth-container">
-            <div id="phone-input-group">
-                <input type="tel" id="phone-number" placeholder="+91 9876543210">
-                <button class="phone-btn" id="send-otp-btn">Send OTP</button>
-            </div>
+    <span class="tag">Personal Portfolio Project</span>
 
-            <div id="otp-input-group" style="display:none;">
-                <input type="text" id="verification-code" placeholder="6-digit OTP code">
-                <button class="phone-btn" style="background: #10b981;" id="verify-otp-btn">Verify & Login</button>
-            </div>
-        </div>
+    <h1>Toolify Login</h1>
 
-        <!-- Email/Password Authentication -->
-        <div class="auth-section" id="email-auth-container">
-            <input type="email" id="email-input" placeholder="your@email.com">
-            <input type="password" id="password-input" placeholder="Password (min 6 chars)">
-            
-            <div class="status" id="email-status"></div>
-            
-            <button class="email-btn" id="email-signup-btn">Create Account</button>
-            <button class="email-btn" id="email-signin-btn">Sign In</button>
-            
-            <button class="toggle-auth" onclick="toggleAuth('phone-auth-container')">Use Phone Number</button>
-        </div>
+    <p class="subtitle">
+        Sign in to access your tools and settings.
+    </p>
 
-        <div id="recaptcha-container"></div>
+    <button class="google-btn" id="google-login-btn">
+        Continue with Google
+    </button>
 
-        <div class="disclaimer">
-            <strong>Security Note:</strong> Powered by Firebase. We do not store your passwords.
-        </div>
+    <div class="divider">OR</div>
+
+    <input
+        type="email"
+        id="email-input"
+        placeholder="Email Address"
+        autocomplete="email"
+    >
+
+    <input
+        type="password"
+        id="password-input"
+        placeholder="Password"
+        autocomplete="current-password"
+    >
+
+    <div id="status" class="status"></div>
+
+    <button class="primary-btn" id="signup-btn">
+        Create Account
+    </button>
+
+    <button class="primary-btn signin-btn" id="signin-btn">
+        Sign In
+    </button>
+
+    <div class="footer">
+        Powered by Firebase Authentication
     </div>
 
+</div>
+
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { 
-        getAuth, 
-        signInWithPopup, 
-        GoogleAuthProvider, 
-        RecaptchaVerifier, 
-        signInWithPhoneNumber,
-        createUserWithEmailAndPassword,
-        signInWithEmailAndPassword
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    // Your Firebase Config
-    const firebaseConfig = {
-        apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
-        authDomain: "toolbox-hub-98c03.firebaseapp.com",
-        projectId: "toolbox-hub-98c03",
-        appId: "1:321020105472:web:356e7c2903def7b9d859e5"
-    };
+/* =========================
+   FIREBASE IMPORTS
+========================= */
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-    // Toggle between auth methods
-    function toggleAuth(activeSectionId) {
-        document.querySelectorAll('.auth-section').forEach(section => {
-            section.classList.remove('active');
-        });
-        document.getElementById(activeSectionId).classList.add('active');
+import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+/* =========================
+   FIREBASE CONFIG
+   PASTE YOUR CONFIG HERE
+========================= */
+
+const firebaseConfig = {
+
+    apiKey: "YOUR_API_KEY",
+
+    authDomain: "YOUR_AUTH_DOMAIN",
+
+    projectId: "YOUR_PROJECT_ID",
+
+    storageBucket: "YOUR_STORAGE_BUCKET",
+
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+
+    appId: "YOUR_APP_ID"
+
+};
+
+/* =========================
+   INIT
+========================= */
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+/* =========================
+   HELPERS
+========================= */
+
+function getRedirectPage(){
+    const params = new URLSearchParams(window.location.search);
+    return params.get("redirect") || "index.html";
+}
+
+function showStatus(message,type){
+
+    const status=document.getElementById("status");
+
+    status.textContent=message;
+
+    status.className=`status ${type}`;
+}
+
+function setLoading(state){
+
+    document.body.classList.toggle("loading",state);
+}
+
+/* =========================
+   ALREADY LOGGED IN
+========================= */
+
+onAuthStateChanged(auth,(user)=>{
+
+    if(user){
+
+        window.location.href=getRedirectPage();
+
     }
 
-    // Status helper
-    function showStatus(elementId, message, type) {
-        const status = document.getElementById(elementId);
-        status.textContent = message;
-        status.className = `status ${type}`;
-        status.style.display = 'block';
-        setTimeout(() => status.style.display = 'none', 4000);
+});
+
+/* =========================
+   GOOGLE LOGIN
+========================= */
+
+document
+.getElementById("google-login-btn")
+.addEventListener("click",async()=>{
+
+    try{
+
+        setLoading(true);
+
+        const provider=new GoogleAuthProvider();
+
+        await signInWithPopup(auth,provider);
+
+        window.location.href=getRedirectPage();
+
+    }catch(error){
+
+        showStatus(error.message,"error");
+
+    }finally{
+
+        setLoading(false);
+
     }
 
-    // 1. Google Login (unchanged)
-    document.getElementById('google-login-btn').onclick = () => {
-        const provider = new GoogleAuthProvider();
-        signInWithPopup(auth, provider)
-            .then(() => window.location.href = "index.html")
-            .catch((error) => alert(error.message));
-    };
+});
 
-    // 2. Phone Auth Setup (unchanged)
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible'
-    });
+/* =========================
+   SIGN UP
+========================= */
 
-    // 3. Send Phone OTP (unchanged)
-    document.getElementById('send-otp-btn').onclick = () => {
-        const number = document.getElementById('phone-number').value;
-        if(!number.includes('+')) return alert("Add country code like +91");
+document
+.getElementById("signup-btn")
+.addEventListener("click",async()=>{
 
-        signInWithPhoneNumber(auth, number, window.recaptchaVerifier)
-            .then((result) => {
-                window.confirmationResult = result;
-                document.getElementById('phone-input-group').style.display = 'none';
-                document.getElementById('otp-input-group').style.display = 'block';
-                alert("OTP Sent!");
-            }).catch((err) => alert(err.message));
-    };
+    const email=document
+        .getElementById("email-input")
+        .value
+        .trim();
 
-    // 4. Verify Phone OTP (unchanged)
-    document.getElementById('verify-otp-btn').onclick = () => {
-        const code = document.getElementById('verification-code').value;
-        window.confirmationResult.confirm(code)
-            .then(() => window.location.href = "index.html")
-            .catch(() => alert("Invalid OTP!"));
-    };
+    const password=document
+        .getElementById("password-input")
+        .value;
 
-    // 5. NEW: Email/Password Sign Up
-    document.getElementById('email-signup-btn').onclick = async () => {
-        const email = document.getElementById('email-input').value;
-        const password = document.getElementById('password-input').value;
-        
-        if (!email || !password || password.length < 6) {
-            showStatus('email-status', 'Please enter valid email & password (6+ chars)', 'error');
-            return;
-        }
+    if(!email || !password){
 
-        try {
-            await createUserWithEmailAndPassword(auth, email, password);
-            window.location.href = "index.html";
-        } catch (error) {
-            showStatus('email-status', error.message, 'error');
-            document.getElementById('email-signup-btn').classList.add('error');
-            setTimeout(() => document.getElementById('email-signup-btn').classList.remove('error'), 2000);
-        }
-    };
+        showStatus(
+            "Please enter email and password.",
+            "error"
+        );
 
-    // 6. NEW: Email/Password Sign In
-    document.getElementById('email-signin-btn').onclick = async () => {
-        const email = document.getElementById('email-input').value;
-        const password = document.getElementById('password-input').value;
-        
-        if (!email || !password) {
-            showStatus('email-status', 'Please enter email & password', 'error');
-            return;
-        }
+        return;
+    }
 
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            window.location.href = "index.html";
-        } catch (error) {
-            showStatus('email-status', error.message, 'error');
-            document.getElementById('email-signin-btn').classList.add('error');
-            setTimeout(() => document.getElementById('email-signin-btn').classList.remove('error'), 2000);
-        }
-    };
+    if(password.length < 6){
+
+        showStatus(
+            "Password must be at least 6 characters.",
+            "error"
+        );
+
+        return;
+    }
+
+    try{
+
+        setLoading(true);
+
+        await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        window.location.href=getRedirectPage();
+
+    }catch(error){
+
+        showStatus(error.message,"error");
+
+    }finally{
+
+        setLoading(false);
+
+    }
+
+});
+
+/* =========================
+   SIGN IN
+========================= */
+
+document
+.getElementById("signin-btn")
+.addEventListener("click",async()=>{
+
+    const email=document
+        .getElementById("email-input")
+        .value
+        .trim();
+
+    const password=document
+        .getElementById("password-input")
+        .value;
+
+    if(!email || !password){
+
+        showStatus(
+            "Please enter email and password.",
+            "error"
+        );
+
+        return;
+    }
+
+    try{
+
+        setLoading(true);
+
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        window.location.href=getRedirectPage();
+
+    }catch(error){
+
+        showStatus(error.message,"error");
+
+    }finally{
+
+        setLoading(false);
+
+    }
+
+});
+
 </script>
 
 </body>
 </html>
+```
