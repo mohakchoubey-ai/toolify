@@ -442,16 +442,7 @@ footer a{
 
 <script> 
 
-    import { auth } from "./firebase-config.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-onAuthStateChanged(auth, (user) => {
-    if (!user) {
-        window.location.replace("/index.html");
-    }
-});
-    
-const cards = document.querySelectorAll('.card');
+   const cards = document.querySelectorAll('.card');
 
 const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
@@ -461,7 +452,30 @@ const observer = new IntersectionObserver(entries => {
     });
 },{threshold:0.1});
 
+cards.forEach(card => observer.observe(card)); 
+
+const cards = document.querySelectorAll('.card');
+
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('show');
+        }
+    });
+}, { threshold: 0.1 });
+
 cards.forEach(card => observer.observe(card));
+
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        const currentPage =
+            encodeURIComponent(window.location.pathname + window.location.search);
+
+        window.location.href =
+            `/login.html?redirect=${currentPage}`;
+    }
+});
+    
 </script>
 
 </body>
