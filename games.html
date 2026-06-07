@@ -440,17 +440,8 @@ footer a{
     <a href="index.html">Home</a>
 </footer>
 
-<script> 
-
-   const cards = document.querySelectorAll('.card');
-
-const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-        if(entry.isIntersecting){
-            entry.target.classList.add('show');
-        }
-    });
-},{threshold:0.1});
+<script>
+const cards = document.querySelectorAll('.card');
 
 const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
@@ -458,20 +449,26 @@ const observer = new IntersectionObserver(entries => {
             entry.target.classList.add('show');
         }
     });
-}, { threshold: 0.1 });
+}, {
+    threshold: 0.1
+});
 
 cards.forEach(card => observer.observe(card));
 
 onAuthStateChanged(auth, (user) => {
+
     if (!user) {
-        const currentPage =
-            encodeURIComponent(window.location.pathname + window.location.search);
+
+        const currentPage = encodeURIComponent(
+            window.location.pathname +
+            window.location.search
+        );
 
         window.location.href =
-            `/login.html?redirect=${currentPage}`;
+            `login.html?redirect=${currentPage}`;
     }
+
 });
-    
 </script>
 
 </body>
