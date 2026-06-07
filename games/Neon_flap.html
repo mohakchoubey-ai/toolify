@@ -360,10 +360,12 @@
       <h1 id="menuTitle">NEON FLAP</h1>
       <p id="menuText">Fly through the neon pipes. Stay alive. Score every gate.</p>
       <div id="menuStats" class="stats"></div>
-      <div class="row">
-        <button class="primary" id="primaryBtn">PLAY</button>
-        <button class="ghost" id="optionsBtn">OPTIONS</button>
-      </div>
+     <div class="row">
+    <button class="primary" id="primaryBtn">PLAY</button>
+    <button class="ghost" id="retryBtn" style="display:none;">RETRY</button>
+    <button class="ghost" id="exitBtn" style="display:none;">EXIT</button>
+    <button class="ghost" id="optionsBtn">OPTIONS</button>
+</div>
       <p class="tiny" id="menuTiny">Press Space / ↑ / click to flap.</p>
     </div>
   </div>
@@ -427,6 +429,8 @@
 
   const primaryBtn = document.getElementById('primaryBtn');
   const optionsBtn = document.getElementById('optionsBtn');
+  const retryBtn = document.getElementById('retryBtn');
+const exitBtn = document.getElementById('exitBtn');
   const applyOptions = document.getElementById('applyOptions');
   const closeOptions = document.getElementById('closeOptions');
 
@@ -514,11 +518,11 @@
     }
   };
 
-  const DIFFICULTY = {
-    chill:   { name: 'CHILL',   gravity: 1450, flap: 560, speed: 235, gap: 220, spawn: 1.65 },
-    arcade:  { name: 'ARCADE',  gravity: 1720, flap: 620, speed: 285, gap: 188, spawn: 1.40 },
-    chaos:   { name: 'CHAOS',   gravity: 1980, flap: 680, speed: 335, gap: 160, spawn: 1.14 }
-  };
+const DIFFICULTY = {
+  chill:   { name: 'CHILL', gravity: 1200, flap: 500, speed: 170, gap: 250, spawn: 1.90 },
+  arcade:  { name: 'ARCADE', gravity: 1400, flap: 550, speed: 210, gap: 220, spawn: 1.70 },
+  chaos:   { name: 'CHAOS', gravity: 1700, flap: 620, speed: 260, gap: 190, spawn: 1.45 }
+};
 
   let W = 0, H = 0, dpr = 1;
 
@@ -811,12 +815,19 @@
       menuText.textContent = 'Game is paused. Resume when you are ready.';
       menuStats.textContent = `Score: ${score}\nBest: ${best}\nDifficulty: ${profile.name}`;
       primaryBtn.textContent = 'RESUME';
-    }else{
-      menuTitle.textContent = 'CRASHED';
-      menuText.textContent = 'You clipped a pipe or hit the floor. Try again.';
-      menuStats.textContent = `Score: ${score}\nBest: ${best}\nDifficulty: ${profile.name}`;
-      primaryBtn.textContent = 'PLAY AGAIN';
-    }
+  }else{
+    menuTitle.textContent = 'GAME OVER';
+    menuText.textContent = 'You crashed. Try again or return to Toolify.';
+
+    menuStats.textContent =
+`Score: ${score}
+Best: ${best}
+Difficulty: ${profile.name}`;
+
+    primaryBtn.style.display = 'none';
+    retryBtn.style.display = 'block';
+    exitBtn.style.display = 'block';
+}
   }
 
   function syncHUD(){
