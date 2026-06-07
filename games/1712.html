@@ -1,25 +1,426 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catch Blocks</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Catch Blocks - Arcade</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#111;
+    color:#fff;
+    min-height:100vh;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    padding:20px;
+    overflow:hidden;
+    touch-action:none;
+}
+
+#ui{
+    width:min(90vw,500px);
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:20px;
+
+    padding:12px 18px;
+
+    border:2px solid rgba(255,255,255,.15);
+    border-radius:12px;
+
+    background:#1b1b1b;
+
+    font-size:18px;
+    font-weight:700;
+
+    box-shadow:
+    0 0 15px rgba(255,255,255,.05);
+}
+
+#ui div{
+    min-width:90px;
+    text-align:center;
+}
+
+#score,
+#combo,
+#best{
+    color:#00ff88;
+}
+
+#game{
+    position:relative;
+
+    width:min(90vw,500px);
+    height:600px;
+
+    background:#1e1e1e;
+
+    border:3px solid #ffffff;
+    border-radius:12px;
+
+    overflow:hidden;
+
+    box-shadow:
+    0 0 20px rgba(255,255,255,.08);
+}
+
+#player{
+    position:absolute;
+
+    width:80px;
+    height:20px;
+
+    left:50%;
+    bottom:15px;
+
+    transform:translateX(-50%);
+
+    background:#00ff88;
+
+    border-radius:10px;
+
+    box-shadow:
+    0 0 12px rgba(0,255,136,.5);
+}
+
+.block{
+    position:absolute;
+
+    width:28px;
+    height:28px;
+
+    border-radius:6px;
+
+    box-shadow:
+    0 0 8px rgba(255,255,255,.15);
+}
+
+.red{
+    background:#ff4d4d;
+}
+
+.gold{
+    background:gold;
+}
+
+.blue{
+    background:#4dd2ff;
+}
+
+@media (max-width:600px){
+
+    #ui{
+        font-size:15px;
+        padding:10px;
+    }
+
+    #ui div{
+        min-width:auto;
+    }
+
+    #game{
+        height:70vh;
+        max-height:600px;
+    }
+}
+</style>
 </head>
+
 <body>
 
-    <div id="ui">
-        <h2>Score: <span id="score">0</span></h2>
-    </div>
+<div id="ui">
+  <div>Score: <span id="score">0</span></div>
+  <div>Combo: <span id="combo">0</span></div>
+  <div>Best: <span id="best">0</span></div>
+</div>
 
-    <div id="game">
-        <div id="player"></div>
-        <div id="gameOver">
-            <h1>Game Over</h1>
-            <button onclick="location.reload()">Restart</button>
-        </div>
-    </div>
+<div id="game">
+  <div id="player"></div>
+</div>
 
-    <script src="script.js"></script>
+<script>
+const game = document.getElementById("game");
+const player = document.getElementById("player");
+
+const scoreEl = document.getElementById("score");
+const comboEl = document.getElementById("combo");
+const bestEl = document.getElementById("best");
+
+let score = 0;
+let combo = 0;
+let best = Number(localStorage.getItem("best")) || 0;
+
+bestEl.textContent = best;
+
+let blocks = [];
+let playerX = 0;
+
+let speed = 250;
+let spawnRate = 900;
+let spawnTimer = 0;
+
+let running = true;
+
+let lastTime = performance.now();
+
+let comboTimeout;
+
+// ---------------- AUDIO ----------------
+
+let audioCtx;
+
+function unlockAudio(){
+    if(!audioCtx){
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    if(audioCtx.state === "suspended"){
+        audioCtx.resume();
+    }
+}
+
+window.addEventListener("pointerdown", unlockAudio);
+
+function beep(freq=500){
+
+    if(!audioCtx) return;
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.frequency.value = freq;
+    gain.gain.value = 0.05;
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.08);
+}
+
+// ---------------- PLAYER ----------------
+
+function centerPlayer(){
+    playerX = game.clientWidth/2 - 40;
+    player.style.left = playerX + "px";
+}
+
+centerPlayer();
+
+function movePlayer(screenX){
+
+    const rect = game.getBoundingClientRect();
+
+    playerX = screenX - rect.left - 40;
+
+    playerX = Math.max(
+        0,
+        Math.min(game.clientWidth - 80, playerX)
+    );
+
+    player.style.left = playerX + "px";
+}
+
+game.addEventListener("mousemove", e=>{
+    if(running) movePlayer(e.clientX);
+});
+
+game.addEventListener("touchmove", e=>{
+    if(running){
+        movePlayer(e.touches[0].clientX);
+    }
+},{passive:true});
+
+// ---------------- BLOCKS ----------------
+
+function spawnBlock(){
+
+    const block = document.createElement("div");
+
+    block.className = "block";
+
+    const random = Math.random();
+
+    let points = 1;
+
+    if(random < 0.75){
+
+        block.style.background = "#ff4d4d";
+
+    }
+    else if(random < 0.92){
+
+        block.style.background = "gold";
+        points = 3;
+
+    }
+    else{
+
+        block.style.background = "#4dd2ff";
+        points = 5;
+    }
+
+    const x = Math.random() * (game.clientWidth - 28);
+
+    block.style.left = x + "px";
+    block.style.top = "-30px";
+
+    game.appendChild(block);
+
+    blocks.push({
+        el:block,
+        x:x,
+        y:-30,
+        points:points
+    });
+}
+
+// ---------------- GAME OVER ----------------
+
+function gameOver(){
+
+    running = false;
+
+    alert(
+        "Game Over\n\nScore: " + score +
+        "\nBest: " + best
+    );
+}
+
+// ---------------- UPDATE ----------------
+
+function update(dt){
+
+    speed = 250 + score * 1.2;
+
+    spawnRate = Math.max(
+        250,
+        900 - score * 2
+    );
+
+    spawnTimer += dt;
+
+    if(spawnTimer >= spawnRate){
+
+        spawnBlock();
+
+        spawnTimer = 0;
+    }
+
+    for(let i = blocks.length-1; i >= 0; i--){
+
+        const b = blocks[i];
+
+        b.y += speed * dt / 1000;
+
+        b.el.style.top = b.y + "px";
+
+        // REAL COLLISION
+
+        const blockRect = b.el.getBoundingClientRect();
+        const playerRect = player.getBoundingClientRect();
+
+        const hit =
+            blockRect.left < playerRect.right &&
+            blockRect.right > playerRect.left &&
+            blockRect.top < playerRect.bottom &&
+            blockRect.bottom > playerRect.top;
+
+        if(hit){
+
+            combo++;
+
+            let gain = b.points;
+
+            if(combo >= 3){
+                gain *= 2;
+            }
+
+            score += gain;
+
+            scoreEl.textContent = score;
+            comboEl.textContent = combo;
+
+            beep(400 + combo * 30);
+
+            if(score > best){
+
+                best = score;
+
+                localStorage.setItem(
+                    "best",
+                    best
+                );
+
+                bestEl.textContent = best;
+            }
+
+            clearTimeout(comboTimeout);
+
+            comboTimeout = setTimeout(()=>{
+
+                combo = 0;
+                comboEl.textContent = 0;
+
+            },1200);
+
+            b.el.remove();
+            blocks.splice(i,1);
+
+            continue;
+        }
+
+        if(b.y > game.clientHeight){
+
+            combo = 0;
+            comboEl.textContent = 0;
+
+            b.el.remove();
+            blocks.splice(i,1);
+
+            gameOver();
+
+            return;
+        }
+    }
+}
+
+// ---------------- LOOP ----------------
+
+function loop(now){
+
+    if(!running) return;
+
+    const dt = now - lastTime;
+
+    lastTime = now;
+
+    update(dt);
+
+    requestAnimationFrame(loop);
+}
+
+requestAnimationFrame(loop);
+
+window.addEventListener("resize", centerPlayer);
+</script>
+
+
+
 </body>
 </html>
