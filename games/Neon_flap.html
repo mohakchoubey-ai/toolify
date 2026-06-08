@@ -1118,6 +1118,24 @@ Difficulty: ${profile.name}`;
   init();
 })();
 
+    onAuthStateChanged(auth, user => {
+
+    if(!user){
+
+        const currentPage =
+        encodeURIComponent(
+            window.location.pathname +
+            window.location.search
+        );
+
+        window.location.href =
+        `login.html?redirect=${currentPage}`;
+
+    }
+
+});
+
+
 </script> 
 </body>
 </html>
