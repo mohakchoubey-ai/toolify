@@ -1,4 +1,3 @@
-
 // ─── 8. SHOW DASHBOARD ───────────────────
 function showDashboard(user) {
   landingScreen.classList.add("hidden");
