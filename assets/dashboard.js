@@ -23,6 +23,22 @@ function showDashboard(user) {
   else if (hour < 21)  timeOfDayEl.textContent = "evening";
   else                 timeOfDayEl.textContent  = "night";
 }
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  // Load user data
+  const firstName = (user.displayName || "Creator").split(" ")[0];
+
+  userNameEl.textContent = firstName;
+  greetNameEl.textContent = firstName;
+
+  if (user.photoURL) {
+    userAvatar.src = user.photoURL;
+  }
+
 
 // ─── 9. TOOL LINK GUARD ──────────────────
 // Any card click checks auth before navigating.
