@@ -51,4 +51,3 @@ document.querySelectorAll("#dashboard-screen .card").forEach((card) => {
     }
     // Otherwise navigation proceeds naturally
   });
-});
