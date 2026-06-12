@@ -1,177 +1,158 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard | Toolbox Hub</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        :root {
-            --primary: #7efaff;
-            --glass: rgba(255, 255, 255, 0.1);
-            --bg-gradient: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg-gradient);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 30px 20px;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        .profile-section {
-            text-align: center;
-            margin-bottom: 30px;
-            animation: fadeIn 0.8s ease;
-        }
-
-        #userPhoto {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid var(--primary);
-            margin-bottom: 10px;
-            box-shadow: 0 0 15px rgba(126, 250, 255, 0.3);
-        }
-
-        h2 { font-size: 1.8rem; margin: 0; font-weight: 700; }
-        #email { opacity: 0.6; font-size: 0.9rem; margin-top: 5px; }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            padding: 30px;
-            border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
-        h3 { 
-            text-align: center; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            font-size: 0.9rem; 
-            margin-bottom: 25px; 
-            color: var(--primary);
-        }
-
-        /* Responsive Tool Grid */
-        .tools {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-        }
-
-        .tools a {
-            padding: 25px 15px;
-            background: rgba(255,255,255,0.05);
-            color: white;
-            border-radius: 20px;
-            text-decoration: none;
-            font-weight: 600;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .tools a span { font-size: 1.8rem; }
-
-        .tools a:hover {
-            background: rgba(126, 250, 255, 0.15);
-            border-color: var(--primary);
-            transform: translateY(-8px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        .logout-btn {
-            background: rgba(255, 75, 43, 0.2);
-            color: #ff4b2b;
-            border: 1px solid #ff4b2b;
-            padding: 12px 40px;
-            border-radius: 50px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 40px;
-            transition: 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: #ff4b2b;
-            color: white;
-            box-shadow: 0 5px 15px rgba(255, 75, 43, 0.4);
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toolify — Futuristic Workspace</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <meta name="google-site-verification" content="xrZFu5cpuycZgitIQWcRT0DmD7er9zSVNmzWktTYs10" />
+  <link rel="stylesheet" href="assets/dashboard.css" />
 </head>
 <body>
 
-<div class="profile-section">
-    <img id="userPhoto" src="https://via.placeholder.com/80" alt="User">
-    <h2>Hi, <span id="name">...</span></h2>
-    <p id="email"></p>
-</div>
+  <!-- ░░ NOISE OVERLAY ░░ -->
+  <div class="noise"></div>
 
-<div class="container">
-    <h3>Available Services</h3>
-    <div class="tools">
-        <a href="alarm.html"><span>⏰</span> Alarm</a>
-        <a href="calculator.html"><span>🧮</span> Calculator</a>
-        <a href="weather.html"><span>☀️</span> Weather</a>
-        <a href="calendar.html"><span>🗓️</span> Calendar</a>
-        <a href="speech.html"><span>🎙️</span> Speech</a>
-        <a href="qr.html"><span>🔍</span> QR Maker</a>
-        <a href="clock.html"><span>🕒</span> Digital Clock</a>
-        <a href="timer.html"><span> ⏳ </span> Timer </a>
-    </div>
+  <!-- ░░ AURORA BACKGROUND ░░ -->
+  <div class="aurora">
+    <div class="aurora-orb orb-1"></div>
+    <div class="aurora-orb orb-2"></div>
+    <div class="aurora-orb orb-3"></div>
+  </div>
 
+  <!-- ░░ CURSOR TRAIL ░░ -->
+  <div class="cursor-glow" id="cursorGlow"></div>
+    
+    <div id="dashboard-screen" class="hidden">
 
-<button class="logout-btn" onclick="logout()">Secure Logout</button>
+    <header class="dash-header">
+      <div class="brand">
+        <img src="logo.png" alt="Toolify" width="28" height="28" />
+        <span class="brand-name"><em>tool</em>ify</span>
+      </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+      <div class="header-right">
+        <div class="user-pill" id="userPill">
+          <img id="userAvatar" src="" alt="" class="avatar-img" />
+          <span id="userName"></span>
+        </div>
+        <button class="btn-signout" id="signOutBtn">Sign out</button>
+      </div>
+    </header>
 
-const firebaseConfig = {
-    apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
-    authDomain: "toolbox-hub-98c03.firebaseapp.com",
-    projectId: "toolbox-hub-98c03",
-    appId: "1:321020105472:web:356e7c2903def7b9d859e5"
-};
+    <main class="dash-main">
+      <div class="dash-welcome">
+        <h2>Good <span id="timeOfDay">day</span>, <span id="greetName">Creator</span> 👋</h2>
+        <p>Your workspace is ready.</p>
+      </div>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+      <div class="tools-grid">
 
-onAuthStateChanged(auth, user => {
-    if(!user) {
-        window.location.href = "login.html";
-    } else {
-        document.getElementById("name").innerText = user.displayName.split(' ')[0] || "User";
-        document.getElementById("email").innerText = user.email;
-        if(user.photoURL) {
-            document.getElementById("userPhoto").src = user.photoURL;
-        }
-    }
-});
+        <a href="chatbot" class="card card--featured">
+          <span class="card-icon">֎</span>
+          <h4>AI Chatbot</h4>
+          <span class="card-tag">NEW</span>
+        </a> 
 
-window.logout = () => {
-    if(confirm("Are you sure you want to logout?")) {
-        signOut(auth).then(() => {
-            window.location.href = "login.html";
-        }).catch(err => alert(err.message));
-    }
-};
-</script>
+                <a href="games.html" class="card card--featured">
+          <span class="card-icon">🎮 </span>
+          <h4> Game </h4>
+          <span class="card-tag">NEW</span>
+        </a>
 
+        <a href="https://mohakdev1220.github.io/gatividhiya/" class="card">
+          <span class="card-icon">🚴</span>
+          <h4>Activities Tracker</h4>
+        </a>
+
+        <a href="time#alarm-section" class="card">
+          <span class="card-icon">⏰</span>
+          <h4>Alarm</h4>
+        </a>
+
+        <a href="calculator" class="card">
+          <span class="card-icon">🧮</span>
+          <h4>Calculator</h4>
+        </a>
+
+        <a href="grammar" class="card">
+          <span class="card-icon">✍</span>
+          <h4>Paragraph Editor</h4>
+        </a>
+
+        <a href="weather" class="card">
+          <span class="card-icon">☀️</span>
+          <h4>Weather</h4>
+        </a>
+
+        <a href="qr" class="card">
+          <span class="card-icon">🔍</span>
+          <h4>QR Maker</h4>
+        </a>
+
+        <a href="colour" class="card">
+          <span class="card-icon">🎨</span>
+          <h4>Colors</h4>
+        </a>
+
+        <a href="time" class="card">
+          <span class="card-icon">🕓</span>
+          <h4>Clock</h4>
+        </a>
+
+        <a href="time#timer-section" class="card">
+          <span class="card-icon">⌛</span>
+          <h4>Timer</h4>
+        </a>
+
+        <a href="speech" class="card">
+          <span class="card-icon">🗣️</span>
+          <h4>Speech</h4>
+        </a>
+
+        <a href="calendar" class="card">
+          <span class="card-icon">📅</span>
+          <h4>Calendar</h4>
+        </a>
+
+        <a href="pdf" class="card">
+          <span class="card-icon">📄</span>
+          <h4>PDF Maker</h4>
+        </a>
+
+        <a href="time#stopwatch-section" class="card">
+          <span class="card-icon">⏱️</span>
+          <h4>Stopwatch</h4>
+        </a>
+
+        <a href="password" class="card">
+          <span class="card-icon">🔒</span>
+          <h4>Password Gen</h4>
+        </a>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-links">
+          <a href="privacy">Privacy Policy</a>
+          <a href="terms">Terms &amp; Conditions</a>
+          <a href="feedback">Feedback</a>
+          <a href="https://mohakdev1220.github.io/websites_link/" target="_blank" rel="noopener">Our Other Sites</a>
+          <a href="https://www.youtube.com/@MOHAKCHOUBEY?sub_confirmation=1" target="_blank" rel="noopener" class="yt-link" aria-label="YouTube">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+          </a>
+        </div>
+        <p class="made-by">Developed with <span class="heart">♥</span> by Mohak @2026</p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Firebase -->
+  <script type="module" src="assets/dashboard.js"></script>
 </body>
 </html>
