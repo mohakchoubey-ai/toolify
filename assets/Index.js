@@ -43,12 +43,9 @@ document.addEventListener("mousemove", (e) => {
   cursorGlow.style.top  = `${e.clientY}px`;
 });
 
-// ─── 4. AUTH STATE LISTENER ──────────────
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    showDashboard(user);
-  } else {
-    showLanding();
+    window.location.href = "dashboard.html";
   }
 });
 
