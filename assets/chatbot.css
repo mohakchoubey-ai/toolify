@@ -1,11 +1,11 @@
-/* ════════════════════════════════════════════════════════════════════════════
-   TOOLIFY CHATBOT — Advanced Rules-Based Assistant
-   Professional Design • Dark/Light Mode • Mobile Responsive
-═════════════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════════════════════════════════════ */
+/*    TOOLIFY CHATBOT — Advanced Rules-Based Assistant                                             */
+/*    Professional Design • Dark/Light Mode • Mobile Responsive                                    */
+/* ════════════════════════════════════════════════════════════════════════════════════════════════ */
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━���━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 /* ROOT & THEME VARIABLES */
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 :root {
   /* Light Mode Colors */
@@ -59,9 +59,9 @@ html.dark-mode {
   color-scheme: dark;
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 /* RESET & BASE */
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 * {
   margin: 0;
@@ -90,9 +90,9 @@ html.dark-mode body {
   color: var(--dark-text);
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 /* CHATBOT CONTAINER */
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .chatbot-container {
   display: flex;
@@ -236,9 +236,9 @@ html.dark-mode .theme-toggle:hover {
   background: var(--dark-hover);
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 /* MAIN CONTENT */
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .chatbot-main {
   display: flex;
@@ -480,11 +480,16 @@ html.dark-mode .empty-container p {
   color: var(--light-text);
   cursor: pointer;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: var(--spacing-md);
   font-size: 0.9rem;
   font-weight: 500;
   transition: all var(--transition-fast);
+  min-height: 100%;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow: hidden;
 }
 
 html.dark-mode .quick-prompt {
@@ -703,9 +708,9 @@ html.dark-mode .input-hint {
   color: var(--dark-text-muted);
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 /* INFO POPUP */
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .popup-overlay {
   position: fixed;
@@ -856,9 +861,9 @@ html.dark-mode .popup-section ul {
   background: #0d8968;
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 /* LOADING INDICATOR */
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .loading-indicator {
   position: fixed;
@@ -896,9 +901,9 @@ html.dark-mode .loader {
   border-color: var(--dark-border);
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 /* SCROLLBAR */
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 ::-webkit-scrollbar {
   width: 8px;
@@ -930,9 +935,9 @@ html.dark-mode ::-webkit-scrollbar-thumb:hover {
   background: var(--dark-text-muted);
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 /* RESPONSIVE */
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 @media (max-width: 768px) {
   .sidebar-toggle {
@@ -998,18 +1003,42 @@ html.dark-mode ::-webkit-scrollbar-thumb:hover {
     gap: var(--spacing-md);
   }
 
-  .ai-indicator {
+  .header-right {
+    gap: var(--spacing-sm);
+  }
+
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+
+  .chatbot-sidebar {
+    width: 220px;
+  }
+
+  .sidebar-content {
+    padding: var(--spacing-md);
+  }
+
+  .empty-container {
+    max-width: 100%;
+    padding: var(--spacing-lg);
+  }
+
+  .quick-prompts {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .quick-prompt {
+    padding: var(--spacing-md);
     font-size: 0.85rem;
   }
 
   .message-content {
-    max-width: 95%;
-    padding: var(--spacing-md);
-  }
-
-  .messages-container {
-    padding: var(--spacing-md);
-    gap: var(--spacing-md);
+    max-width: 90%;
+    padding: var(--spacing-sm) var(--spacing-md);
   }
 
   .chat-input-area {
@@ -1020,20 +1049,18 @@ html.dark-mode ::-webkit-scrollbar-thumb:hover {
     gap: var(--spacing-sm);
   }
 
-  .quick-prompt {
-    padding: var(--spacing-md);
-    font-size: 0.85rem;
+  .message-input {
+    padding: var(--spacing-sm);
+    font-size: 0.9rem;
+  }
+
+  .send-btn {
+    width: 36px;
+    height: 36px;
   }
 
   .popup-content {
-    padding: var(--spacing-xl);
-  }
-
-  .empty-icon {
-    font-size: 3rem;
-  }
-
-  .empty-container h2 {
-    font-size: 1.2rem;
+    margin: var(--spacing-md);
+    padding: var(--spacing-lg);
   }
 }
