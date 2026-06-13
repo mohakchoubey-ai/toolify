@@ -49,4 +49,4 @@ document.querySelectorAll("#dashboard-screen .card").forEach((card) => {
       showLanding();
     }
     // Otherwise navigation proceeds naturally
-  });
+  }
