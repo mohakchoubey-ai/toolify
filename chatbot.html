@@ -2,79 +2,271 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MohakGPT</title>
-  <link rel="stylesheet" href="assets/chatbot.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toolify Assistant - Rules-Based Helper</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/chatbot.css" />
 </head>
-<body class="theme-light">
+<body>
 
-  <script>
-    const API_KEY = "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";
-    const SERP_KEY = "d10eceed201f03c4349e9776c1c99723ca1fd4b7863bc830933fd92829067d12";
-  </script>
+  <div id="authCheck" style="display:none;"></div>
 
-  <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <button class="new-chat-btn" onclick="createNewChat()">＋ New Chat</button>
-      <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
-    </div>
-    <div class="chat-list" id="chatList"></div>
-    <div class="sidebar-footer">
-      <div class="theme-row">
-        <span class="theme-label">Theme</span>
-        <div class="theme-options">
-          <button class="theme-btn" data-theme="light" onclick="setTheme('light')">☀️ Light</button>
-          <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')">🌙 Dark</button>
+  <div class="chatbot-container">
+    <!-- Header Section -->
+    <div class="chatbot-header">
+      <div class="header-left">
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div class="header-brand">
+          <span class="ai-indicator">
+            <span class="ai-badge">⚙️</span>
+            Toolify Assistant
+          </span>
+          <span class="not-ai-label">
+            <button class="info-btn" id="notAiBtn" title="Learn more">
+              <span class="info-icon">ℹ️</span> Not AI
+            </button>
+          </span>
         </div>
       </div>
-      <div class="sidebar-links">
-        <a href="privacy.html" target="_blank">Privacy Policy</a>
-        <a href="terms.html" target="_blank">Terms</a>
+
+      <div class="header-right">
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
       </div>
+    </div>
+
+    <div class="chatbot-main">
+      <!-- Sidebar -->
+      <aside class="chatbot-sidebar">
+        <div class="sidebar-content">
+          <button class="new-chat-btn" id="newChatBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            New Chat
+          </button>
+
+          <div class="sidebar-section">
+            <div class="sidebar-title">Chat History</div>
+            <div class="chat-history" id="chatHistory">
+              <!-- Chat history items will be added here -->
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-footer">
+          <button class="sidebar-btn" id="clearHistoryBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+            Clear History
+          </button>
+
+          <button class="sidebar-btn" id="signOutBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      <!-- Chat Area -->
+      <main class="chatbot-content">
+        <!-- Empty State -->
+        <div class="chat-empty" id="chatEmpty">
+          <div class="empty-container">
+            <div class="empty-icon">🤖</div>
+            <h2>Welcome to Toolify Assistant</h2>
+            <p>I'm a rules-based assistant that knows everything about your workspace.</p>
+            <p>Ask me about tools, features, or how to get the most out of Toolify!</p>
+
+            <div class="quick-prompts">
+              <button class="quick-prompt" data-prompt="What tools are available in Toolify?">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"></path>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                </svg>
+                What tools are available?
+              </button>
+
+              <button class="quick-prompt" data-prompt="How do I use the alarm feature?">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="13" r="8"></circle>
+                  <path d="M12 9v4l3 2"></path>
+                  <path d="M9 2h6M3 2l3 3M15 2l3 3"></path>
+                </svg>
+                How to use Alarm?
+              </button>
+
+              <button class="quick-prompt" data-prompt="What are other websites by Mohak?">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M2 12h20"></path>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                Other websites?
+              </button>
+
+              <button class="quick-prompt" data-prompt="Can you tell me about your privacy policy?">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                Privacy & Terms?
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages Container -->
+        <div class="messages-container" id="messagesContainer">
+          <!-- Messages will be added here -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="chat-input-area">
+          <div class="input-wrapper">
+            <textarea
+              id="messageInput"
+              class="message-input"
+              placeholder="Ask me anything about Toolify..."
+              rows="1"
+            ></textarea>
+            <button class="send-btn" id="sendBtn" title="Send message">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.9429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16346273 C3.34915502,0.9 2.40734225,1.00636533 1.77946707,1.4776575 C0.994623095,2.10604706 0.837654326,3.0486314 1.15159189,3.99701575 L3.03521743,10.4379774 C3.03521743,10.5950748 3.19218622,10.7521722 3.50612381,10.7521722 L16.6915026,11.5376591 C16.6915026,11.5376591 17.1624089,11.5376591 17.1624089,12.0089513 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z"></path>
+              </svg>
+            </button>
+          </div>
+          <p class="input-hint">This chatbot uses rules-based logic to answer your questions accurately.</p>
+        </div>
+      </main>
     </div>
   </div>
 
-  <!-- Mobile overlay -->
-  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+  <!-- Info Popup -->
+  <div class="info-popup" id="infoPopup" style="display:none;">
+    <div class="popup-overlay" id="popupOverlay"></div>
+    <div class="popup-content">
+      <button class="popup-close" id="popupClose">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
 
-  <!-- Main -->
-  <div class="main">
-    <div class="header">
-      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-      <div class="logo">⚡</div>
-      <div>
-        <div class="header-title">MohakGPT</div>
-        <div class="header-sub">by <a href="https://mohakdev1220.github.io/toolify/" target="_blank">Toolify</a> • AI Assistant</div>
+      <h2>How This Works</h2>
+
+      <div class="popup-section">
+        <h3>🔧 Not an AI</h3>
+        <p>This is NOT an artificial intelligence. It's a rules-based assistant that uses pre-programmed knowledge about Toolify to answer your questions accurately.</p>
       </div>
-      <a class="toolify-btn" href="https://mohakdev1220.github.io/toolify/" target="_blank">🔗 Toolify</a>
-    </div>
 
-    <div id="messages"></div>
-
-    <div id="suggestions">
-      <button class="suggestion" onclick="sendMsg('What is photosynthesis?')">What is photosynthesis?</button>
-      <button class="suggestion" onclick="sendMsg('Toolify mein kya tools hain?')">Toolify tools?</button>
-      <button class="suggestion" onclick="sendMsg('Who made Toolify?')">Who made Toolify?</button>
-      <button class="suggestion" onclick="sendMsg('What is 12 x 12?')">12 × 12 = ?</button>
-    </div>
-
-    <div class="input-area">
-      <div class="input-row">
-        <textarea id="inputBox" rows="1"
-          placeholder="Kuch bhi pooch... ⚡"
-          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
-          oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-        <button id="sendBtn" onclick="sendMsg()">➤</button>
+      <div class="popup-section">
+        <h3>📚 What It Knows</h3>
+        <ul>
+          <li>All tools available in Toolify (Calculator, Weather, QR Maker, PDF, etc.)</li>
+          <li>How to use each tool</li>
+          <li>Privacy Policy and Terms & Conditions</li>
+          <li>Other websites by Mohak</li>
+          <li>Your account information</li>
+          <li>Feature details and updates</li>
+        </ul>
       </div>
-      <div class="hint">
-        ⚠️ MohakGPT can make mistakes, double check it &nbsp;|&nbsp;
-        <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a>
+
+      <div class="popup-section">
+        <h3>💾 Chat History</h3>
+        <p>Your conversations are saved locally in your browser. You can:</p>
+        <ul>
+          <li>Start a new chat anytime</li>
+          <li>View previous conversations</li>
+          <li>Clear all history with one click</li>
+        </ul>
       </div>
+
+      <div class="popup-section">
+        <h3>🔗 Session URLs</h3>
+        <p>Each chat session gets a unique URL (like ChatGPT and Claude). You can share or bookmark these URLs to revisit conversations.</p>
+      </div>
+
+      <div class="popup-section">
+        <h3>✨ Accuracy</h3>
+        <p>All answers are based on verified information about Toolify. The assistant doesn't guess or make predictions—it only provides information from its knowledge base.</p>
+      </div>
+
+      <button class="popup-close-btn" id="popupCloseBtn">Got it</button>
     </div>
   </div>
 
+  <!-- Loading Indicator -->
+  <div class="loading-indicator" id="loadingIndicator" style="display:none;">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Firebase Auth -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
+      authDomain: "toolbox-hub-98c03.firebaseapp.com",
+      projectId: "toolbox-hub-98c03",
+      storageBucket: "toolbox-hub-98c03.firebasestorage.app",
+      messagingSenderId: "321020105472",
+      appId: "1:321020105472:web:356e7c2903def7b9d859e5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    window.auth = auth;
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      } else {
+        window.currentUser = user;
+        document.getElementById('authCheck').style.display = 'none';
+        initChatbot();
+      }
+    });
+
+    window.signOutUser = async () => {
+      await signOut(auth);
+    };
+  </script>
+
+  <!-- Chatbot Script -->
   <script src="assets/chatbot.js"></script>
-  <script type="module" src="protect.js"></script>
+
 </body>
 </html>
