@@ -1,46 +1,168 @@
-// Firebase is globally available from the script tags
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toolify — Futuristic Workspace</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <meta name="google-site-verification" content="xrZFu5cpuycZgitIQWcRT0DmD7er9zSVNmzWktTYs10" />
+  <link rel="stylesheet" href="assets/Index.css" />
+</head>
+<body>
 
-// ─── DOM ELEMENTS ───────────────────
-const landingScreen = document.getElementById("landing-screen");
-const dashboardScreen = document.getElementById("dashboard-screen");
-const userNameEl = document.getElementById("user-name");
-const greetNameEl = document.getElementById("greet-name");
-const userAvatar = document.getElementById("user-avatar");
-const timeOfDayEl = document.getElementById("time-of-day");
+  <!-- ░░ NOISE OVERLAY ░░ -->
+  <div class="noise"></div>
 
-// ─── SHOW DASHBOARD ───────────────────
-function showDashboard(user) {
-  if (!landingScreen || !dashboardScreen) return;
-  
-  landingScreen.classList.add("hidden");
-  dashboardScreen.classList.remove("hidden");
+  <!-- ░░ AURORA BACKGROUND ░░ -->
+  <div class="aurora">
+    <div class="aurora-orb orb-1"></div>
+    <div class="aurora-orb orb-2"></div>
+    <div class="aurora-orb orb-3"></div>
+  </div>
 
-  const firstName = (user.displayName || "Creator").split(" ")[0];
-  if (userNameEl) userNameEl.textContent = firstName;
-  if (greetNameEl) greetNameEl.textContent = firstName;
+  <!-- ░░ CURSOR TRAIL ░░ -->
+  <div class="cursor-glow" id="cursorGlow"></div>
+    
+  <div id="dashboard-screen" class="hidden">
 
-  if (user.photoURL && userAvatar) {
-    userAvatar.src = user.photoURL;
-    userAvatar.style.display = "block";
-  } else if (userAvatar) {
-    userAvatar.style.display = "none";
-  }
+    <header class="dash-header">
+      <div class="brand">
+        <img src="logo.png" alt="Toolify" width="28" height="28" />
+        <span class="brand-name"><em>tool</em>ify</span>
+      </div>
 
-  const hour = new Date().getHours();
-  if (timeOfDayEl) {
-    if (hour < 12) timeOfDayEl.textContent = "morning";
-    else if (hour < 17) timeOfDayEl.textContent = "afternoon";
-    else if (hour < 21) timeOfDayEl.textContent = "evening";
-    else timeOfDayEl.textContent = "night";
-  }
-}
+      <div class="header-right">
+        <div class="user-pill" id="userPill">
+          <img id="user-avatar" src="" alt="" class="avatar-img" />
+          <span id="user-name"></span>
+        </div>
+        <button class="btn-signout" id="signOutBtn">Sign out</button>
+      </div>
+    </header>
 
-// ─── AUTH LISTENER ───────────────────
-firebase.auth().onAuthStateChanged((user) => {
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
+    <main class="dash-main">
+      <div class="dash-welcome">
+        <h2>Good <span id="time-of-day">day</span>, <span id="greet-name">Creator</span> 👋</h2>
+        <p>Your workspace is ready.</p>
+      </div>
 
-  showDashboard(user);
-});
+      <div class="tools-grid">
+
+        <a href="chatbot" class="card card--featured">
+          <span class="card-icon">֎</span>
+          <h4>AI Chatbot</h4>
+          <span class="card-tag">NEW</span>
+        </a> 
+
+        <a href="games.html" class="card card--featured">
+          <span class="card-icon">🎮 </span>
+          <h4> Game </h4>
+          <span class="card-tag">NEW</span>
+        </a>
+
+        <a href="https://mohakdev1220.github.io/gatividhiya/" class="card">
+          <span class="card-icon">🚴</span>
+          <h4>Activities Tracker</h4>
+        </a>
+
+        <a href="time#alarm-section" class="card">
+          <span class="card-icon">⏰</span>
+          <h4>Alarm</h4>
+        </a>
+
+        <a href="calculator" class="card">
+          <span class="card-icon">🧮</span>
+          <h4>Calculator</h4>
+        </a>
+
+        <a href="grammar" class="card">
+          <span class="card-icon">✍</span>
+          <h4>Paragraph Editor</h4>
+        </a>
+
+        <a href="weather" class="card">
+          <span class="card-icon">☀️</span>
+          <h4>Weather</h4>
+        </a>
+
+        <a href="qr" class="card">
+          <span class="card-icon">🔍</span>
+          <h4>QR Maker</h4>
+        </a>
+
+        <a href="colour" class="card">
+          <span class="card-icon">🎨</span>
+          <h4>Colors</h4>
+        </a>
+
+        <a href="time" class="card">
+          <span class="card-icon">🕓</span>
+          <h4>Clock</h4>
+        </a>
+
+        <a href="time#timer-section" class="card">
+          <span class="card-icon">⌛</span>
+          <h4>Timer</h4>
+        </a>
+
+        <a href="speech" class="card">
+          <span class="card-icon">🗣️</span>
+          <h4>Speech</h4>
+        </a>
+
+        <a href="calendar" class="card">
+          <span class="card-icon">📅</span>
+          <h4>Calendar</h4>
+        </a>
+
+        <a href="pdf" class="card">
+          <span class="card-icon">📄</span>
+          <h4>PDF Maker</h4>
+        </a>
+
+        <a href="time#stopwatch-section" class="card">
+          <span class="card-icon">⏱️</span>
+          <h4>Stopwatch</h4>
+        </a>
+
+        <a href="password" class="card">
+          <span class="card-icon">🔒</span>
+          <h4>Password Gen</h4>
+        </a>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-links">
+          <a href="privacy">Privacy Policy</a>
+          <a href="terms">Terms &amp; Conditions</a>
+          <a href="feedback">Feedback</a>
+          <a href="https://mohakdev1220.github.io/websites_link/" target="_blank" rel="noopener">Our Other Sites</a>
+          <a href="https://www.youtube.com/@MOHAKCHOUBEY?sub_confirmation=1" target="_blank" rel="noopener" class="yt-link" aria-label="YouTube">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+          </a>
+        </div>
+        <p class="made-by">Developed with <span class="heart">♥</span> by Mohak @2026</p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+
+  <script>
+    // Firebase is now available globally
+    const auth = firebase.auth();
+  </script>
+
+  <script src="./assets/dashboard.js"></script>
+  <script type="module" src="/toolify/protect.js"></script>
+
+</body>
+</html>
