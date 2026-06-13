@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -10,6 +10,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <meta name="google-site-verification" content="xrZFu5cpuycZgitIQWcRT0DmD7er9zSVNmzWktTYs10" />
   <link rel="stylesheet" href="assets/Index.css" />
+  <style>
+    /* Ensure dashboard is visible when CSS loads */
+    body {
+      background: var(--bg, #040609);
+      color: var(--text, #f0f4ff);
+      font-family: var(--font-body, 'DM Sans', sans-serif);
+    }
+    #dashboard-screen {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: var(--bg, #040609);
+    }
+  </style>
 </head>
 <body>
 
@@ -26,7 +40,7 @@
   <!-- ░░ CURSOR TRAIL ░░ -->
   <div class="cursor-glow" id="cursorGlow"></div>
     
-    <div id="dashboard-screen" class="hidden">
+  <div id="dashboard-screen">
 
     <header class="dash-header">
       <div class="brand">
@@ -57,7 +71,7 @@
           <span class="card-tag">NEW</span>
         </a> 
 
-                <a href="games.html" class="card card--featured">
+        <a href="games.html" class="card card--featured">
           <span class="card-icon">🎮 </span>
           <h4> Game </h4>
           <span class="card-tag">NEW</span>
@@ -144,31 +158,75 @@
           <a href="feedback">Feedback</a>
           <a href="https://mohakdev1220.github.io/websites_link/" target="_blank" rel="noopener">Our Other Sites</a>
           <a href="https://www.youtube.com/@MOHAKCHOUBEY?sub_confirmation=1" target="_blank" rel="noopener" class="yt-link" aria-label="YouTube">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.815 3.604.246 11.625.245 15.23 0 3.897-.266 4.356-2.62 4.385-8.815-.029-6.185-.484-8.549-4.385-8.816zM9.522 15.236V8.764L15.846 12l-6.324 3.236z" fill="currentColor"></path></svg>
           </a>
         </div>
         <p class="made-by">Developed with <span class="heart">♥</span> by Mohak @2026</p>
       </div>
     </footer>
   </div>
-<script type="module">
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-  import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-  
-  const firebaseConfig = {
-    apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
-    authDomain: "toolbox-hub-98c03.firebaseapp.com",
-    projectId: "toolbox-hub-98c03",
-    storageBucket: "toolbox-hub-98c03.firebasestorage.app",
-    messagingSenderId: "321020105472",
-    appId: "1:321020105472:web:356e7c2903def7b9d859e5"
-  };
-  
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  window.auth = auth;
-</script>
- 
-<script type="module" src="/toolify/protect.js"></script>
+
+  <!-- Firebase Auth -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
+      authDomain: "toolbox-hub-98c03.firebaseapp.com",
+      projectId: "toolbox-hub-98c03",
+      storageBucket: "toolbox-hub-98c03.firebasestorage.app",
+      messagingSenderId: "321020105472",
+      appId: "1:321020105472:web:356e7c2903def7b9d859e5"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    window.auth = auth;
+
+    // Check authentication
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // Not logged in, redirect to index
+        window.location.href = "index.html";
+      } else {
+        // Load dashboard functionality
+        loadDashboard(user);
+      }
+    });
+
+    function loadDashboard(user) {
+      const userAvatar = document.getElementById("userAvatar");
+      const userName = document.getElementById("userName");
+      const greetNameEl = document.getElementById("greetName");
+      const timeOfDayEl = document.getElementById("timeOfDay");
+      const signOutBtn = document.getElementById("signOutBtn");
+      const cursorGlow = document.getElementById("cursorGlow");
+
+      // Set user info
+      if (user.photoURL) userAvatar.src = user.photoURL;
+      if (user.displayName) {
+        userName.textContent = user.displayName.split(" ")[0];
+        greetNameEl.textContent = user.displayName.split(" ")[0];
+      }
+
+      // Update greeting based on time
+      const hour = new Date().getHours();
+      if (hour < 12) timeOfDayEl.textContent = "morning";
+      else if (hour < 18) timeOfDayEl.textContent = "afternoon";
+      else timeOfDayEl.textContent = "evening";
+
+      // Sign out handler
+      signOutBtn.addEventListener("click", async () => {
+        await signOut(auth);
+      });
+
+      // Cursor glow effect
+      document.addEventListener("mousemove", (e) => {
+        cursorGlow.style.left = `${e.clientX}px`;
+        cursorGlow.style.top = `${e.clientY}px`;
+      });
+    }
+  </script>
 </body>
 </html>
