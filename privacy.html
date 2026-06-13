@@ -1,100 +1,280 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Policy | Toolify</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            background-color: #f9fafb;
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
         }
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+
+        body{
+            font-family:'Inter',sans-serif;
+            line-height:1.8;
+            color:#374151;
+            background:#f3f4f6;
+            padding:40px 20px;
         }
-        h1 { color: #1f2937; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
-        h2 { color: #374151; margin-top: 30px; }
-        p { margin-bottom: 15px; }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #3b82f6;
-            text-decoration: none;
-            font-weight: 600;
+
+        .wrapper{
+            max-width:900px;
+            margin:auto;
+        }
+
+        .back-link{
+            display:inline-block;
+            margin-bottom:20px;
+            color:#2563eb;
+            text-decoration:none;
+            font-weight:600;
+        }
+
+        .back-link:hover{
+            text-decoration:underline;
+        }
+
+        .container{
+            background:#fff;
+            padding:40px;
+            border-radius:20px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        h1{
+            color:#111827;
+            margin-bottom:10px;
+            padding-bottom:15px;
+            border-bottom:3px solid #2563eb;
+        }
+
+        .updated{
+            color:#6b7280;
+            margin-bottom:25px;
+        }
+
+        h2{
+            margin-top:35px;
+            margin-bottom:12px;
+            color:#1f2937;
+        }
+
+        p{
+            margin-bottom:15px;
+        }
+
+        ul{
+            margin-left:20px;
+            margin-bottom:15px;
+        }
+
+        li{
+            margin-bottom:8px;
+        }
+
+        a{
+            color:#2563eb;
+        }
+
+        .footer-note{
+            margin-top:35px;
+            padding:15px;
+            background:#eff6ff;
+            border-left:4px solid #2563eb;
+            border-radius:10px;
+        }
+
+        @media(max-width:768px){
+            .container{
+                padding:25px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="back-link">← Back to Home</a>
+<div class="wrapper">
+
+    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
 
     <div class="container">
-        <h1>Privacy Policy</h1>
-        <p><strong>Last Updated:</strong> May 25, 2026 </p>
 
-        <p>Welcome to <strong>Toolify</strong>. Your privacy is important to us. This policy explains how we handle your information when you use our web utilities.</p>
+        <h1>Privacy Policy</h1>
+
+        <p class="updated">
+            <strong>Last Updated:</strong> June 13, 2026
+        </p>
+
+        <p>
+            Welcome to <strong>Toolify</strong>. Your privacy is important to us.
+            This Privacy Policy explains what information we collect, how we use it,
+            and how we protect it when you use our website and services.
+        </p>
 
         <h2>1. Information We Collect</h2>
-        <p>When you sign in using <strong>Google Authentication</strong>, we receive basic information from your Google Profile, such as:</p>
+
+        <p>
+            When you sign in using <strong>Google Authentication</strong>,
+            we may receive basic profile information including:
+        </p>
+
         <ul>
-            <li>Your Name (to personalize your dashboard)</li>
-            <li>Your Email Address (to identify your account)</li>
-            <li>Your Profile Picture (to display in the settings menu)</li>
+            <li>Your Name</li>
+            <li>Your Email Address</li>
+            <li>Your Profile Picture</li>
+            <li>Your Google Account ID</li>
         </ul>
 
-<h2>2. How We Use Your Data</h2>
-<p>
-We use the collected information solely to provide a personalized experience. 
-We do <strong>not</strong> sell, rent, or share your personal data with third parties for marketing purposes.
-</p>
+        <p>
+            This information is used solely to provide account functionality
+            and personalize your experience on Toolify.
+        </p>
 
-<h2>3. Local Storage & Cookies</h2>
-<p>
-Toolify uses local storage and cookies to remember your preferences, such as 
-<strong>Dark Mode</strong> or <strong>Light Mode</strong> settings, so you do not have to reset them every time you visit.
-</p>
+        <h2>2. How We Use Your Information</h2>
 
-<h2>4. Third-Party Services</h2>
-<p>
-Our website uses <strong>Firebase (Google)</strong> for authentication and hosting. 
-Their use of your information is governed by 
-<a href="https://policies.google.com/privacy" target="_blank">
-Google's Privacy Policy
-</a> 
-</p>
+        <p>
+            We use your information to:
+        </p>
 
-<h2>5. Your Rights</h2>
-<p>
-You can stop our collection of your data at any time by logging out and disconnecting your Google account from Toolify.
-</p>
+        <ul>
+            <li>Authenticate and manage your account</li>
+            <li>Personalize your dashboard</li>
+            <li>Display your profile information</li>
+            <li>Store your preferences and settings</li>
+            <li>Improve the functionality of Toolify</li>
+            <li>Provide support when needed</li>
+        </ul>
 
-<h2>6. Contact Us</h2>
-<p>
-If you have any questions about this Privacy Policy, you can contact the developer (Mohak) through the official project repository.
-</p>
+        <p>
+            We do <strong>not</strong> sell, rent, or trade your personal
+            information to third parties.
+        </p>
 
-<h2>7. Delete My Account</h2>
-<p>
-If you would like your account to be deleted, please email us at 
-<strong>mohakchoubey@gmail.com</strong>.
-</p>
+        <h2>3. Local Storage & Cookies</h2>
 
-<h2>8. Chatbot</h2>
-<p>
-Our chatbot, <strong>MohakGPT</strong>, uses the 
-<strong>Llama 3.1 8B Instant</strong> model. 
-By using the chatbot, you agree to our Terms and Conditions.
-</p>
+        <p>
+            Toolify uses browser storage technologies such as Local Storage,
+            Session Storage, and Cookies to remember:
+        </p>
+
+        <ul>
+            <li>Theme preferences (Dark Mode / Light Mode)</li>
+            <li>User settings</li>
+            <li>Session information</li>
+            <li>Application preferences</li>
+        </ul>
+
+        <p>
+            You may clear this data at any time through your browser settings.
+        </p>
+
+        <h2>4. Third-Party Services</h2>
+
+        <p>
+            Toolify uses <strong>Firebase (Google)</strong> for authentication,
+            database services, and hosting.
+        </p>
+
+        <p>
+            Learn more about Google's privacy practices:
+        </p>
+
+        <p>
+            <a href="https://policies.google.com/privacy"
+               target="_blank"
+               rel="noopener noreferrer">
+                Google Privacy Policy
+            </a>
+        </p>
+
+        <h2>5. Rule-Based Chatbot</h2>
+
+        <p>
+            Toolify includes a chatbot called <strong>MohakGPT</strong>.
+        </p>
+
+        <p>
+            MohakGPT currently operates as a <strong>rule-based chatbot</strong>.
+            Responses are generated using predefined rules and programmed logic,
+            not human review.
+        </p>
+
+        <p>
+            Please avoid sharing sensitive information such as passwords,
+            banking details, government identification numbers, or other
+            confidential data through the chatbot.
+        </p>
+
+        <h2>6. Data Security</h2>
+
+        <p>
+            We take reasonable security measures to protect your information
+            from unauthorized access, misuse, or disclosure.
+        </p>
+
+        <p>
+            However, no online service can guarantee absolute security.
+        </p>
+
+        <h2>7. Your Rights</h2>
+
+        <p>
+            You may:
+        </p>
+
+        <ul>
+            <li>Access your account information</li>
+            <li>Update your profile details</li>
+            <li>Disconnect your Google account</li>
+            <li>Request account deletion</li>
+        </ul>
+
+        <h2>8. Account Deletion</h2>
+
+        <p>
+            If you would like your Toolify account and associated data
+            removed, please contact:
+        </p>
+
+        <p>
+            <strong>mohakchoubey@gmail.com</strong>
+        </p>
+
+        <h2>9. Changes to This Policy</h2>
+
+        <p>
+            We may update this Privacy Policy from time to time.
+            Any changes will be posted on this page with a revised
+            "Last Updated" date.
+        </p>
+
+        <h2>10. Contact Us</h2>
+
+        <p>
+            If you have questions regarding this Privacy Policy,
+            please contact the Toolify developer:
+        </p>
+
+        <p>
+            <strong>Mohak Choubey</strong><br>
+            Email: mohakchoubey@gmail.com
+        </p>
+
+        <div class="footer-note">
+            By using Toolify, you acknowledge that you have read and
+            agreed to this Privacy Policy.
+        </div>
+
     </div>
+
+</div>
 
 </body>
 </html>
+```
