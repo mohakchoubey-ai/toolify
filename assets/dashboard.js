@@ -1,5 +1,4 @@
-import { auth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+// Firebase is globally available from the script tags
 
 // ─── DOM ELEMENTS ───────────────────
 const landingScreen = document.getElementById("landing-screen");
@@ -11,7 +10,7 @@ const timeOfDayEl = document.getElementById("time-of-day");
 
 // ─── SHOW DASHBOARD ───────────────────
 function showDashboard(user) {
-  if (!landingScreen || !dashboardScreen) return; // Safety check
+  if (!landingScreen || !dashboardScreen) return;
   
   landingScreen.classList.add("hidden");
   dashboardScreen.classList.remove("hidden");
@@ -37,7 +36,7 @@ function showDashboard(user) {
 }
 
 // ─── AUTH LISTENER ───────────────────
-onAuthStateChanged(auth, (user) => {
+firebase.auth().onAuthStateChanged((user) => {
   if (!user) {
     window.location.href = "index.html";
     return;
