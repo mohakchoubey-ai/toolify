@@ -175,7 +175,7 @@
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         // Not logged in, redirect to index
-        window.location.href = "index.html";
+        window.location.href = "login.html";
       } else {
         // Load dashboard functionality
         loadDashboard(user);
