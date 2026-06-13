@@ -1,4 +1,8 @@
-// ─── 8. SHOW DASHBOARD ───────────────────
+import { auth } from "./firebase-auth.js";
+import { onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// ─── SHOW DASHBOARD ───────────────────
 function showDashboard(user) {
   landingScreen.classList.add("hidden");
   dashboardScreen.classList.remove("hidden");
@@ -21,33 +25,12 @@ function showDashboard(user) {
   else timeOfDayEl.textContent = "night";
 }
 
-
+// ─── AUTH LISTENER ───────────────────
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "index.html";
     return;
   }
 
-  // your logic here
-  console.log(user);
-});
-
-  const firstName = (user.displayName || "Creator").split(" ")[0];
-  userNameEl.textContent = firstName;
-  greetNameEl.textContent = firstName;
-
-  if (user.photoURL) {
-    userAvatar.src = user.photoURL;
-  }
-});
-
-
-// ─── 9. TOOL LINK GUARD ──────────────────
-document.querySelectorAll("#dashboard-screen .card").forEach((card) => {
-  card.addEventListener("click", (e) => {
-    if (!auth.currentUser) {
-      e.preventDefault();
-      showLanding();
-    }
-  });
+  showDashboard(user);
 });
