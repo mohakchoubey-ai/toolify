@@ -151,9 +151,17 @@
       </div>
     </footer>
   </div>
+<!-- In your index.html or dashboard.html -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
 
-  <!-- Firebase -->
-  <script type="module" src="assets/dashboard.js"></script>
+<script>
+  // Firebase is now available globally
+  const auth = firebase.auth();
+</script>
+
+<script src="./assets/dashboard.js"></script>
+
  <script type="module" src="/toolify/protect.js"></script>
 </body>
 </html>
