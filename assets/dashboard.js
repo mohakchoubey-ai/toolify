@@ -48,4 +48,3 @@ document.querySelectorAll("#dashboard-screen .card").forEach((card) => {
       e.preventDefault();
       showLanding();
     }
-    
