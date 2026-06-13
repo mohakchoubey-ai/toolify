@@ -48,5 +48,4 @@ document.querySelectorAll("#dashboard-screen .card").forEach((card) => {
       e.preventDefault();
       showLanding();
     }
-    // Otherwise navigation proceeds naturally
-  }
+    
