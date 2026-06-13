@@ -1,5 +1,5 @@
-import { auth } from "./firebase-auth.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { auth } from "firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // ─── DOM ELEMENTS ───────────────────
 const landingScreen = document.getElementById("landing-screen");
