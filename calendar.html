@@ -3,103 +3,374 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#141e30" />
   <title>Events Calendar | Toolbox Hub</title>
+
   <style>
     :root {
-        --glass: rgba(255, 255, 255, 0.12);
-        --primary: #7efaff;
+      --bg-1: #141e30;
+      --bg-2: #243b55;
+      --bg-3: #7b4397;
+      --bg-4: #dc2430;
+
+      --glass: rgba(255, 255, 255, 0.10);
+      --glass-strong: rgba(255, 255, 255, 0.14);
+      --border: rgba(255, 255, 255, 0.16);
+      --text: #ffffff;
+      --muted: rgba(255, 255, 255, 0.72);
+      --accent: #7efaff;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+      --radius: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
     }
 
     body {
-        font-family: 'Segoe UI', system-ui, sans-serif;
-        background: linear-gradient(-45deg, #243b55, #141e30, #7b4397, #dc2430);
-        background-size: 400% 400%;
-        animation: gradientBG 10s ease infinite;
-        color: white;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 0;
-        padding: 20px;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(16px, 3vw, 28px);
+      background: linear-gradient(-45deg, var(--bg-2), var(--bg-1), var(--bg-3), var(--bg-4));
+      background-size: 400% 400%;
+      animation: gradientBG 12s ease infinite;
+      overflow-x: hidden;
     }
 
     @keyframes gradientBG {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: min(100%, 1100px);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: clamp(18px, 7vh, 72px);
+      margin-bottom: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(1.35rem, 2.8vw, 2.05rem);
+      line-height: 1.15;
+      letter-spacing: 0.01em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.5;
+      max-width: 62ch;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn, .link-btn {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.10);
+      color: white;
+      text-decoration: none;
+      padding: 11px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.14);
+    }
+
+    .btn:hover, .link-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.16);
+      border-color: rgba(255,255,255,0.24);
+    }
+
+    .btn:focus-visible, .link-btn:focus-visible, .back-btn:focus-visible {
+      outline: 3px solid rgba(126, 250, 255, 0.36);
+      outline-offset: 2px;
     }
 
     .back-btn {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: var(--glass);
-        border: 1px solid rgba(255,255,255,0.2);
-        padding: 10px 20px;
-        border-radius: 12px;
-        color: white;
-        text-decoration: none;
-        backdrop-filter: blur(10px);
-        font-weight: 600;
-        transition: 0.3s;
-        z-index: 100;
-    }
-    .back-btn:hover { background: rgba(255,255,255,0.2); transform: translateX(-5px); }
-
-    .container {
-        background: var(--glass);
-        backdrop-filter: blur(30px);
-        border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 35px;
-        padding: 25px;
-        width: 100%;
-        max-width: 900px;
-        text-align: center;
-        box-shadow: 0 30px 60px rgba(0,0,0,0.4);
-        margin-top: 80px;
-        animation: slideIn 0.8s ease;
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 1000;
+      white-space: nowrap;
     }
 
-    @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-    h2 { margin-bottom: 20px; letter-spacing: 2px; color: var(--primary); }
-
-    .calendar-wrapper {
-      position: relative;
-      padding-bottom: 75%; /* Aspect Ratio */
-      height: 0;
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.11), rgba(255,255,255,0.08));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: clamp(16px, 2.8vw, 24px);
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.08);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       overflow: hidden;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.1);
     }
-    
-    .calendar-wrapper iframe {
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .card-head h2 {
+      margin: 0;
+      font-size: clamp(1.15rem, 2vw, 1.55rem);
+      letter-spacing: 0.01em;
+    }
+
+    .date-line {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .calendar-shell {
+      position: relative;
+      width: 100%;
+      height: clamp(520px, 76vh, 920px);
+      min-height: 420px;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.12);
+    }
+
+    .calendar-loading {
       position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      z-index: 2;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    .calendar-loading[hidden] {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.20);
+      border-top-color: var(--accent);
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 0.95rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 0 16px;
+    }
+
+    iframe {
       width: 100%;
       height: 100%;
       border: 0;
-      filter: invert(90%) hue-rotate(180deg); /* Dark mode effect for Google Calendar */
+      display: block;
+      background: white;
     }
 
-    footer { margin-top: 20px; opacity: 0.7; font-size: 13px; }
+    .note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .note a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .note a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 8px 0 6px;
+      color: rgba(255,255,255,0.72);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 14px;
+      }
+
+      .page {
+        margin-top: 66px;
+      }
+
+      .back-btn {
+        top: 12px;
+        right: 12px;
+        padding: 10px 14px;
+        border-radius: 12px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .calendar-shell {
+        height: 74svh;
+        min-height: 460px;
+      }
+
+      .card-head {
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .title {
+        font-size: 1.25rem;
+      }
+
+      .subtitle {
+        font-size: 0.92rem;
+      }
+
+      .btn, .link-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .actions {
+        width: 100%;
+      }
+
+      .calendar-shell {
+        height: 78svh;
+        min-height: 420px;
+        border-radius: 18px;
+      }
+    }
   </style>
 </head>
 <body>
+  <a href="dashboard.html" class="btn back-btn" aria-label="Back to dashboard">🏠 Back to dashboard</a>
 
-  <a href="dashboard" class="back-btn">🏠 Back to dashboard </a>
+  <main class="page">
+    <section class="topbar" aria-label="Calendar page header">
+      <div class="brand">
+        <div class="eyebrow">Toolbox Hub</div>
+        <h1 class="title">🗓️ Events & Holidays</h1>
+        <p class="subtitle">
+          View Indian holidays and calendar events in a layout that adapts cleanly to phone, tablet, and desktop screens.
+        </p>
+      </div>
 
-  <div class="container">
-    <h2>🗓️ Events & Holidays</h2>
-    <div class="calendar-wrapper">
-      <iframe
-        src="https://calendar.google.com/calendar/u/0/embed?color=%2316a765&src=en.indian%23holiday@group.v.calendar.google.com&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=0"
-        scrolling="no">
-      </iframe>
-    </div>
-  </div>
+      <div class="actions">
+        <button class="btn" id="refreshBtn" type="button">🔄 Refresh</button>
+        <a class="link-btn" href="https://calendar.google.com" target="_blank" rel="noopener noreferrer">↗ Open Google Calendar</a>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Calendar section">
+      <div class="card-head">
+        <div>
+          <h2>Calendar View</h2>
+          <p class="date-line" id="todayDate">Loading date...</p>
+        </div>
+      </div>
+
+      <div class="calendar-shell" id="calendarShell">
+        <div class="calendar-loading" id="loader" aria-live="polite" aria-busy="true">
+          <div class="spinner" aria-hidden="true"></div>
+          <div class="loading-text">Loading calendar...</div>
+        </div>
+
+        <iframe
+          id="calendarFrame"
+          title="Google Calendar embed showing holidays"
+          loading="lazy"
+          referrerpolicy="no-referrer"
+          src="https://calendar.google.com/calendar/embed?src=en.indian%23holiday%40group.v.calendar.google.com&ctz=Asia%2FKolkata&mode=MONTH&showTitle=0&showNav=1&showDate=1&showTabs=0&showCalendars=0&showPrint=0">
+        </iframe>
+      </div>
+
+      <p class="note">
+        Tip: if the embedded calendar does not load in a browser, use
+        <a href="https://calendar.google.com" target="_blank" rel="noopener noreferrer">Google Calendar</a>.
+      </p>
+    </section>
+  </main>
 
   <footer>Developed by <strong>Mohak Choubey</strong></footer>
 
@@ -117,15 +388,43 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    onAuthStateChanged(auth, user => {
-      if(!user) {
-        window.location.href="login.html";
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.replace("login.html");
       }
     });
-    
-  </script> 
-  
-  <script type="module" src="protect.js"></script>
 
+    const todayEl = document.getElementById("todayDate");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const loader = document.getElementById("loader");
+    const frame = document.getElementById("calendarFrame");
+
+    const formatter = new Intl.DateTimeFormat("en-IN", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+
+    todayEl.textContent = formatter.format(new Date());
+
+    const hideLoader = () => {
+      loader.hidden = true;
+      loader.setAttribute("aria-busy", "false");
+    };
+
+    frame.addEventListener("load", hideLoader);
+
+    refreshBtn.addEventListener("click", () => {
+      loader.hidden = false;
+      loader.setAttribute("aria-busy", "true");
+
+      const currentSrc = new URL(frame.src);
+      currentSrc.searchParams.set("_t", Date.now().toString());
+      frame.src = currentSrc.toString();
+    });
+  </script>
+
+  <script type="module" src="protect.js"></script>
 </body>
 </html>
