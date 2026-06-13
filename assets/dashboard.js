@@ -22,12 +22,15 @@ function showDashboard(user) {
 }
 
 
-// ─── AUTH STATE ─────────────────────────
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "index.html";
     return;
   }
+
+  // your logic here
+  console.log(user);
+});
 
   const firstName = (user.displayName || "Creator").split(" ")[0];
   userNameEl.textContent = firstName;
