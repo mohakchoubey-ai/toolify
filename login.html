@@ -229,10 +229,6 @@ input:focus{
 
 <script type="module">
 
-/* =========================
-   FIREBASE IMPORTS
-========================= */
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
@@ -241,13 +237,12 @@ import {
     signInWithPopup,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    onAuthStateChanged
+    onAuthStateChanged,
+    sendEmailVerification,
+    signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* =========================
-   FIREBASE CONFIG
-   PASTE YOUR CONFIG HERE
-========================= */
+
 const firebaseConfig = {
   apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
   authDomain: "toolbox-hub-98c03.firebaseapp.com",
@@ -256,12 +251,10 @@ const firebaseConfig = {
   messagingSenderId: "321020105472",
   appId: "1:321020105472:web:356e7c2903def7b9d859e5"
 };
-/* =========================
-   INIT
-========================= */
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
 
 /* =========================
    HELPERS
@@ -273,171 +266,144 @@ function getRedirectPage(){
 }
 
 function showStatus(message,type){
-
     const status=document.getElementById("status");
-
     status.textContent=message;
-
     status.className=`status ${type}`;
 }
 
 function setLoading(state){
-
     document.body.classList.toggle("loading",state);
 }
 
+
 /* =========================
-   ALREADY LOGGED IN
+   AUTO CHECK LOGIN
 ========================= */
 
-onAuthStateChanged(auth,(user)=>{
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
 
-    if(user){
+        await user.reload();
 
-        window.location.href=getRedirectPage();
+        // BLOCK UNVERIFIED USERS
+        if (!user.emailVerified && user.providerData[0]?.providerId === "password") {
+            await signOut(auth);
+            showStatus("Verify your email first. Check inbox.", "error");
+            return;
+        }
 
+        window.location.href = getRedirectPage();
     }
-
 });
+
 
 /* =========================
    GOOGLE LOGIN
 ========================= */
 
-document
-.getElementById("google-login-btn")
-.addEventListener("click",async()=>{
+document.getElementById("google-login-btn")
+.addEventListener("click", async () => {
 
-    try{
-
+    try {
         setLoading(true);
 
-        const provider=new GoogleAuthProvider();
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
 
-        await signInWithPopup(auth,provider);
+        window.location.href = getRedirectPage();
 
-        window.location.href=getRedirectPage();
-
-    }catch(error){
-
-        showStatus(error.message,"error");
-
-    }finally{
-
+    } catch (error) {
+        showStatus(error.message, "error");
+    } finally {
         setLoading(false);
-
     }
 
 });
 
+
 /* =========================
-   SIGN UP
+   SIGN UP (WITH EMAIL VERIFY FIX)
 ========================= */
 
-document
-.getElementById("signup-btn")
-.addEventListener("click",async()=>{
+document.getElementById("signup-btn")
+.addEventListener("click", async () => {
 
-    const email=document
-        .getElementById("email-input")
-        .value
-        .trim();
+    const email = document.getElementById("email-input").value.trim();
+    const password = document.getElementById("password-input").value;
 
-    const password=document
-        .getElementById("password-input")
-        .value;
-
-    if(!email || !password){
-
-        showStatus(
-            "Please enter email and password.",
-            "error"
-        );
-
+    if (!email || !password) {
+        showStatus("Please enter email and password.", "error");
         return;
     }
 
-    if(password.length < 6){
-
-        showStatus(
-            "Password must be at least 6 characters.",
-            "error"
-        );
-
+    if (password.length < 6) {
+        showStatus("Password must be at least 6 characters.", "error");
         return;
     }
 
-    try{
-
+    try {
         setLoading(true);
 
-        await createUserWithEmailAndPassword(
+        const userCredential = await createUserWithEmailAndPassword(
             auth,
             email,
             password
         );
 
-        window.location.href=getRedirectPage();
+        // SEND VERIFICATION EMAIL (IMPORTANT FIX)
+        await sendEmailVerification(userCredential.user);
 
-    }catch(error){
+        await signOut(auth);
 
-        showStatus(error.message,"error");
+        showStatus("Verification email sent. Check inbox.", "success");
 
-    }finally{
-
+    } catch (error) {
+        showStatus(error.message, "error");
+    } finally {
         setLoading(false);
-
     }
 
 });
 
+
 /* =========================
-   SIGN IN
+   SIGN IN (BLOCK UNVERIFIED)
 ========================= */
 
-document
-.getElementById("signin-btn")
-.addEventListener("click",async()=>{
+document.getElementById("signin-btn")
+.addEventListener("click", async () => {
 
-    const email=document
-        .getElementById("email-input")
-        .value
-        .trim();
+    const email = document.getElementById("email-input").value.trim();
+    const password = document.getElementById("password-input").value;
 
-    const password=document
-        .getElementById("password-input")
-        .value;
-
-    if(!email || !password){
-
-        showStatus(
-            "Please enter email and password.",
-            "error"
-        );
-
+    if (!email || !password) {
+        showStatus("Please enter email and password.", "error");
         return;
     }
 
-    try{
-
+    try {
         setLoading(true);
 
-        await signInWithEmailAndPassword(
+        const userCredential = await signInWithEmailAndPassword(
             auth,
             email,
             password
         );
 
-        window.location.href=getRedirectPage();
+        await userCredential.user.reload();
 
-    }catch(error){
+        if (!userCredential.user.emailVerified) {
+            await signOut(auth);
+            showStatus("Please verify your email first.", "error");
+            return;
+        }
 
-        showStatus(error.message,"error");
+        window.location.href = getRedirectPage();
 
-    }finally{
-
+    } catch (error) {
+        showStatus(error.message, "error");
+    } finally {
         setLoading(false);
-
     }
 
 });
