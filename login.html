@@ -1,35 +1,37 @@
-<!DOCTYPE html>
+ <!DOCTYPE html> 
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Toolify | Sign in</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | Toolify</title>
 
 <style>
 :root{
-    --bg:#0f1115;
-    --card:#171a21;
-    --border:#2a2f3a;
-    --text:#e8eaed;
-    --muted:#9aa0a6;
-    --blue:#1a73e8;
-    --blue-hover:#1557b0;
-    --red:#f28b82;
-    --green:#81c995;
+    --bg:#0f172a;
+    --card:#1e293bcc;
+    --primary:#3b82f6;
+    --primary-hover:#2563eb;
+    --text:#ffffff;
+    --muted:#94a3b8;
+    --border:rgba(255,255,255,.08);
+    --success:#10b981;
+    --error:#ef4444;
 }
 
-*{box-sizing:border-box;margin:0;padding:0}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
 body{
-    font-family:Roboto,Arial,sans-serif;
-    background:radial-gradient(circle at top,#111827,#0b0d11);
-    color:var(--text);
-    height:100vh;
+    min-height:100vh;
     display:flex;
-    align-items:center;
     justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#020617,#0f172a,#1e293b);
+    font-family:Segoe UI,system-ui,sans-serif;
+    color:var(--text);
     padding:20px;
 }
 
@@ -37,252 +39,407 @@ body{
     width:100%;
     max-width:420px;
     background:var(--card);
+    backdrop-filter:blur(16px);
     border:1px solid var(--border);
-    border-radius:16px;
-    padding:30px;
+    border-radius:24px;
+    padding:35px;
+    text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,.35);
 }
 
-.header{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:20px;
-}
-
-.header img{
-    width:34px;
-    height:34px;
-}
-
-.header h2{
-    font-size:18px;
-    font-weight:700;
-}
-
-.title{
-    font-size:22px;
-    margin-bottom:6px;
-}
-
-.sub{
-    font-size:14px;
-    color:var(--muted);
-    margin-bottom:18px;
-}
-
-input{
-    width:100%;
-    padding:12px;
-    border-radius:10px;
-    border:1px solid var(--border);
-    background:#0f1115;
-    color:white;
+.logo{
+    font-size:56px;
     margin-bottom:10px;
 }
 
-input:focus{
-    outline:none;
-    border-color:var(--blue);
+.tag{
+    display:block;
+    color:#7efaff;
+    font-size:.72rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-bottom:14px;
+}
+
+h1{
+    font-size:1.9rem;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    color:var(--muted);
+    margin-bottom:28px;
+    line-height:1.5;
 }
 
 button{
     width:100%;
-    padding:12px;
-    border-radius:10px;
     border:none;
-    font-weight:600;
     cursor:pointer;
-    margin-top:10px;
+    transition:.2s;
+    font-weight:700;
 }
 
-.primary{
-    background:var(--blue);
-    color:white;
-}
-
-.primary:hover{
-    background:var(--blue-hover);
-}
-
-.google{
-    background:white;
-    color:#000;
+.google-btn,
+.primary-btn{
+    padding:14px;
+    border-radius:12px;
     display:flex;
     align-items:center;
     justify-content:center;
     gap:10px;
+    font-size:.95rem;
 }
 
-.google img{width:18px}
-
-.link{
-    text-align:center;
-    font-size:13px;
-    color:var(--muted);
-    margin-top:12px;
-    cursor:pointer;
+.google-btn{
+    background:var(--primary);
+    color:white;
 }
 
-.link:hover{color:white}
+.google-btn:hover,
+.primary-btn:hover{
+    transform:translateY(-2px);
+}
+
+.google-btn:hover{
+    background:var(--primary-hover);
+}
+
+.divider{
+    margin:24px 0;
+    color:#64748b;
+    font-size:.8rem;
+}
+
+input{
+    width:100%;
+    padding:13px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:rgba(15,23,42,.7);
+    color:white;
+    margin-bottom:12px;
+}
+
+input:focus{
+    outline:none;
+    border-color:#7efaff;
+}
+
+.primary-btn{
+    background:var(--success);
+    color:white;
+    margin-top:4px;
+}
+
+.signin-btn{
+    background:var(--primary);
+    margin-top:10px;
+}
 
 .status{
     display:none;
-    margin-top:10px;
+    margin:12px 0;
     padding:10px;
-    border-radius:8px;
-    font-size:13px;
+    border-radius:10px;
+    font-size:.85rem;
 }
 
-.show{display:block}
-.error{background:rgba(242,139,130,.15);color:var(--red)}
-.success{background:rgba(129,201,149,.15);color:var(--green)}
+.status.success{
+    display:block;
+    background:rgba(16,185,129,.15);
+    color:var(--success);
+}
 
+.status.error{
+    display:block;
+    background:rgba(239,68,68,.15);
+    color:var(--error);
+}
+
+.footer{
+    margin-top:24px;
+    padding-top:18px;
+    border-top:1px solid rgba(255,255,255,.05);
+    color:#64748b;
+    font-size:.75rem;
+}
+
+.loading{
+    opacity:.7;
+    pointer-events:none;
+}
+
+@media(max-width:480px){
+    .card{
+        padding:28px 22px;
+    }
+}
 </style>
 </head>
-
 <body>
 
 <div class="card">
 
-    <div class="header">
-        <img src="logo.png" />
-        <h2>Toolify</h2>
-    </div>
+    <div class="logo">🛠️</div>
 
-    <div class="title">Sign in</div>
-    <div class="sub">Use your account to continue</div>
+    <span class="tag">Personal Portfolio Project</span>
 
-    <button class="google" id="googleBtn">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">
+    <h1>Toolify Login</h1>
+
+    <p class="subtitle">
+        Sign in to access your tools and settings.
+    </p>
+
+    <button class="google-btn" id="google-login-btn">
         Continue with Google
     </button>
 
-    <input id="email" type="email" placeholder="Email address">
-    <input id="password" type="password" placeholder="Password">
+    <div class="divider">OR</div>
 
-    <button class="primary" id="signupBtn">Create account</button>
-    <button class="primary" id="loginBtn">Sign in</button>
+    <input
+        type="email"
+        id="email-input"
+        placeholder="Email Address"
+        autocomplete="email"
+    >
 
-    <div class="link" id="forgot">Forgot password?</div>
+    <input
+        type="password"
+        id="password-input"
+        placeholder="Password"
+        autocomplete="current-password"
+    >
 
     <div id="status" class="status"></div>
+
+    <button class="primary-btn" id="signup-btn">
+        Create Account
+    </button>
+
+    <button class="primary-btn signin-btn" id="signin-btn">
+        Sign In
+    </button>
+
+    <div class="footer">
+        Powered by Firebase Authentication
+    </div>
 
 </div>
 
 <script type="module">
 
+/* =========================
+   FIREBASE IMPORTS
+========================= */
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 import {
-getAuth,
-GoogleAuthProvider,
-signInWithPopup,
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword,
-sendEmailVerification,
-sendPasswordResetEmail,
-onAuthStateChanged,
-signOut
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-
+/* =========================
+   FIREBASE CONFIG
+   PASTE YOUR CONFIG HERE
+========================= */
 const firebaseConfig = {
-  apiKey: "AIzaSyAoj4yHcaRW4wdOPA7SrZhGQZqAobHDdB0",
+  apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
   authDomain: "toolbox-hub-98c03.firebaseapp.com",
   projectId: "toolbox-hub-98c03",
   storageBucket: "toolbox-hub-98c03.firebasestorage.app",
   messagingSenderId: "321020105472",
-  appId: "1:321020105472:web:698ba3bf9dfe75add859e5"
+  appId: "1:321020105472:web:356e7c2903def7b9d859e5"
 };
+/* =========================
+   INIT
+========================= */
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const email = document.getElementById("email");
-const password = document.getElementById("password");
-const status = document.getElementById("status");
+/* =========================
+   HELPERS
+========================= */
 
-function show(msg,type){
-status.className = `status show ${type}`;
-status.textContent = msg;
+function getRedirectPage(){
+    const params = new URLSearchParams(window.location.search);
+    return params.get("redirect") || "index.html";
 }
 
-function clear(){
-status.className="status";
-status.textContent="";
+function showStatus(message,type){
+
+    const status=document.getElementById("status");
+
+    status.textContent=message;
+
+    status.className=`status ${type}`;
 }
 
-/* GOOGLE */
-document.getElementById("googleBtn").onclick = async () => {
-try{
-clear();
-const provider = new GoogleAuthProvider();
-await signInWithPopup(auth,provider);
-}catch(e){
-show(e.message,"error");
-}
-};
+function setLoading(state){
 
-/* SIGN UP */
-document.getElementById("signupBtn").onclick = async () => {
-try{
-clear();
-
-const user = await createUserWithEmailAndPassword(
-auth,
-email.value,
-password.value
-);
-
-await sendEmailVerification(user.user);
-await signOut(auth);
-
-show("Verification email sent. Check inbox.","success");
-
-}catch(e){
-show(e.message,"error");
-}
-};
-
-/* LOGIN */
-document.getElementById("loginBtn").onclick = async () => {
-try{
-clear();
-
-const user = await signInWithEmailAndPassword(
-auth,
-email.value,
-password.value
-);
-
-await user.user.reload();
-
-if(!user.user.emailVerified){
-await signOut(auth);
-show("Verify email first.","error");
-return;
+    document.body.classList.toggle("loading",state);
 }
 
-window.location.href="home.html";
+/* =========================
+   ALREADY LOGGED IN
+========================= */
 
-}catch(e){
-show(e.message,"error");
-}
-};
-
-/* RESET */
-document.getElementById("forgot").onclick = async () => {
-try{
-await sendPasswordResetEmail(auth,email.value);
-show("Reset email sent.","success");
-}catch(e){
-show(e.message,"error");
-}
-};
-
-/* AUTO LOGIN */
 onAuthStateChanged(auth,(user)=>{
-if(user && user.emailVerified){
-window.location.href="home.html";
-}
+
+    if(user){
+
+        window.location.href=getRedirectPage();
+
+    }
+
+});
+
+/* =========================
+   GOOGLE LOGIN
+========================= */
+
+document
+.getElementById("google-login-btn")
+.addEventListener("click",async()=>{
+
+    try{
+
+        setLoading(true);
+
+        const provider=new GoogleAuthProvider();
+
+        await signInWithPopup(auth,provider);
+
+        window.location.href=getRedirectPage();
+
+    }catch(error){
+
+        showStatus(error.message,"error");
+
+    }finally{
+
+        setLoading(false);
+
+    }
+
+});
+
+/* =========================
+   SIGN UP
+========================= */
+
+document
+.getElementById("signup-btn")
+.addEventListener("click",async()=>{
+
+    const email=document
+        .getElementById("email-input")
+        .value
+        .trim();
+
+    const password=document
+        .getElementById("password-input")
+        .value;
+
+    if(!email || !password){
+
+        showStatus(
+            "Please enter email and password.",
+            "error"
+        );
+
+        return;
+    }
+
+    if(password.length < 6){
+
+        showStatus(
+            "Password must be at least 6 characters.",
+            "error"
+        );
+
+        return;
+    }
+
+    try{
+
+        setLoading(true);
+
+        await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        window.location.href=getRedirectPage();
+
+    }catch(error){
+
+        showStatus(error.message,"error");
+
+    }finally{
+
+        setLoading(false);
+
+    }
+
+});
+
+/* =========================
+   SIGN IN
+========================= */
+
+document
+.getElementById("signin-btn")
+.addEventListener("click",async()=>{
+
+    const email=document
+        .getElementById("email-input")
+        .value
+        .trim();
+
+    const password=document
+        .getElementById("password-input")
+        .value;
+
+    if(!email || !password){
+
+        showStatus(
+            "Please enter email and password.",
+            "error"
+        );
+
+        return;
+    }
+
+    try{
+
+        setLoading(true);
+
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        window.location.href=getRedirectPage();
+
+    }catch(error){
+
+        showStatus(error.message,"error");
+
+    }finally{
+
+        setLoading(false);
+
+    }
+
 });
 
 </script>
