@@ -1,247 +1,729 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login | Toolify</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Toolify | Sign in</title>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+
 :root{
-    --bg:#0f172a;
-    --card:#1e293bcc;
-    --primary:#3b82f6;
-    --primary-hover:#2563eb;
-    --text:#ffffff;
-    --muted:#94a3b8;
-    --border:rgba(255,255,255,.08);
-    --success:#10b981;
-    --error:#ef4444;
+    --bg:#0f1115;
+    --panel:#171a21;
+    --panel-2:#1d212a;
+    --panel-3:#222734;
+    --line:#2a2f3a;
+    --line-2:#353b47;
+    --text:#e8eaed;
+    --muted:#9aa0a6;
+    --soft:#bdc1c6;
+    --blue:#8ab4f8;
+    --blue-2:#1a73e8;
+    --blue-3:#1669c1;
+    --green:#81c995;
+    --red:#f28b82;
+    --shadow:0 20px 50px rgba(0,0,0,.32);
+    --radius:12px;
 }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
 body{
+    margin:0;
+    font-family:Roboto, Arial, sans-serif;
+    background:
+        radial-gradient(circle at 10% 0%, rgba(138,180,248,.12), transparent 22%),
+        radial-gradient(circle at 90% 100%, rgba(26,115,232,.10), transparent 24%),
+        linear-gradient(180deg, #0b0d11 0%, #0f1115 100%);
+    color:var(--text);
+    overflow:hidden;
+}
+
+.app{
     min-height:100vh;
     display:flex;
-    justify-content:center;
     align-items:center;
-    background:linear-gradient(135deg,#020617,#0f172a,#1e293b);
-    font-family:Segoe UI,system-ui,sans-serif;
-    color:var(--text);
-    padding:20px;
+    justify-content:center;
+    padding:24px;
 }
 
-.card{
+.shell{
+    width:100%;
+    max-width:1060px;
+    min-height:680px;
+    display:grid;
+    grid-template-columns: 1fr 1.15fr;
+    background:rgba(13,15,19,.78);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:24px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    position:relative;
+}
+
+.shell::before,
+.shell::after{
+    content:"";
+    position:absolute;
+    width:240px;
+    height:240px;
+    border-radius:999px;
+    filter:blur(50px);
+    pointer-events:none;
+    opacity:.5;
+}
+
+.shell::before{
+    background:rgba(26,115,232,.20);
+    top:-70px;
+    right:12%;
+}
+
+.shell::after{
+    background:rgba(16,185,129,.12);
+    bottom:-80px;
+    left:8%;
+}
+
+.auth-side{
+    background:linear-gradient(180deg, rgba(23,26,33,.96), rgba(18,20,26,.96));
+    border-right:1px solid rgba(255,255,255,.06);
+    padding:34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.auth-card{
     width:100%;
     max-width:420px;
-    background:var(--card);
-    backdrop-filter:blur(16px);
-    border:1px solid var(--border);
-    border-radius:24px;
-    padding:35px;
-    text-align:center;
-    box-shadow:0 20px 50px rgba(0,0,0,.35);
 }
 
-.logo{
-    font-size:56px;
-    margin-bottom:10px;
+.brand-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:34px;
 }
 
-.tag{
-    display:block;
-    color:#7efaff;
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.brand img{
+    width:42px;
+    height:42px;
+    object-fit:contain;
+    border-radius:10px;
+    background:#0f1115;
+    border:1px solid rgba(255,255,255,.06);
+}
+
+.brand-text{
+    display:flex;
+    flex-direction:column;
+    line-height:1.05;
+}
+
+.brand-title{
+    font-size:1.06rem;
+    font-weight:900;
+    letter-spacing:-.02em;
+}
+
+.brand-sub{
+    font-size:.8rem;
+    color:var(--muted);
+    margin-top:4px;
+}
+
+.badge{
     font-size:.72rem;
-    letter-spacing:2px;
+    letter-spacing:.14em;
     text-transform:uppercase;
-    margin-bottom:14px;
+    color:#cbd5e1;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.04);
+    padding:9px 12px;
+    border-radius:999px;
+}
+
+.step-wrap{
+    position:relative;
+    min-height:430px;
+}
+
+.step{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    transform:translateX(18px);
+    pointer-events:none;
+    transition:opacity .26s ease, transform .26s ease;
+}
+
+.step.active{
+    opacity:1;
+    transform:translateX(0);
+    pointer-events:auto;
+}
+
+.step.exit-left{
+    opacity:0;
+    transform:translateX(-18px);
+}
+
+.step.exit-right{
+    opacity:0;
+    transform:translateX(18px);
+}
+
+.hero{
+    margin-bottom:22px;
+}
+
+.icon{
+    width:68px;
+    height:68px;
+    border-radius:20px;
+    display:grid;
+    place-items:center;
+    background:
+        linear-gradient(135deg, rgba(26,115,232,.95), rgba(138,180,248,.92));
+    color:white;
+    font-size:1.7rem;
+    box-shadow:0 16px 36px rgba(26,115,232,.2);
+    margin-bottom:18px;
 }
 
 h1{
-    font-size:1.9rem;
-    margin-bottom:10px;
+    margin:0 0 8px;
+    font-size:2rem;
+    line-height:1.08;
+    letter-spacing:-.04em;
 }
 
 .subtitle{
+    margin:0;
     color:var(--muted);
-    margin-bottom:28px;
-    line-height:1.5;
+    line-height:1.55;
+    font-size:.96rem;
+    max-width:34ch;
 }
 
-button{
-    width:100%;
-    border:none;
-    cursor:pointer;
-    transition:.2s;
-    font-weight:700;
+.form{
+    display:grid;
+    gap:12px;
+    margin-top:22px;
 }
 
-.google-btn,
-.primary-btn{
-    padding:14px;
-    border-radius:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    font-size:.95rem;
-}
-
-.google-btn{
-    background:var(--primary);
-    color:white;
-}
-
-.google-btn:hover,
-.primary-btn:hover{
-    transform:translateY(-2px);
-}
-
-.google-btn:hover{
-    background:var(--primary-hover);
-}
-
-.divider{
-    margin:24px 0;
-    color:#64748b;
-    font-size:.8rem;
+.field{
+    position:relative;
 }
 
 input{
     width:100%;
-    padding:13px;
+    border:1px solid var(--line);
+    background:#0f1115;
+    color:var(--text);
+    padding:14px 48px 14px 14px;
     border-radius:10px;
-    border:1px solid var(--border);
-    background:rgba(15,23,42,.7);
-    color:white;
-    margin-bottom:12px;
+    font-size:.96rem;
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
 }
+
+input::placeholder{ color:#7d8590; }
 
 input:focus{
-    outline:none;
-    border-color:#7efaff;
+    border-color:#5f94e8;
+    box-shadow:0 0 0 3px rgba(26,115,232,.15);
+    background:#12151c;
 }
 
-.primary-btn{
-    background:var(--success);
+.icon-btn{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    width:34px;
+    height:34px;
+    border:none;
+    border-radius:10px;
+    background:transparent;
+    color:var(--soft);
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+}
+
+.icon-btn:hover{
+    background:rgba(255,255,255,.06);
+    color:#fff;
+}
+
+.btn{
+    width:100%;
+    min-height:44px;
+    border:none;
+    border-radius:10px;
+    font-weight:700;
+    font-size:.95rem;
+    cursor:pointer;
+    transition:transform .16s ease, filter .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+.btn:active{ transform:translateY(1px); }
+
+.btn-primary{
+    background:var(--blue-2);
     color:white;
-    margin-top:4px;
+    box-shadow:0 10px 24px rgba(26,115,232,.20);
 }
 
-.signin-btn{
-    background:var(--primary);
-    margin-top:10px;
+.btn-primary:hover{ background:var(--blue-3); }
+
+.btn-secondary{
+    background:#20242d;
+    color:var(--text);
+    border:1px solid var(--line);
+}
+
+.btn-secondary:hover{ background:#252a35; }
+
+.btn-white{
+    background:#fff;
+    color:#202124;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+}
+
+.btn-white:hover{ background:#f8f9fa; }
+
+.google-mark{
+    width:18px;
+    height:18px;
+    display:inline-block;
+    flex:0 0 auto;
+}
+
+.divider{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:18px 0 14px;
+    color:#7d8590;
+    font-size:.78rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+}
+
+.divider::before,
+.divider::after{
+    content:"";
+    height:1px;
+    flex:1;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
 }
 
 .status{
     display:none;
-    margin:12px 0;
-    padding:10px;
+    margin:14px 0 0;
+    padding:12px 14px;
     border-radius:10px;
+    font-size:.88rem;
+    line-height:1.45;
+    border:1px solid transparent;
+}
+
+.status.success{ display:block; background:rgba(129,201,149,.12); color:var(--green); border-color:rgba(129,201,149,.18); }
+.status.error{ display:block; background:rgba(242,139,130,.12); color:var(--red); border-color:rgba(242,139,130,.18); }
+.status.info{ display:block; background:rgba(138,180,248,.11); color:#cfe0ff; border-color:rgba(138,180,248,.16); }
+
+.small-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:center;
+    margin-top:12px;
+    font-size:.84rem;
+    color:var(--muted);
+}
+
+.link{
+    color:#cbd5e1;
+    cursor:pointer;
+    text-decoration:none;
+}
+
+.link:hover{ color:var(--blue); }
+
+.inline-actions{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-top:10px;
+    flex-wrap:wrap;
+}
+
+.resend-btn{
+    display:none;
+    width:100%;
+    min-height:44px;
+    border:1px solid var(--line);
+    background:#161a22;
+    color:#e8eaed;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.resend-btn:hover{ background:#1c212b; }
+
+.micro{
+    margin-top:12px;
+    color:#7d8590;
+    font-size:.8rem;
+    line-height:1.5;
+}
+
+.panel-side{
+    padding:34px;
+    background:
+        radial-gradient(circle at top right, rgba(26,115,232,.13), transparent 24%),
+        linear-gradient(180deg, rgba(18,21,27,.92), rgba(14,16,20,.92));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.dashboard{
+    width:100%;
+    max-width:560px;
+}
+
+.dashboard-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:18px;
+}
+
+.user-chip{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    border-radius:999px;
+    background:#151922;
+    border:1px solid var(--line);
+}
+
+.user-avatar{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:linear-gradient(135deg, #1a73e8, #8ab4f8);
+    display:grid;
+    place-items:center;
+    font-weight:700;
+    color:#fff;
+}
+
+.user-meta{
+    display:flex;
+    flex-direction:column;
+    line-height:1.1;
+}
+
+.user-meta span:first-child{
     font-size:.85rem;
+    font-weight:700;
 }
 
-.status.success{
-    display:block;
-    background:rgba(16,185,129,.15);
-    color:var(--success);
-}
-
-.status.error{
-    display:block;
-    background:rgba(239,68,68,.15);
-    color:var(--error);
-}
-
-.footer{
-    margin-top:24px;
-    padding-top:18px;
-    border-top:1px solid rgba(255,255,255,.05);
-    color:#64748b;
+.user-meta span:last-child{
     font-size:.75rem;
+    color:var(--muted);
 }
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:14px;
+}
+
+.card-box{
+    background:#151922;
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:18px;
+    min-height:132px;
+}
+
+.card-box h3{
+    margin:0 0 8px;
+    font-size:1rem;
+}
+
+.card-box p{
+    margin:0;
+    color:var(--muted);
+    line-height:1.55;
+    font-size:.9rem;
+}
+
+.stat{
+    margin-top:14px;
+    font-size:1.7rem;
+    font-weight:900;
+    letter-spacing:-.04em;
+}
+
+.tools-list{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:12px;
+    margin-top:14px;
+}
+
+.tool-item{
+    padding:14px;
+    border-radius:14px;
+    background:#1a1f29;
+    border:1px solid var(--line);
+}
+
+.tool-item .name{
+    font-weight:700;
+    margin-bottom:6px;
+}
+
+.tool-item .desc{
+    color:var(--muted);
+    font-size:.84rem;
+    line-height:1.45;
+}
+
+.topbar{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+}
+
+.top-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.pill-btn{
+    border:1px solid var(--line);
+    background:#151922;
+    color:#e8eaed;
+    border-radius:999px;
+    padding:10px 14px;
+    cursor:pointer;
+    font-size:.88rem;
+}
+
+.pill-btn:hover{ background:#1d2230; }
+
+.hidden{ display:none !important; }
 
 .loading{
-    opacity:.7;
+    opacity:.75;
     pointer-events:none;
 }
 
-@media(max-width:480px){
-    .card{
-        padding:28px 22px;
-    }
+.loading::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:rgba(0,0,0,.05);
+}
+
+@media (max-width: 980px){
+    body{ overflow:auto; }
+    .shell{ grid-template-columns:1fr; max-width:760px; }
+    .auth-side{ border-right:none; border-bottom:1px solid rgba(255,255,255,.06); }
+    .panel-side{ min-height:420px; }
+}
+
+@media (max-width: 640px){
+    .app{ padding:14px; }
+    .auth-side,.panel-side{ padding:22px; }
+    .shell{ border-radius:20px; }
+    h1{ font-size:1.72rem; }
+    .dashboard-grid,.tools-list{ grid-template-columns:1fr; }
+    .topbar{ align-items:flex-start; }
 }
 </style>
 </head>
 <body>
+<div class="app">
+    <div class="shell">
+        <section class="auth-side" id="authView">
+            <div class="auth-card">
+                <div class="brand-row">
+                    <div class="brand">
+                        <img src="logo.png" alt="Toolify logo">
+                        <div class="brand-text">
+                            <div class="brand-title">Toolify</div>
+                            <div class="brand-sub">Google-style auth</div>
+                        </div>
+                    </div>
+                    <div class="badge">Private SaaS</div>
+                </div>
 
-<div class="card">
+                <div class="step-wrap">
+                    <div class="step active" id="stepEmail">
+                        <div class="hero">
+                            <div class="icon">T</div>
+                            <h1>Sign in</h1>
+                            <p class="subtitle">Use your Toolify account. Fast access, clean login, and email verification.</p>
+                        </div>
 
-    <div class="logo">🛠️</div>
+                        <button class="btn btn-white" id="google-login-btn" type="button">
+                            <svg class="google-mark" viewBox="0 0 48 48" aria-hidden="true">
+                                <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.6 33 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34.1 5.7 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.2-.4-3.5z"/>
+                                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15 18.9 12 24 12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34.1 5.7 29.4 4 24 4 16.2 4 9.4 8.4 6.3 14.7z"/>
+                                <path fill="#4CAF50" d="M24 44c5.3 0 10.1-1.8 13.8-4.9l-6.4-5.2C29.5 35.7 26.9 36.8 24 36.8c-5.2 0-9.5-3.3-11.1-7.9l-6.5 5C9.4 39.6 16.2 44 24 44z"/>
+                                <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.4 4.1-5.4 6.8-10 6.8-3.5 0-6.6-1.2-8.9-3.2l-6.5 5C12.2 40.8 17.7 44 24 44c11.1 0 20-8.9 20-20 0-1.3-.1-2.2-.4-3.5z"/>
+                            </svg>
+                            Sign in with Google
+                        </button>
 
-    <span class="tag">Personal Portfolio Project</span>
+                        <div class="divider">or use email</div>
 
-    <h1>Toolify Login</h1>
+                        <div class="form">
+                            <div class="field">
+                                <input type="email" id="email-input" placeholder="Email address" autocomplete="email" spellcheck="false" />
+                            </div>
+                            <button class="btn btn-primary" id="continue-btn" type="button">Continue</button>
+                        </div>
 
-    <p class="subtitle">
-        Sign in to access your tools and settings.
-    </p>
+                        <div id="status" class="status"></div>
+                        <div class="micro">By continuing, you agree to Toolify access rules. Verification is required for email accounts.</div>
+                    </div>
 
-    <button class="google-btn" id="google-login-btn">
-        Continue with Google
-    </button>
+                    <div class="step" id="stepPassword">
+                        <div class="hero">
+                            <div class="icon">🔒</div>
+                            <h1>Welcome back</h1>
+                            <p class="subtitle" id="emailLabel">Enter your password to continue.</p>
+                        </div>
 
-    <div class="divider">OR</div>
+                        <div class="form">
+                            <div class="field">
+                                <input type="password" id="password-input" placeholder="Password" autocomplete="current-password" />
+                                <button class="icon-btn" id="toggle-password" type="button" aria-label="Show password">👁️</button>
+                            </div>
 
-    <input
-        type="email"
-        id="email-input"
-        placeholder="Email Address"
-        autocomplete="email"
-    >
+                            <button class="btn btn-primary" id="login-btn" type="button">Sign in</button>
+                            <button class="btn btn-secondary" id="back-btn" type="button">Back</button>
 
-    <input
-        type="password"
-        id="password-input"
-        placeholder="Password"
-        autocomplete="current-password"
-    >
+                            <button class="btn btn-secondary" id="signup-btn" type="button">Create account</button>
 
-    <div id="status" class="status"></div>
+                            <div class="small-row">
+                                <a class="link" href="#" id="forgot-link">Forgot password?</a>
+                                <a class="link" href="#" id="resend-link">Resend verification</a>
+                            </div>
 
-    <button class="primary-btn" id="signup-btn">
-        Create Account
-    </button>
+                            <button class="resend-btn" id="resend-btn" type="button">Resend verification email</button>
+                        </div>
 
-    <button class="primary-btn signin-btn" id="signin-btn">
-        Sign In
-    </button>
+                        <div id="status2" class="status"></div>
+                        <div class="micro">Email accounts must be verified before dashboard access. Google sign-in skips this step because the provider already verified the email.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <div class="footer">
-        Powered by Firebase Authentication
+        <section class="panel-side hidden" id="dashboardView">
+            <div class="dashboard">
+                <div class="topbar">
+                    <div>
+                        <div style="color:#9aa0a6;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px;">Toolify home</div>
+                        <h1 style="margin:0;font-size:2rem;line-height:1.08;">Dashboard</h1>
+                    </div>
+                    <div class="top-actions">
+                        <button class="pill-btn" id="refreshBtn" type="button">Refresh</button>
+                        <button class="pill-btn" id="logoutBtn" type="button">Log out</button>
+                    </div>
+                </div>
+
+                <div class="user-chip" style="margin-bottom:16px;">
+                    <div class="user-avatar" id="userAvatar">T</div>
+                    <div class="user-meta">
+                        <span id="userName">Toolify user</span>
+                        <span id="userEmail">Signed in</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card-box">
+                        <h3>Account status</h3>
+                        <p id="accountStatusText">Verified account ready for use.</p>
+                        <div class="stat" id="accountStat">Active</div>
+                    </div>
+                    <div class="card-box">
+                        <h3>Quick access</h3>
+                        <p>Open your daily tools, saved settings, and personal workspace.</p>
+                        <div class="stat">Ready</div>
+                    </div>
+                </div>
+
+                <div class="card-box" style="margin-top:14px;">
+                    <h3 style="margin-bottom:10px;">Toolify services</h3>
+                    <div class="tools-list">
+                        <div class="tool-item">
+                            <div class="name">Notes</div>
+                            <div class="desc">Capture thoughts, tasks, and ideas.</div>
+                        </div>
+                        <div class="tool-item">
+                            <div class="name">Tracker</div>
+                            <div class="desc">Track habits and daily progress.</div>
+                        </div>
+                        <div class="tool-item">
+                            <div class="name">Saved items</div>
+                            <div class="desc">Keep important content organized.</div>
+                        </div>
+                        <div class="tool-item">
+                            <div class="name">Settings</div>
+                            <div class="desc">Manage profile and preferences.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
-
 </div>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
 import {
     getAuth,
     GoogleAuthProvider,
     signInWithPopup,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    onAuthStateChanged,
+    sendPasswordResetEmail,
     sendEmailVerification,
-    signOut
+    onAuthStateChanged,
+    signOut,
+    updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
 
 const firebaseConfig = {
   apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
@@ -255,161 +737,382 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+const authView = document.getElementById('authView');
+const dashboardView = document.getElementById('dashboardView');
+const stepEmail = document.getElementById('stepEmail');
+const stepPassword = document.getElementById('stepPassword');
+const emailInput = document.getElementById('email-input');
+const passwordInput = document.getElementById('password-input');
+const emailLabel = document.getElementById('emailLabel');
+const status = document.getElementById('status');
+const status2 = document.getElementById('status2');
+const resendBtn = document.getElementById('resend-btn');
+const resendLink = document.getElementById('resend-link');
+const forgotLink = document.getElementById('forgot-link');
+const togglePasswordBtn = document.getElementById('toggle-password');
+const userAvatar = document.getElementById('userAvatar');
+const userName = document.getElementById('userName');
+const userEmail = document.getElementById('userEmail');
+const accountStatusText = document.getElementById('accountStatusText');
+const accountStat = document.getElementById('accountStat');
 
-/* =========================
-   HELPERS
-========================= */
+let pendingEmail = '';
+let stepLocked = false;
 
-function getRedirectPage(){
-    const params = new URLSearchParams(window.location.search);
-    return params.get("redirect") || "index.html";
+function showLoading(on){
+    document.body.classList.toggle('loading', !!on);
 }
 
-function showStatus(message,type){
-    const status=document.getElementById("status");
-    status.textContent=message;
-    status.className=`status ${type}`;
+function showStatus(message, type = 'info', target = 1){
+    const el = target === 2 ? status2 : status;
+    el.textContent = message;
+    el.className = `status ${type}`;
 }
 
-function setLoading(state){
-    document.body.classList.toggle("loading",state);
+function clearStatus(target = 1){
+    const el = target === 2 ? status2 : status;
+    el.textContent = '';
+    el.className = 'status';
 }
 
+function friendlyAuthMessage(error){
+    const map = {
+        'auth/invalid-email': 'Enter a valid email address.',
+        'auth/user-not-found': 'No account found for this email.',
+        'auth/wrong-password': 'Incorrect password.',
+        'auth/invalid-credential': 'Email or password is incorrect.',
+        'auth/email-already-in-use': 'This email already has an account.',
+        'auth/weak-password': 'Password must be at least 6 characters.',
+        'auth/popup-closed-by-user': 'Google sign-in was closed before completion.',
+        'auth/unauthorized-domain': 'This domain is not authorized in Firebase or Google settings.',
+        'auth/operation-not-allowed': 'Enable this sign-in method in Firebase Authentication.',
+        'auth/network-request-failed': 'Network error. Check your connection and try again.',
+        'auth/too-many-requests': 'Too many attempts. Try again later.'
+    };
+    return map[error?.code] || error?.message || 'Something went wrong.';
+}
 
-/* =========================
-   AUTO CHECK LOGIN
-========================= */
+function validateEmail(value){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
 
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
+function setStep(step){
+    stepLocked = true;
+    const showPassword = step === 'password';
 
-        await user.reload();
+    if(showPassword){
+        stepEmail.classList.remove('active');
+        stepEmail.classList.add('exit-left');
+        stepPassword.classList.remove('exit-right');
+        stepPassword.classList.add('active');
+        setTimeout(() => {
+            stepEmail.classList.remove('exit-left');
+            stepLocked = false;
+        }, 260);
+        passwordInput.focus();
+    }else{
+        stepPassword.classList.remove('active');
+        stepPassword.classList.add('exit-right');
+        stepEmail.classList.remove('exit-left');
+        stepEmail.classList.add('active');
+        setTimeout(() => {
+            stepPassword.classList.remove('exit-right');
+            stepLocked = false;
+        }, 260);
+        emailInput.focus();
+    }
+}
 
-        // BLOCK UNVERIFIED USERS
-        if (!user.emailVerified && user.providerData[0]?.providerId === "password") {
+function normalizeNameFromEmail(email){
+    const local = (email || '').split('@')[0];
+    if(!local) return 'Toolify user';
+    return local
+        .replace(/[._-]+/g, ' ')
+        .replace(/\b\w/g, c => c.toUpperCase())
+        .slice(0, 32);
+}
+
+function setDashboardUser(user){
+    const displayName = user.displayName || normalizeNameFromEmail(user.email);
+    userName.textContent = displayName;
+    userEmail.textContent = user.email || 'Signed in';
+    userAvatar.textContent = (displayName || 'T').trim().charAt(0).toUpperCase();
+
+    const verified = !!user.emailVerified || user.providerData.some(p => p.providerId !== 'password');
+    accountStatusText.textContent = verified ? 'Verified account ready for use.' : 'Email verification is required.';
+    accountStat.textContent = verified ? 'Active' : 'Pending';
+}
+
+function showAuthScreen(){
+    authView.classList.remove('hidden');
+    dashboardView.classList.add('hidden');
+}
+
+function showDashboard(user){
+    authView.classList.add('hidden');
+    dashboardView.classList.remove('hidden');
+    setDashboardUser(user);
+}
+
+async function requireVerifiedEmail(user){
+    await user.reload();
+    const passwordProvider = user.providerData.some(p => p.providerId === 'password');
+    if(passwordProvider && !user.emailVerified){
+        await signOut(auth);
+        resendBtn.style.display = 'block';
+        showStatus('Verify your email first. Check your inbox.', 'error', 2);
+        return false;
+    }
+    resendBtn.style.display = 'none';
+    return true;
+}
+
+function updateStepPrompt(){
+    if(pendingEmail){
+        emailLabel.textContent = pendingEmail;
+    }else{
+        emailLabel.textContent = 'Enter your password to continue.';
+    }
+}
+
+async function continueFlow(){
+    const email = emailInput.value.trim();
+    if(!email){
+        showStatus('Enter your email address first.', 'error');
+        return;
+    }
+    if(!validateEmail(email)){
+        showStatus('Enter a valid email address.', 'error');
+        return;
+    }
+
+    pendingEmail = email;
+    updateStepPrompt();
+    clearStatus();
+    setStep('password');
+}
+
+async function loginFlow(){
+    const email = (pendingEmail || emailInput.value).trim();
+    const password = passwordInput.value;
+
+    if(!email || !password){
+        showStatus('Enter your email and password.', 'error', 2);
+        return;
+    }
+
+    try{
+        showLoading(true);
+        clearStatus(2);
+
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        await userCredential.user.reload();
+
+        if(!userCredential.user.emailVerified){
             await signOut(auth);
-            showStatus("Verify your email first. Check inbox.", "error");
+            resendBtn.style.display = 'block';
+            showStatus('Please verify your email first.', 'error', 2);
             return;
         }
 
-        window.location.href = getRedirectPage();
+        showDashboard(userCredential.user);
+    }catch(error){
+        showStatus(friendlyAuthMessage(error), 'error', 2);
+    }finally{
+        showLoading(false);
     }
-});
+}
 
+async function signupFlow(){
+    const email = (pendingEmail || emailInput.value).trim();
+    const password = passwordInput.value;
 
-/* =========================
-   GOOGLE LOGIN
-========================= */
+    if(!email || !password){
+        showStatus('Enter your email and password.', 'error', 2);
+        return;
+    }
+    if(!validateEmail(email)){
+        showStatus('Enter a valid email address.', 'error', 2);
+        return;
+    }
+    if(password.length < 6){
+        showStatus('Password must be at least 6 characters.', 'error', 2);
+        return;
+    }
 
-document.getElementById("google-login-btn")
-.addEventListener("click", async () => {
+    try{
+        showLoading(true);
+        clearStatus(2);
 
-    try {
-        setLoading(true);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(userCredential.user);
+        await signOut(auth);
+
+        pendingEmail = email;
+        updateStepPrompt();
+        resendBtn.style.display = 'block';
+        showStatus('Verification email sent. Check your inbox.', 'success', 2);
+    }catch(error){
+        showStatus(friendlyAuthMessage(error), 'error', 2);
+    }finally{
+        showLoading(false);
+    }
+}
+
+async function resendVerification(){
+    const email = (pendingEmail || emailInput.value).trim();
+    const password = passwordInput.value;
+
+    try{
+        showLoading(true);
+        clearStatus(2);
+
+        let user = auth.currentUser;
+
+        if(!user){
+            if(!email || !password){
+                showStatus('Enter the same email and password to resend verification.', 'error', 2);
+                return;
+            }
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            user = userCredential.user;
+        }
+
+        await user.reload();
+        if(user.emailVerified){
+            showStatus('This email is already verified.', 'success', 2);
+            resendBtn.style.display = 'none';
+            return;
+        }
+
+        await sendEmailVerification(user);
+        pendingEmail = user.email || email;
+        await signOut(auth);
+        showStatus('Verification email resent. Check inbox.', 'success', 2);
+        resendBtn.style.display = 'block';
+    }catch(error){
+        showStatus(friendlyAuthMessage(error), 'error', 2);
+    }finally{
+        showLoading(false);
+    }
+}
+
+async function resetPassword(){
+    const email = (pendingEmail || emailInput.value).trim();
+    if(!email || !validateEmail(email)){
+        showStatus('Enter your email first to reset the password.', 'error', 2);
+        return;
+    }
+
+    try{
+        showLoading(true);
+        clearStatus(2);
+        await sendPasswordResetEmail(auth, email);
+        showStatus('Password reset email sent.', 'success', 2);
+    }catch(error){
+        showStatus(friendlyAuthMessage(error), 'error', 2);
+    }finally{
+        showLoading(false);
+    }
+}
+
+/* BUTTONS */
+document.getElementById('google-login-btn').addEventListener('click', async () => {
+    try{
+        showLoading(true);
+        clearStatus();
+        clearStatus(2);
 
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
-
-        window.location.href = getRedirectPage();
-
-    } catch (error) {
-        showStatus(error.message, "error");
-    } finally {
-        setLoading(false);
+    }catch(error){
+        showStatus(friendlyAuthMessage(error), 'error');
+    }finally{
+        showLoading(false);
     }
-
 });
 
+document.getElementById('continue-btn').addEventListener('click', continueFlow);
+document.getElementById('login-btn').addEventListener('click', loginFlow);
+document.getElementById('signup-btn').addEventListener('click', signupFlow);
+document.getElementById('back-btn').addEventListener('click', () => {
+    if(stepLocked) return;
+    clearStatus(2);
+    setStep('email');
+});
 
-/* =========================
-   SIGN UP (WITH EMAIL VERIFY FIX)
-========================= */
+togglePasswordBtn.addEventListener('click', () => {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    togglePasswordBtn.textContent = isPassword ? '🙈' : '👁️';
+    togglePasswordBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+});
 
-document.getElementById("signup-btn")
-.addEventListener("click", async () => {
+resendLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    resendVerification();
+});
 
-    const email = document.getElementById("email-input").value.trim();
-    const password = document.getElementById("password-input").value;
+forgotLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    resetPassword();
+});
 
-    if (!email || !password) {
-        showStatus("Please enter email and password.", "error");
-        return;
+resendBtn.addEventListener('click', resendVerification);
+
+document.getElementById('refreshBtn').addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if(user){
+        await user.reload();
+        setDashboardUser(user);
     }
+});
 
-    if (password.length < 6) {
-        showStatus("Password must be at least 6 characters.", "error");
-        return;
-    }
-
-    try {
-        setLoading(true);
-
-        const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-
-        // SEND VERIFICATION EMAIL (IMPORTANT FIX)
-        await sendEmailVerification(userCredential.user);
-
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    try{
+        showLoading(true);
         await signOut(auth);
-
-        showStatus("Verification email sent. Check inbox.", "success");
-
-    } catch (error) {
-        showStatus(error.message, "error");
-    } finally {
-        setLoading(false);
+        pendingEmail = '';
+        passwordInput.value = '';
+        emailInput.value = '';
+        resendBtn.style.display = 'none';
+        clearStatus();
+        clearStatus(2);
+        setStep('email');
+        showAuthScreen();
+    }finally{
+        showLoading(false);
     }
-
 });
 
+/* ENTER KEY SUPPORT */
+emailInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') continueFlow();
+});
 
-/* =========================
-   SIGN IN (BLOCK UNVERIFIED)
-========================= */
+passwordInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') loginFlow();
+});
 
-document.getElementById("signin-btn")
-.addEventListener("click", async () => {
-
-    const email = document.getElementById("email-input").value.trim();
-    const password = document.getElementById("password-input").value;
-
-    if (!email || !password) {
-        showStatus("Please enter email and password.", "error");
+/* AUTH STATE */
+onAuthStateChanged(auth, async (user) => {
+    if(!user){
+        showAuthScreen();
         return;
     }
 
-    try {
-        setLoading(true);
-
-        const userCredential = await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-
-        await userCredential.user.reload();
-
-        if (!userCredential.user.emailVerified) {
-            await signOut(auth);
-            showStatus("Please verify your email first.", "error");
-            return;
-        }
-
-        window.location.href = getRedirectPage();
-
-    } catch (error) {
-        showStatus(error.message, "error");
-    } finally {
-        setLoading(false);
+    const ok = await requireVerifiedEmail(user);
+    if(!ok){
+        showAuthScreen();
+        return;
     }
 
+    showDashboard(user);
 });
 
+/* INITIAL */
+showAuthScreen();
+updateStepPrompt();
 </script>
-
 </body>
 </html>
-```
