@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toolify | Converter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== TOKENS ===== */
+        [data-theme="dark"] {
+            --bg: #0d0e1a;
+            --surface: #13152a;
+            --surface2: #1a1d35;
+            --border: #252847;
+            --text: #e8eaf6;
+            --muted: #7880b0;
+            --shadow: 0 4px 24px rgba(0,0,0,0.5);
+        }
+        [data-theme="light"] {
+            --bg: #f0f2ff;
+            --surface: #ffffff;
+            --surface2: #eceeff;
+            --border: #d4d6f0;
+            --text: #1a1d35;
+            --muted: #6b6f90;
+            --shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+
+        /* Category accent colors */
+        .cat-length   { --cat: #22d3ee; --cat-bg: rgba(34,211,238,0.1); }
+        .cat-weight   { --cat: #fb923c; --cat-bg: rgba(251,146,60,0.1); }
+        .cat-temp     { --cat: #f43f5e; --cat-bg: rgba(244,63,94,0.1); }
+        .cat-area     { --cat: #a78bfa; --cat-bg: rgba(167,139,250,0.1); }
+        .cat-speed    { --cat: #facc15; --cat-bg: rgba(250,204,21,0.1); }
+        .cat-data     { --cat: #34d399; --cat-bg: rgba(52,211,153,0.1); }
+        .cat-currency { --cat: #4ade80; --cat-bg: rgba(74,222,128,0.1); }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-top: 68px;
+            padding-bottom: 40px;
+            transition: background 0.3s, color 0.3s;
+            visibility: hidden;
+        }
+
+        /* ===== NAV ===== */
+        nav {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center;
+            padding: 0 clamp(16px, 4vw, 48px);
+            z-index: 100; gap: 12px;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .logo { font-weight: 700; font-size: 1.1rem; color: #6c63ff; text-decoration: none; letter-spacing: -0.5px; }
+        .logo span { color: var(--text); }
+        .nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+        .back-btn {
+            color: #f43f5e; font-size: 0.82rem; font-weight: 600;
+            text-decoration: none; padding: 6px 12px;
+            border-radius: 8px; border: 1px solid rgba(244,63,94,0.3);
+            transition: background 0.2s;
+        }
+        .back-btn:hover { background: rgba(244,63,94,0.1); }
+        .theme-btn {
+            width: 36px; height: 36px; border-radius: 9px;
+            border: 1px solid var(--border); background: var(--surface2);
+            color: var(--text); cursor: pointer; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color 0.2s;
+        }
+        .theme-btn:hover { border-color: #6c63ff; }
+
+        /* ===== PAGE ===== */
+        .page { max-width: 860px; margin: 0 auto; padding: 28px 16px; }
+
+        .page-header { text-align: center; margin-bottom: 28px; }
+        .page-header h1 {
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            font-weight: 700; letter-spacing: -1px;
+            color: var(--text);
+        }
+        .page-header p { color: var(--muted); font-size: 0.88rem; margin-top: 6px; }
+
+        /* ===== CATEGORY TABS ===== */
+        .cat-tabs {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            justify-content: center; margin-bottom: 28px;
+        }
+        .cat-tab {
+            padding: 7px 16px; border-radius: 20px;
+            border: 1.5px solid var(--border);
+            background: var(--surface2);
+            color: var(--muted); font-size: 0.82rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .cat-tab:hover { border-color: var(--cat); color: var(--cat); }
+        .cat-tab.active {
+            background: var(--cat-bg);
+            border-color: var(--cat);
+            color: var(--cat);
+        }
+
+        /* ===== CONVERTER CARD ===== */
+        .converter-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        /* Unit selectors */
+        .unit-selectors {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 12px; align-items: center;
+            margin-bottom: 20px;
+        }
+        .unit-box { display: flex; flex-direction: column; gap: 8px; }
+        .unit-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+        .unit-select {
+            width: 100%; padding: 12px 14px;
+            border-radius: 14px; border: 1.5px solid var(--border);
+            background: var(--surface2); color: var(--text);
+            font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600;
+            outline: none; cursor: pointer;
+            transition: border-color 0.2s, background 0.3s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237880b0' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+        .unit-select:focus { border-color: var(--cat, #6c63ff); }
+        [data-theme="dark"] .unit-select option { background: #1a1d35; }
+
+        /* Swap button */
+        .swap-btn {
+            width: 44px; height: 44px; border-radius: 12px;
+            border: 1.5px solid var(--border);
+            background: var(--surface2); color: var(--text);
+            cursor: pointer; font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0; margin-top: 20px;
+        }
+        .swap-btn:hover { border-color: var(--cat, #6c63ff); color: var(--cat, #6c63ff); transform: rotate(180deg); }
+
+        /* Input / Output */
+        .io-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px; margin-bottom: 16px;
+        }
+        .io-box { display: flex; flex-direction: column; gap: 6px; }
+        .io-input {
+            width: 100%; padding: 16px 18px;
+            border-radius: 16px; border: 2px solid var(--border);
+            background: var(--surface2); color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 700;
+            outline: none; transition: border-color 0.2s, background 0.3s;
+        }
+        .io-input:focus { border-color: var(--cat, #6c63ff); }
+        .io-input.output-field {
+            background: var(--cat-bg, rgba(108,99,255,0.08));
+            border-color: var(--cat, #6c63ff);
+            color: var(--cat, #6c63ff);
+            cursor: default;
+        }
+
+        /* Formula bar */
+        .formula-bar {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px; padding: 12px 16px;
+            font-size: 0.82rem; color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 12px; flex-wrap: wrap;
+            transition: background 0.3s;
+        }
+        .formula-text { flex: 1; }
+        .copy-btn {
+            padding: 6px 14px; border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface); color: var(--text);
+            font-size: 0.78rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .copy-btn:hover { border-color: var(--cat, #6c63ff); color: var(--cat, #6c63ff); }
+        .copy-btn.copied { border-color: #34d399; color: #34d399; }
+
+        /* Currency note */
+        .currency-note {
+            font-size: 0.75rem; color: var(--muted);
+            text-align: center; margin-top: 10px;
+            display: none;
+        }
+        .currency-note.show { display: block; }
+        .rate-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 0.72rem; padding: 3px 8px; border-radius: 6px;
+            background: rgba(74,222,128,0.1); color: #4ade80;
+            font-weight: 600;
+        }
+
+        /* ===== ALL-RESULTS GRID ===== */
+        .all-results {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+        }
+        .result-chip {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 12px 14px;
+            cursor: pointer; transition: border-color 0.2s;
+        }
+        .result-chip:hover { border-color: var(--cat, #6c63ff); }
+        .result-chip .rc-unit { font-size: 0.72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; }
+        .result-chip .rc-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem; font-weight: 700; color: var(--text);
+            margin-top: 3px; word-break: break-all;
+        }
+
+        /* ===== HISTORY ===== */
+        .history-section { margin-top: 28px; }
+        .history-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px;
+        }
+        .history-title { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+        .clear-hist {
+            font-size: 0.75rem; color: #f43f5e; background: none; border: none;
+            cursor: pointer; font-weight: 600;
+        }
+        .history-list { display: flex; flex-direction: column; gap: 6px; }
+        .hist-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px; padding: 10px 14px;
+            font-size: 0.82rem; display: flex; justify-content: space-between;
+            align-items: center; gap: 12px; cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .hist-item:hover { border-color: var(--cat, #6c63ff); }
+        .hist-expr { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .hist-cat { font-size: 0.7rem; color: var(--muted); flex-shrink: 0; }
+        .hist-empty { color: var(--muted); font-size: 0.82rem; text-align: center; padding: 16px; }
+
+        /* ===== TOAST ===== */
+        #toast {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(12px);
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 10px 20px; border-radius: 10px;
+            font-size: 0.83rem; font-weight: 500;
+            box-shadow: var(--shadow); opacity: 0;
+            transition: opacity 0.25s, transform 0.25s; z-index: 999;
+            pointer-events: none; white-space: nowrap;
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .unit-selectors { grid-template-columns: 1fr; }
+            .swap-btn { margin: 0 auto; transform: rotate(90deg); }
+            .swap-btn:hover { transform: rotate(270deg); }
+            .io-row { grid-template-columns: 1fr; }
+            .io-input { font-size: 1.3rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html" class="logo">TOOL<span>IFY</span></a>
+    <div class="nav-right">
+        <a href="index.html" class="back-btn">← Hub</a>
+        <button class="theme-btn" id="themeBtn">🌙</button>
+    </div>
+</nav>
+
+<div id="toast"></div>
+
+<div class="page">
+    <div class="page-header">
+        <h1>💸 Converter</h1>
+        <p>Units, measurements & live currency — all in one place</p>
+    </div>
+
+    <!-- Category tabs -->
+    <div class="cat-tabs" id="catTabs"></div>
+
+    <!-- Main converter card -->
+    <div class="converter-card">
+        <!-- Unit selectors -->
+        <div class="unit-selectors">
+            <div class="unit-box">
+                <div class="unit-label">From</div>
+                <select class="unit-select" id="fromUnit" onchange="convert()"></select>
+            </div>
+            <button class="swap-btn" onclick="swapUnits()" title="Swap units">⇄</button>
+            <div class="unit-box">
+                <div class="unit-label">To</div>
+                <select class="unit-select" id="toUnit" onchange="convert()"></select>
+            </div>
+        </div>
+
+        <!-- Input / Output -->
+        <div class="io-row">
+            <div class="io-box">
+                <div class="unit-label">Value</div>
+                <input class="io-input" type="number" id="inputVal" value="1" oninput="convert()" placeholder="Enter value">
+            </div>
+            <div class="io-box">
+                <div class="unit-label">Result</div>
+                <input class="io-input output-field" type="text" id="outputVal" readonly placeholder="—">
+            </div>
+        </div>
+
+        <!-- Formula bar -->
+        <div class="formula-bar">
+            <span class="formula-text" id="formulaText">Select units to see the formula</span>
+            <button class="copy-btn" id="copyBtn" onclick="copyResult()">Copy</button>
+        </div>
+
+        <!-- Currency rate info -->
+        <div class="currency-note" id="currencyNote">
+            <span id="rateInfo">Fetching live rates…</span>
+        </div>
+
+        <!-- All-units result grid -->
+        <div class="all-results" id="allResults"></div>
+    </div>
+
+    <!-- History -->
+    <div class="history-section">
+        <div class="history-header">
+            <span class="history-title">Recent conversions</span>
+            <button class="clear-hist" onclick="clearHistory()">Clear all</button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script>
+// ==================== THEME ====================
+let isDark = localStorage.getItem('toolify-theme') !== 'light';
+const themeBtn = document.getElementById('themeBtn');
+function applyTheme() {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    themeBtn.textContent = isDark ? '☀️' : '🌙';
+    localStorage.setItem('toolify-theme', isDark ? 'dark' : 'light');
+}
+themeBtn.onclick = () => { isDark = !isDark; applyTheme(); };
+applyTheme();
+document.body.style.visibility = 'visible';
+
+// ==================== DATA ====================
+const CATEGORIES = [
+    {
+        id: 'length', label: 'Length', icon: '📏', cls: 'cat-length',
+        units: {
+            Millimeter: 0.001, Centimeter: 0.01, Meter: 1, Kilometer: 1000,
+            Inch: 0.0254, Foot: 0.3048, Yard: 0.9144, Mile: 1609.344,
+            'Nautical Mile': 1852, Micrometer: 1e-6, Nanometer: 1e-9,
+            'Light Year': 9.461e15
+        }
+    },
+    {
+        id: 'weight', label: 'Weight', icon: '⚖️', cls: 'cat-weight',
+        units: {
+            Milligram: 1e-6, Gram: 0.001, Kilogram: 1, 'Metric Ton': 1000,
+            Ounce: 0.0283495, Pound: 0.453592, Stone: 6.35029,
+            'US Ton': 907.185, 'Imperial Ton': 1016.05, Microgram: 1e-9
+        }
+    },
+    {
+        id: 'temp', label: 'Temp', icon: '🌡️', cls: 'cat-temp',
+        units: { Celsius: 'C', Fahrenheit: 'F', Kelvin: 'K', Rankine: 'R' },
+        special: true
+    },
+    {
+        id: 'area', label: 'Area', icon: '🟦', cls: 'cat-area',
+        units: {
+            'Square mm': 1e-6, 'Square cm': 1e-4, 'Square m': 1,
+            'Square km': 1e6, 'Square inch': 6.4516e-4, 'Square foot': 0.092903,
+            'Square yard': 0.836127, Acre: 4046.86, Hectare: 10000,
+            'Square mile': 2.59e6
+        }
+    },
+    {
+        id: 'speed', label: 'Speed', icon: '🚀', cls: 'cat-speed',
+        units: {
+            'm/s': 1, 'km/h': 0.277778, 'mph': 0.44704,
+            Knot: 0.514444, 'ft/s': 0.3048, 'Mach (sea level)': 340.29,
+            'Speed of Light': 299792458
+        }
+    },
+    {
+        id: 'data', label: 'Data', icon: '💾', cls: 'cat-data',
+        units: {
+            Bit: 1/8, Byte: 1, Kilobyte: 1024, Megabyte: 1048576,
+            Gigabyte: 1073741824, Terabyte: 1099511627776,
+            Petabyte: 1.126e15, Kibibyte: 1024, Mebibyte: 1048576
+        }
+    },
+    {
+        id: 'currency', label: 'Currency', icon: '💱', cls: 'cat-currency',
+        currency: true,
+        units: {
+            USD: 1, EUR: 1, GBP: 1, INR: 1, JPY: 1, CNY: 1,
+            AUD: 1, CAD: 1, CHF: 1, HKD: 1, SGD: 1, AED: 1,
+            MXN: 1, BRL: 1, KRW: 1, SEK: 1, NOK: 1, DKK: 1,
+            NZD: 1, ZAR: 1, RUB: 1, TRY: 1, THB: 1, IDR: 1
+        }
+    }
+];
+
+// Currency flags
+const CURRENCY_FLAGS = {
+    USD:'🇺🇸', EUR:'🇪🇺', GBP:'🇬🇧', INR:'🇮🇳', JPY:'🇯🇵', CNY:'🇨🇳',
+    AUD:'🇦🇺', CAD:'🇨🇦', CHF:'🇨🇭', HKD:'🇭🇰', SGD:'🇸🇬', AED:'🇦🇪',
+    MXN:'🇲🇽', BRL:'🇧🇷', KRW:'🇰🇷', SEK:'🇸🇪', NOK:'🇳🇴', DKK:'🇩🇰',
+    NZD:'🇳🇿', ZAR:'🇿🇦', RUB:'🇷🇺', TRY:'🇹🇷', THB:'🇹🇭', IDR:'🇮🇩'
+};
+
+let activeCat = CATEGORIES[0];
+let fxRates = null;
+let fxUpdated = null;
+let history = JSON.parse(localStorage.getItem('toolify-conv-history') || '[]');
+
+// ==================== TEMPERATURE ====================
+function convertTemp(val, from, to) {
+    // To Celsius first
+    let c;
+    if (from === 'C') c = val;
+    else if (from === 'F') c = (val - 32) * 5/9;
+    else if (from === 'K') c = val - 273.15;
+    else if (from === 'R') c = (val - 491.67) * 5/9;
+    // Celsius to target
+    if (to === 'C') return c;
+    if (to === 'F') return c * 9/5 + 32;
+    if (to === 'K') return c + 273.15;
+    if (to === 'R') return (c + 273.15) * 9/5;
+}
+
+function tempFormula(from, to) {
+    const formulas = {
+        'CF': 'F = C × 9/5 + 32', 'CK': 'K = C + 273.15', 'CR': 'R = (C + 273.15) × 9/5',
+        'FC': 'C = (F − 32) × 5/9', 'FK': 'K = (F − 32) × 5/9 + 273.15', 'FR': 'R = F + 459.67',
+        'KC': 'C = K − 273.15', 'KF': 'F = (K − 273.15) × 9/5 + 32', 'KR': 'R = K × 9/5',
+        'RC': 'C = (R − 491.67) × 5/9', 'RF': 'F = R − 459.67', 'RK': 'K = R × 5/9'
+    };
+    return formulas[from[0]+to[0]] || 'Same unit — no conversion needed';
+}
+
+// ==================== CURRENCY ====================
+async function fetchRates() {
+    const cached = localStorage.getItem('toolify-fx');
+    const cachedTs = localStorage.getItem('toolify-fx-ts');
+    // Use cache if < 1 hour old
+    if (cached && cachedTs && Date.now() - parseInt(cachedTs) < 3600000) {
+        fxRates = JSON.parse(cached);
+        fxUpdated = new Date(parseInt(cachedTs));
+        updateCurrencyNote();
+        return;
+    }
+    try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        if (data.rates) {
+            fxRates = data.rates;
+            localStorage.setItem('toolify-fx', JSON.stringify(fxRates));
+            localStorage.setItem('toolify-fx-ts', Date.now().toString());
+            fxUpdated = new Date();
+            updateCurrencyNote();
+            if (activeCat.id === 'currency') convert();
+        }
+    } catch(e) {
+        document.getElementById('rateInfo').textContent = '⚠️ Could not fetch live rates — using cached data';
+    }
+}
+
+function updateCurrencyNote() {
+    const note = document.getElementById('currencyNote');
+    const info = document.getElementById('rateInfo');
+    if (activeCat.id === 'currency') {
+        note.classList.add('show');
+        if (fxUpdated) {
+            info.innerHTML = `<span class="rate-badge">● LIVE</span> Rates updated ${fxUpdated.toLocaleTimeString()} · Base: USD`;
+        }
+    } else {
+        note.classList.remove('show');
+    }
+}
+
+// ==================== CATEGORY TABS ====================
+function buildTabs() {
+    const tabs = document.getElementById('catTabs');
+    tabs.innerHTML = '';
+    CATEGORIES.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = `cat-tab ${cat.cls} ${cat === activeCat ? 'active' : ''}`;
+        btn.textContent = `${cat.icon} ${cat.label}`;
+        btn.onclick = () => selectCat(cat);
+        tabs.appendChild(btn);
+    });
+}
+
+function selectCat(cat) {
+    activeCat = cat;
+    buildTabs();
+    buildSelects();
+    updateCurrencyNote();
+    document.querySelector('.converter-card').className = `converter-card ${cat.cls}`;
+    if (cat.id === 'currency' && !fxRates) fetchRates();
+    convert();
+}
+
+// ==================== SELECTS ====================
+function buildSelects() {
+    const from = document.getElementById('fromUnit');
+    const to = document.getElementById('toUnit');
+    const units = Object.keys(activeCat.units);
+    from.innerHTML = to.innerHTML = '';
+    units.forEach((u, i) => {
+        const optF = document.createElement('option');
+        const optT = document.createElement('option');
+        const label = activeCat.currency ? `${CURRENCY_FLAGS[u] || ''} ${u}` : u;
+        optF.value = optT.value = u;
+        optF.textContent = optT.textContent = label;
+        from.appendChild(optF);
+        to.appendChild(optT);
+    });
+    // Default: first → second
+    from.value = units[0];
+    to.value = units[1] || units[0];
+}
+
+// ==================== CONVERT ====================
+function fmt(n) {
+    if (n === null || n === undefined || isNaN(n)) return '—';
+    if (Math.abs(n) >= 1e15 || (Math.abs(n) < 1e-10 && n !== 0)) return n.toExponential(6);
+    // Smart precision
+    if (Number.isInteger(n)) return n.toLocaleString();
+    return parseFloat(n.toPrecision(10)).toLocaleString(undefined, { maximumFractionDigits: 8 });
+}
+
+function convert() {
+    const val = parseFloat(document.getElementById('inputVal').value);
+    const fromU = document.getElementById('fromUnit').value;
+    const toU = document.getElementById('toUnit').value;
+    const out = document.getElementById('outputVal');
+    const formula = document.getElementById('formulaText');
+
+    if (isNaN(val)) { out.value = '—'; formula.textContent = 'Enter a number to convert'; return; }
+
+    let result;
+
+    if (activeCat.special) {
+        // Temperature
+        result = convertTemp(val, activeCat.units[fromU], activeCat.units[toU]);
+        formula.textContent = fromU === toU ? 'Same unit' : tempFormula(activeCat.units[fromU], activeCat.units[toU]);
+    } else if (activeCat.currency) {
+        if (!fxRates) { out.value = '…'; formula.textContent = 'Fetching live rates…'; return; }
+        const toUSD = val / fxRates[fromU];
+        result = toUSD * fxRates[toU];
+        const rate = fxRates[toU] / fxRates[fromU];
+        formula.textContent = `1 ${fromU} = ${fmt(rate)} ${toU}`;
+    } else {
+        const base = val * activeCat.units[fromU];
+        result = base / activeCat.units[toU];
+        const rate = activeCat.units[fromU] / activeCat.units[toU];
+        if (fromU === toU) formula.textContent = 'Same unit — no conversion needed';
+        else formula.textContent = `1 ${fromU} = ${fmt(rate)} ${toU}`;
+    }
+
+    out.value = fmt(result);
+    buildAllResults(val, fromU);
+
+    // Save to history (debounced via last entry check)
+    if (!isNaN(result) && fromU !== toU) {
+        const entry = {
+            expr: `${fmt(val)} ${fromU} = ${fmt(result)} ${toU}`,
+            cat: activeCat.label,
+            catCls: activeCat.cls,
+            ts: Date.now()
+        };
+        // Avoid duplicate last entry
+        if (!history.length || history[0].expr !== entry.expr) {
+            history.unshift(entry);
+            if (history.length > 20) history.pop();
+            localStorage.setItem('toolify-conv-history', JSON.stringify(history));
+            renderHistory();
+        }
+    }
+}
+
+// ==================== ALL RESULTS GRID ====================
+function buildAllResults(val, fromU) {
+    const grid = document.getElementById('allResults');
+    grid.innerHTML = '';
+    if (isNaN(val)) return;
+
+    const units = Object.keys(activeCat.units);
+    if (units.length <= 2) return;
+
+    units.forEach(u => {
+        if (u === fromU) return;
+        let result;
+        if (activeCat.special) {
+            result = convertTemp(val, activeCat.units[fromU], activeCat.units[u]);
+        } else if (activeCat.currency) {
+            if (!fxRates) return;
+            result = (val / fxRates[fromU]) * fxRates[u];
+        } else {
+            result = (val * activeCat.units[fromU]) / activeCat.units[u];
+        }
+        const chip = document.createElement('div');
+        chip.className = 'result-chip';
+        const flag = activeCat.currency ? (CURRENCY_FLAGS[u] || '') + ' ' : '';
+        chip.innerHTML = `<div class="rc-unit">${flag}${u}</div><div class="rc-val">${fmt(result)}</div>`;
+        chip.onclick = () => {
+            document.getElementById('toUnit').value = u;
+            document.getElementById('outputVal').value = fmt(result);
+            convert();
+        };
+        grid.appendChild(chip);
+    });
+}
+
+// ==================== HISTORY ====================
+function renderHistory() {
+    const list = document.getElementById('historyList');
+    if (!history.length) {
+        list.innerHTML = '<div class="hist-empty">No conversions yet</div>';
+        return;
+    }
+    list.innerHTML = '';
+    history.slice(0, 8).forEach(h => {
+        const item = document.createElement('div');
+        item.className = `hist-item ${h.catCls || ''}`;
+        item.innerHTML = `
+            <span class="hist-expr">${h.expr}</span>
+            <span class="hist-cat">${h.cat}</span>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function clearHistory() {
+    history = [];
+    localStorage.removeItem('toolify-conv-history');
+    renderHistory();
+    showToast('History cleared');
+}
+
+// ==================== SWAP ====================
+function swapUnits() {
+    const f = document.getElementById('fromUnit');
+    const t = document.getElementById('toUnit');
+    const tmp = f.value;
+    f.value = t.value;
+    t.value = tmp;
+    // Swap input/output values
+    const inVal = document.getElementById('inputVal');
+    const outVal = document.getElementById('outputVal');
+    const outNum = parseFloat(outVal.value.replace(/,/g, ''));
+    if (!isNaN(outNum)) inVal.value = outNum;
+    convert();
+}
+
+// ==================== COPY ====================
+function copyResult() {
+    const btn = document.getElementById('copyBtn');
+    const val = document.getElementById('inputVal').value;
+    const out = document.getElementById('outputVal').value;
+    const from = document.getElementById('fromUnit').value;
+    const to = document.getElementById('toUnit').value;
+    const text = `${val} ${from} = ${out} ${to}`;
+    navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        showToast('Copied to clipboard');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+}
+
+// ==================== TOAST ====================
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ==================== KEYBOARD ====================
+document.addEventListener('keydown', e => {
+    if (document.activeElement.tagName === 'INPUT') return;
+    if (e.key === 'Tab') { e.preventDefault(); swapUnits(); }
+});
+
+// ==================== INIT ====================
+buildTabs();
+buildSelects();
+document.querySelector('.converter-card').className = `converter-card ${activeCat.cls}`;
+convert();
+renderHistory();
+fetchRates();
+</script>
+<script type="module" src="/toolify/protect.js"></script>
+</body>
+</html>
