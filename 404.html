@@ -1,76 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Not Found | Toolify</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:Inter, Arial, sans-serif;
-        }
+<title>404 • Toolify</title>
 
-        body{
-            min-height:100vh;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            background:#0f172a;
-            color:white;
-            text-align:center;
-            padding:20px;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-        .container{
-            max-width:600px;
-        }
+<style>
 
-        h1{
-            font-size:120px;
-            margin-bottom:10px;
-        }
+:root{
+    --bg:#09090b;
+    --card:#111114;
+    --border:#232327;
+    --text:#fafafa;
+    --muted:#9ca3af;
+    --blue:#2563eb;
+    --blue-hover:#1d4ed8;
+}
 
-        h2{
-            font-size:32px;
-            margin-bottom:20px;
-        }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Inter",sans-serif;
+}
 
-        p{
-            color:#cbd5e1;
-            margin-bottom:30px;
-            line-height:1.6;
-        }
+body{
+    background:var(--bg);
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+    overflow:hidden;
+}
 
-        .btn{
-            display:inline-block;
-            padding:12px 24px;
-            background:#3b82f6;
-            color:white;
-            text-decoration:none;
-            border-radius:10px;
-            font-weight:600;
-        }
+/* Grid Background */
 
-        .btn:hover{
-            opacity:.9;
-        }
-    </style>
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:radial-gradient(circle at center, black 35%, transparent 90%);
+    pointer-events:none;
+}
+
+/* Blue Glow */
+
+.glow{
+    position:fixed;
+    width:500px;
+    height:500px;
+    background:#2563eb25;
+    border-radius:50%;
+    filter:blur(120px);
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+}
+
+.card{
+    width:100%;
+    max-width:470px;
+    background:rgba(17,17,20,.95);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:42px 36px;
+    text-align:center;
+    position:relative;
+    z-index:2;
+    box-shadow:0 15px 50px rgba(0,0,0,.45);
+}
+
+.logo{
+    width:60px;
+    display:block;
+    margin:0 auto 18px;
+}
+
+.status{
+    display:inline-block;
+    padding:6px 12px;
+    font-size:12px;
+    font-weight:600;
+    color:#60a5fa;
+    border:1px solid rgba(37,99,235,.35);
+    background:rgba(37,99,235,.08);
+    border-radius:999px;
+    margin-bottom:18px;
+}
+
+.error{
+    font-size:78px;
+    font-weight:800;
+    letter-spacing:-3px;
+    line-height:1;
+    margin-bottom:12px;
+}
+
+h2{
+    font-size:28px;
+    font-weight:700;
+    margin-bottom:14px;
+}
+
+p{
+    color:var(--muted);
+    line-height:1.7;
+    font-size:15px;
+    margin-bottom:34px;
+}
+
+.buttons{
+    display:flex;
+    gap:12px;
+}
+
+.btn{
+    flex:1;
+    height:46px;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.25s;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.primary{
+    background:var(--blue);
+    color:white;
+    border:none;
+}
+
+.primary:hover{
+    background:var(--blue-hover);
+}
+
+.secondary{
+    background:transparent;
+    color:white;
+    border:1px solid var(--border);
+}
+
+.secondary:hover{
+    background:#18181b;
+}
+
+.brand{
+    margin-top:28px;
+    color:#71717a;
+    font-size:13px;
+}
+
+.brand span{
+    color:white;
+    font-weight:600;
+}
+
+@media(max-width:500px){
+
+.card{
+    padding:32px 22px;
+}
+
+.error{
+    font-size:64px;
+}
+
+h2{
+    font-size:24px;
+}
+
+.buttons{
+    flex-direction:column;
+}
+
+}
+
+</style>
+
 </head>
+
 <body>
-    <div class="container">
-        <h1>404</h1>
 
-        <h2>Tool Not Found</h2>
+<div class="glow"></div>
 
-        <p>
-            The page you're looking for doesn't exist,
-            may have been moved, or the URL is incorrect.
-        </p>
+<div class="card">
 
-        <a href="https://mohakdev1220.github.io/toolify/dashboard" class="btn">Back to Home</a>
+    <img src="logo.png" class="logo" alt="Toolify">
+
+    <div class="status">
+        ERROR 404
     </div>
+
+    <div class="error">
+        404
+    </div>
+
+    <h2>Tool Not Found</h2>
+
+    <p>
+        The page you're trying to access doesn't exist,
+        may have been removed, or the URL is incorrect.
+    </p>
+
+    <div class="buttons">
+
+        <a href="https://mohakdev1220.github.io/toolify/dashboard" class="btn primary">
+            Dashboard
+        </a>
+
+        <button onclick="location.reload()" class="btn secondary">
+            Reload Page
+        </button>
+
+    </div>
+
+    <div class="brand">
+        Powered by <span>Toolify</span>
+    </div>
+
+</div>
+
 </body>
 </html>
