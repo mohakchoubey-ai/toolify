@@ -1,464 +1,605 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <meta name="google-site-verification" content="xrZFu5cpuycZgitIQWcRT0DmD7er9zSVNmzWktTYs10" /> 
-    <meta name="description" content="Welcome to 9th E, the official class website featuring student information, announcements, timetables, achievements, activities, resources, and memorable moments.">    
-    <title>Class 9th -E | Digital handbook | St. Paul Indore</title> 
-    <link rel="icon" type="image/png" href="favicon.png">
-    
-    <style>
-        :root {
-            --primary: #202124;
-            --google-blue: #1a73e8;
-            --google-red: #ea4335;
-            --google-yellow: #fbbc05;
-            --google-green: #34a853;
-            --bg: #f8f9fa;
-            --surface: #ffffff;
-            --border: #dadce0;
-            --text-secondary: #5f6368;
-            --radius-md: 12px;
-            --radius-lg: 28px;
-            --shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Pro — Toolify</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Product Sans', 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            background-color: var(--bg);
-            color: var(--primary);
-            overflow-x: hidden;
-            line-height: 1.5;
-        }
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: rgba(255,255,255,0.08);
+    --border-active: rgba(99,179,237,0.5);
+    --text: #e6edf3;
+    --text-muted: #7d8590;
+    --accent: #63b3ed;
+    --accent-bg: rgba(99,179,237,0.1);
+    --success: #3fb950;
+    --danger: #f85149;
+    --radius: 10px;
+  }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 8%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 60px;
+  }
 
-        #current-time {
-            font-weight: 500;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            background: rgba(0,0,0,0.04);
-            padding: 6px 14px;
-            border-radius: 20px;
-            letter-spacing: 0.3px;
-        }
+  /* ── Back button ── */
+  .back-btn {
+    position: fixed; top: 16px; left: 16px;
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 8px 14px; border-radius: var(--radius);
+    color: var(--text-muted); text-decoration: none; font-size: 13px;
+    transition: color 0.2s, border-color 0.2s; z-index: 100;
+  }
+  .back-btn:hover { color: var(--text); border-color: var(--border-active); }
+  .back-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
 
-        .hero {
-            min-height: 40vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 40px 20px;
-            background: radial-gradient(circle at top, rgba(66,133,244,0.08) 0%, transparent 70%);
-            animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+  /* ── Page header ── */
+  .page-header {
+    margin-top: 60px; margin-bottom: 28px; text-align: center;
+  }
+  .page-header h1 {
+    font-size: 22px; font-weight: 600; letter-spacing: -0.3px;
+    background: linear-gradient(135deg, #e6edf3 0%, #63b3ed 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .page-header p { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
 
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+  /* ── Main card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%; max-width: 520px;
+    overflow: hidden;
+  }
 
-        .class-logo {
-            width: 90px;
-            height: auto;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
-            transition: var(--transition);
-        }
-        .class-logo:hover {
-            transform: scale(1.05) rotate(3deg);
-        }
+  /* ── Tabs ── */
+  .tabs {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab-btn {
+    padding: 14px; background: none; border: none;
+    color: var(--text-muted); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: color 0.2s, background 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .tab-btn:first-child { border-right: 1px solid var(--border); }
+  .tab-btn.active { color: var(--accent); background: var(--accent-bg); }
+  .tab-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
 
-        .hero h1 {
-            font-size: 3.2rem;
-            margin: 0;
-            font-weight: 700;
-            color: var(--primary);
-            letter-spacing: -0.5px;
-        }
+  /* ── Tab panels ── */
+  .panel { display: none; padding: 24px; }
+  .panel.active { display: block; }
 
-        .color-i { color: var(--google-blue); }
-        .color-x { color: var(--google-red); }
-        .color-dash { color: var(--google-yellow); }
-        .color-e { color: var(--google-green); }
+  /* ── Type selector ── */
+  .type-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 20px;
+  }
+  .type-btn {
+    background: var(--surface-2); border: 1px solid var(--border);
+    padding: 9px 4px; border-radius: var(--radius);
+    color: var(--text-muted); cursor: pointer; font-size: 11px;
+    font-weight: 500; text-align: center; transition: all 0.2s; line-height: 1.4;
+  }
+  .type-btn .icon { display: block; font-size: 18px; margin-bottom: 2px; }
+  .type-btn:hover { border-color: var(--border-active); color: var(--text); }
+  .type-btn.active {
+    border-color: var(--accent); background: var(--accent-bg);
+    color: var(--accent); font-weight: 600;
+  }
 
-        .hero p {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            margin-top: 12px;
-            font-weight: 400;
-        }
+  /* ── Form fields ── */
+  .field-group { display: none; }
+  .field-group.active { display: block; }
 
-        .search-container {
-            display: flex;
-            justify-content: center;
-            margin-top: -28px;
-            padding: 0 5%;
-            position: relative;
-            z-index: 10;
-        }
+  label {
+    display: block; font-size: 11px; font-weight: 600;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px;
+    margin-bottom: 6px; margin-top: 14px;
+  }
+  label:first-child { margin-top: 0; }
 
-        #categorySearch {
-            width: 100%;
-            max-width: 600px;
-            padding: 16px 32px;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border);
-            background: var(--surface);
-            font-size: 16px;
-            outline: none;
-            box-shadow: 0 2px 5px 1px rgba(64,60,67,.16);
-            transition: var(--transition);
-        }
+  input[type="text"], input[type="url"], input[type="tel"],
+  input[type="email"], input[type="password"], select, textarea {
+    width: 100%; padding: 10px 12px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text);
+    font-size: 14px; outline: none; transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  input::placeholder, textarea::placeholder { color: var(--text-muted); }
+  input:focus, select:focus, textarea:focus { border-color: var(--border-active); }
+  select option { background: var(--surface-2); }
+  textarea { resize: vertical; min-height: 80px; }
 
-        #categorySearch:focus {
-            box-shadow: 0 2px 8px 1px rgba(66,133,244,0.30);
-            border-color: var(--google-blue);
-        }
+  /* ── Color row ── */
+  .color-row {
+    display: flex; gap: 10px; margin-top: 16px;
+  }
+  .color-item {
+    flex: 1; display: flex; align-items: center; gap: 8px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 8px 10px;
+  }
+  .color-item label { margin: 0; font-size: 11px; flex: 1; }
+  input[type="color"] {
+    width: 28px; height: 28px; border: none; background: none;
+    cursor: pointer; padding: 0; border-radius: 6px; overflow: hidden;
+  }
 
-        .categories-container {
-            padding: 60px 8%;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 24px;
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+  /* ── QR Preview ── */
+  .preview-wrap {
+    margin-top: 20px; text-align: center;
+  }
+  .preview-label {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px;
+  }
+  #qrcode {
+    display: inline-block; background: #fff;
+    padding: 14px; border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  #qrcode img, #qrcode canvas { display: block; }
 
-        .categories-container.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+  /* ── Buttons ── */
+  .btn {
+    width: 100%; padding: 12px; margin-top: 12px;
+    border: none; border-radius: var(--radius);
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s; display: flex;
+    align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--accent); color: #0d1117; }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-success { background: var(--success); color: #0d1117; display: none; }
+  .btn-success:hover { opacity: 0.9; }
+  .btn-danger  { background: var(--danger); color: #fff; }
+  .btn-danger:hover { opacity: 0.9; }
+  .btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
 
-        .category-card {
-            background: var(--surface);
-            padding: 24px 20px;
-            border-radius: var(--radius-md);
-            text-align: center;
-            text-decoration: none;
-            color: #3c4043;
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 50px;
-            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.1), 0 1px 3px 1px rgba(60,64,67,0.05);
-            transition: var(--transition);
-        }
+  /* ── Scanner ── */
+  #reader {
+    width: 100%; border-radius: 12px; overflow: hidden;
+    background: var(--surface-2); min-height: 60px;
+    margin-bottom: 14px;
+  }
+  #reader video { border-radius: 12px; }
 
-        .category-card h3 {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+  .file-drop {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    border: 1.5px dashed var(--border); border-radius: var(--radius);
+    padding: 18px; margin-bottom: 14px; cursor: pointer;
+    transition: border-color 0.2s; text-align: center;
+  }
+  .file-drop:hover { border-color: var(--border-active); }
+  .file-drop svg { width: 22px; height: 22px; stroke: var(--text-muted); fill: none; }
+  .file-drop span { font-size: 13px; color: var(--text-muted); }
+  .file-drop input { display: none; }
 
-        .category-card:hover {
-            box-shadow: 0 4px 16px 0 rgba(60,64,67,0.15);
-            transform: translateY(-4px);
-            border-color: #b3d1ff;
-            background: linear-gradient(to bottom, #ffffff, #fcfdfe);
-        }
+  /* ── Scan result ── */
+  #scan-result {
+    display: none; background: var(--surface-2);
+    border: 1px solid var(--border-active); border-radius: var(--radius);
+    padding: 14px; margin-top: 14px;
+  }
+  .result-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .result-content { font-size: 13px; word-break: break-all; color: var(--text); line-height: 1.6; }
+  .result-link { color: var(--accent); text-decoration: underline; }
+  .result-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .result-actions button {
+    flex: 1; padding: 8px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 12px; cursor: pointer;
+    transition: border-color 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .result-actions button:hover { border-color: var(--border-active); }
+  .result-actions svg { width: 13px; height: 13px; stroke: currentColor; fill: none; }
 
-        /* Weather Widget custom wrapper styling */
-        .weatherwidget-io {
-            border-radius: 0;
-            margin-bottom: 10px;
-            box-shadow: inset 0 -1px 0 var(--border);
-        }
+  /* ── History ── */
+  .history-section { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); }
+  .history-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+  }
+  .history-header span { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
+  .history-clear {
+    font-size: 11px; background: none; border: 1px solid rgba(248,81,73,0.3);
+    color: var(--danger); padding: 3px 8px; border-radius: 6px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .history-clear:hover { background: rgba(248,81,73,0.1); }
+  .history-list { max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .history-item {
+    background: var(--surface-2); border: 1px solid var(--border);
+    padding: 9px 11px; border-radius: 8px;
+    border-left: 2px solid var(--accent);
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .history-item:hover { border-color: var(--border-active); }
+  .history-text { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+  .history-time { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .history-empty { font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px 0; }
 
-        /* Footer */
-        footer {
-            background: #ffffff;
-            border-top: 1px solid var(--border);
-            padding: 60px 8% 30px 8%;
-            margin-top: 100px;
-        }
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px);
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 18px; border-radius: 24px;
+    font-size: 13px; font-weight: 500; z-index: 9999;
+    transition: transform 0.25s ease, opacity 0.25s ease; opacity: 0;
+    display: flex; align-items: center; gap: 7px; white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast svg { width: 14px; height: 14px; stroke: var(--success); fill: none; }
 
-        .footer-content {
-            display: grid;
-            grid-template-columns: 1.3fr 0.8fr 1.2fr;
-            gap: 50px;
-            margin-bottom: 40px;
-        }
+  /* ── html5-qrcode overrides ── */
+  #reader > div { background: none !important; border: none !important; padding: 0 !important; }
+  #html5-qrcode-button-camera-permission,
+  #html5-qrcode-button-camera-start,
+  #html5-qrcode-button-camera-stop { display: none; }
+  #html5-qrcode-anchor-scan-type-change { color: var(--text-muted) !important; font-size: 12px !important; }
 
-        .school-logo-small {
-            width: 32px;
-            height: auto;
-            vertical-align: middle;
-            margin-right: 12px;
-        }
-
-        .contact-info h4, .footer-links h4, .map-area h4 { 
-            margin-top: 0;
-            margin-bottom: 20px; 
-            color: var(--primary); 
-            font-size: 1.1rem;
-            font-weight: 600;
-            display: flex; 
-            align-items: center; 
-        }        
-        
-        .contact-info p { 
-            margin: 10px 0; 
-            font-size: 0.9rem; 
-            color: var(--text-secondary); 
-            line-height: 1.5; 
-        }        
-        
-        .contact-info b { 
-            color: #3c4043; 
-            font-weight: 500;
-        }
-
-        .footer-links a {
-            display: block;
-            margin-bottom: 12px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: var(--transition);
-        }
-
-        .footer-links a:hover { 
-            color: var(--google-blue);
-            text-decoration: underline; 
-        }
-
-        .map-container {
-            width: 100%;
-            height: 200px;
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-md);
-        }
-
-        iframe { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
-        }
-
-        @media (max-width: 992px) {
-            .footer-content { grid-template-columns: 1fr 1fr; gap: 30px; }
-            .map-area { grid-column: span 2; }
-        }
-
-        @media (max-width: 768px) {
-            .footer-content { grid-template-columns: 1fr; }
-            .map-area { grid-column: span 1; }
-            .hero h1 { font-size: 2.4rem; }
-            .hero p { font-size: 1.1rem; }
-            header { padding: 15px 5%; }
-            .categories-container { padding: 50px 5%; gap: 16px; }
-        }         
-
-        /* Audio Floating Button */
-        .audio-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--google-blue);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 14px 28px;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(66, 133, 244, 0.35);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-family: inherit;
-            font-weight: 500;
-            font-size: 0.95rem;
-            z-index: 2000;
-            transition: var(--transition);
-        }
-
-        .audio-btn:hover {
-            transform: translateY(-4px) scale(1.03);
-            box-shadow: 0 6px 24px rgba(66, 133, 244, 0.45);
-        }
-
-        /* Audio Playing Animation */
-        .playing {
-            animation: pulse-green 1.5s infinite;
-            background: var(--google-green) !important;
-            box-shadow: 0 4px 20px rgba(52, 168, 83, 0.35);
-        }
-
-        @keyframes pulse-green {
-            0% { box-shadow: 0 0 0 0 rgba(52, 168, 83, 0.6); }
-            70% { box-shadow: 0 0 0 15px rgba(52, 168, 83, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(52, 168, 83, 0); }
-        }
-
-        .audio-icon { font-size: 1.2rem; }
-    </style>
+  @media (max-width: 480px) {
+    .type-grid { grid-template-columns: repeat(4, 1fr); }
+    .type-btn { font-size: 10px; }
+    .type-btn .icon { font-size: 15px; }
+  }
+</style>
 </head>
 <body>
 
-    <button class="audio-btn" id="audioControl" onclick="toggleAudio()">
-        <span class="audio-icon" id="speakerIcon">🔊</span> 
-        <span id="btnText">Listen Intro</span>
+<a href="https://mohakdev1220.github.io/toolify/dashboard" class="back-btn">
+  <svg viewBox="0 0 24 24" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+  Dashboard
+</a>
+
+<header class="page-header">
+  <h1>QR Pro</h1>
+  <p>Generate and scan QR codes instantly</p>
+</header>
+
+<div class="card">
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-generate" onclick="switchTab('generate')">
+      <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="17" width="3" height="3"/><rect x="19" y="14" width="2" height="2"/><rect x="17" y="19" width="4" height="2"/></svg>
+      Generate
+    </button>
+    <button class="tab-btn" id="tab-scan" onclick="switchTab('scan')">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M4 8V6a2 2 0 0 1 2-2h2M4 16v2a2 2 0 0 0 2 2h2M16 4h2a2 2 0 0 1 2 2v2M16 20h2a2 2 0 0 0 2-2v-2M5 12h14"/></svg>
+      Scan
+    </button>
+  </div>
+
+  <!-- Generate Panel -->
+  <div class="panel active" id="panel-generate">
+
+    <div class="type-grid">
+      <button class="type-btn active" id="type-url"    onclick="setType('url')">   <span class="icon">🌐</span>URL</button>
+      <button class="type-btn"        id="type-text"   onclick="setType('text')">  <span class="icon">📝</span>Text</button>
+      <button class="type-btn"        id="type-wifi"   onclick="setType('wifi')">  <span class="icon">📶</span>Wi-Fi</button>
+      <button class="type-btn"        id="type-vcard"  onclick="setType('vcard')"> <span class="icon">📇</span>Contact</button>
+    </div>
+
+    <!-- URL -->
+    <div class="field-group active" id="fg-url">
+      <label>URL</label>
+      <input type="url" id="in-url" placeholder="https://example.com" value="https://google.com">
+    </div>
+
+    <!-- Text -->
+    <div class="field-group" id="fg-text">
+      <label>Message</label>
+      <textarea id="in-text" placeholder="Enter your text…"></textarea>
+    </div>
+
+    <!-- Wi-Fi -->
+    <div class="field-group" id="fg-wifi">
+      <label>Network name (SSID)</label>
+      <input type="text" id="in-ssid" placeholder="Home WiFi">
+      <label>Password</label>
+      <input type="password" id="in-wpass" placeholder="••••••••">
+      <label>Security</label>
+      <select id="in-wtype">
+        <option value="WPA">WPA / WPA2</option>
+        <option value="WEP">WEP</option>
+        <option value="nopass">None (open)</option>
+      </select>
+    </div>
+
+    <!-- Contact -->
+    <div class="field-group" id="fg-vcard">
+      <label>Full name</label>
+      <input type="text" id="in-name" placeholder="Jane Doe">
+      <label>Phone</label>
+      <input type="tel" id="in-phone" placeholder="+91 98765 43210">
+      <label>Email</label>
+      <input type="email" id="in-email" placeholder="jane@example.com">
+    </div>
+
+    <div class="color-row">
+      <div class="color-item">
+        <label>Foreground</label>
+        <input type="color" id="c-fg" value="#000000">
+      </div>
+      <div class="color-item">
+        <label>Background</label>
+        <input type="color" id="c-bg" value="#ffffff">
+      </div>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="preview-label">Live preview</div>
+      <div id="qrcode"></div>
+    </div>
+
+    <button class="btn btn-success" id="dl-btn" onclick="downloadQR()">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Download PNG
+    </button>
+  </div>
+
+  <!-- Scan Panel -->
+  <div class="panel" id="panel-scan">
+    <div id="reader"></div>
+
+    <div class="file-drop" onclick="document.getElementById('file-input').click()">
+      <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      <span>Upload an image to scan</span>
+      <input type="file" id="file-input" accept="image/*">
+    </div>
+
+    <button class="btn btn-danger" onclick="stopCamera()">
+      <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      Stop camera
     </button>
 
-    <audio id="introSpeech" src="about.mp3"></audio>
-
-    <header>
-        <div style="font-weight: 700; font-size: 1.25rem; letter-spacing: -0.3px;">
-            <span style="color: #4285F4;">P</span><span style="color: #EA4335;">o</span><span style="color: #FBBC05;">r</span><span style="color: #4285F4;">t</span><span style="color: #34A853;">a</span><span style="color: #EA4335;">l</span> IX-E
-        </div> 
-        <div id="current-time">Loading...</div>
-    </header>
-
-    <a class="weatherwidget-io" href="https://forecast7.com/en/22d7275d86/indore/" data-label_1="INDORE" data-label_2="WEATHER" data-theme="clear" >INDORE WEATHER</a>
-
-    <section class="hero">
-        <img src="IX.png" alt="Class IX-E Logo" class="class-logo">
-        <h1>Welcome to Class <span class="color-i">I</span><span class="color-x">X</span> <span class="color-dash">-</span> <span class="color-e">E</span></h1>
-        <p>St. Paul Higher Secondary School, Indore</p>
-    </section>
-
-    <div class="search-container">
-        <input type="text" id="categorySearch" placeholder="Search handbook sections..." onkeyup="searchCategories()">
+    <div id="scan-result">
+      <div class="result-label">Decoded content</div>
+      <div class="result-content" id="result-content"></div>
+      <div class="result-actions">
+        <button onclick="copyResult()">
+          <svg viewBox="0 0 24 24" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+        <button id="open-link-btn" style="display:none" onclick="openScannedLink()">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+          Open link
+        </button>
+      </div>
     </div>
 
-    <div class="categories-container" id="categoryGrid">
-        <a href="Smartboard-questions-answer-saver-on-browser-(made_by_mohak)" class="category-card"><h3> 🙈 Text Tool </h3></a>
-        <a href="calendar.html" class="category-card"><h3>📅 View Calendar</h3></a>
-        <a href="uniform.html" class="category-card"><h3>👔 School Uniform</h3></a>
-        <a href="tagboard.html" class="category-card"><h3> Tag board 📌 </h3></a>
-        <a href="timetable.html" class="category-card"><h3>🕒 Time Table</h3></a>
-        <a href="fees.html" class="category-card"><h3>💸 School Fees</h3></a>
-        <a href="prayer.html" class="category-card"><h3>🙏 Prayers & Bhajans</h3></a>
-        <a href="timing.html" class="category-card"><h3>⌛ School Timings</h3></a>
-        <a href="coscholasticassesment.html" class="category-card"><h3> Activities (IX) </h3></a>
-        <a href="sports.html" class="category-card"><h3>🏅 Sports Prizes</h3></a>
-        <a href="pta.html" class="category-card"><h3>🤝 PTA Prizes</h3></a>
-        <a href="students.html" class="category-card"><h3>🔒 View Students</h3></a>
-        <a href="cultural.html" class="category-card"><h3>🎭 Cultural Prizes</h3></a>
+    <div class="history-section">
+      <div class="history-header">
+        <span>Scan history</span>
+        <button class="history-clear" onclick="clearHistory()">Clear all</button>
+      </div>
+      <div class="history-list" id="history-list"></div>
     </div>
+  </div>
+</div>
 
-    <footer>
-        <div class="footer-content">
-            <div class="contact-info">
-                <h4><img src="logo.png" alt="" class="school-logo-small"> Contact School</h4>
-                <p><b>Address:</b> 7, Boundary Road, Near Agriculture College, Indore, (MP) 452001</p>
-                <p><b>Email:</b> stpaulhssindore@gmail.com</p>
-                <p><b>Phone:</b> 0731-2492292, 2972920</p>
-                <p><b>Primary Wing:</b> 0731-2492325, 2973325</p>
-                <p><b>Fax:</b> 0731-2492325</p>
-            </div>
-            
-            <div class="footer-links">
-                <h4>Quick Links</h4>
-                <a href="feedback.html">Feedback My Site</a>
-                <a href="about.html">About Us</a>
-                <a href="https://mohakdev1220.github.io/websites_link/" target="_blank" rel="noopener">Our Other Sites</a>
-            </div>
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toast-msg">Copied!</span>
+</div>
 
-            <div class="map-area">
-                <h4>Location</h4>
-                <div class="map-container">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2928.012585733553!2d75.88962099999999!3d22.714022699999997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3962fd6d5c629411%3A0xb6c4d3f81d6308be!2sSt.%20Paul%20Higher%20Secondary%20School%2C%20Indore!5e1!3m2!1sen!2sin!4v1776524828444!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                </div>
-            </div>
-        </div>
-        <center style="color: #70757a; font-size: 0.85rem; border-top: 1px solid var(--border); padding-top: 24px; font-weight: 400;">
-            Handcrafted for Class IX-E 2026
-        </center>
-    </footer>
+<script>
+  /* ── State ── */
+  let scanner = null;
+  let activeType = 'url';
+  let scannedText = '';
 
-    <script>
-        // 1. Clock Update Logic
-        function updateClock() {
-            const now = new Date();
-            const options = { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' };
-            const timeElement = document.getElementById('current-time');
-            if (timeElement) {
-                timeElement.innerText = now.toLocaleDateString('en-IN', options);
-            }
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+  /* ── Tab switching ── */
+  function switchTab(tab) {
+    ['generate','scan'].forEach(t => {
+      document.getElementById('tab-'+t).classList.toggle('active', t === tab);
+      document.getElementById('panel-'+t).classList.toggle('active', t === tab);
+    });
+    if (tab === 'scan') {
+      startCamera();
+      renderHistory();
+    } else {
+      stopCamera();
+    }
+  }
 
-        // 2. Scroll Animation (Intersection Observer)
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) { 
-                    entry.target.classList.add('visible'); 
-                }
-            });
-        }, { threshold: 0.05 });
+  /* ── QR type switching ── */
+  function setType(type) {
+    activeType = type;
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.field-group').forEach(f => f.classList.remove('active'));
+    document.getElementById('type-' + type).classList.add('active');
+    document.getElementById('fg-' + type).classList.add('active');
+    generateQR();
+  }
 
-        const grid = document.getElementById('categoryGrid');
-        if (grid) { observer.observe(grid); }
+  /* ── Build QR payload ── */
+  function buildPayload() {
+    switch(activeType) {
+      case 'url':
+        return document.getElementById('in-url').value.trim() || 'https://example.com';
+      case 'text':
+        return document.getElementById('in-text').value.trim() || 'Hello!';
+      case 'wifi': {
+        const s = document.getElementById('in-ssid').value.trim() || 'WiFi';
+        const p = document.getElementById('in-wpass').value.trim();
+        const t = document.getElementById('in-wtype').value;
+        return `WIFI:S:${s};T:${t};P:${p};;`;
+      }
+      case 'vcard': {
+        const n = document.getElementById('in-name').value.trim() || 'Name';
+        const ph = document.getElementById('in-phone').value.trim();
+        const em = document.getElementById('in-email').value.trim();
+        return `BEGIN:VCARD\nVERSION:3.0\nFN:${n}\nTEL:${ph}\nEMAIL:${em}\nEND:VCARD`;
+      }
+    }
+  }
 
-        // 3. Search Functionality
-        function searchCategories() {
-            let input = document.getElementById('categorySearch').value.toLowerCase();
-            let cards = document.getElementsByClassName('category-card');
-            for (let i = 0; i < cards.length; i++) {
-                let title = cards[i].innerText.toLowerCase();
-                cards[i].style.display = title.includes(input) ? "" : "none";
-            }
-        }
+  /* ── Generate QR ── */
+  function generateQR() {
+    const wrap = document.getElementById('qrcode');
+    const dlBtn = document.getElementById('dl-btn');
+    wrap.innerHTML = '';
+    new QRCode(wrap, {
+      text: buildPayload(),
+      width: 180, height: 180,
+      colorDark: document.getElementById('c-fg').value,
+      colorLight: document.getElementById('c-bg').value,
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    dlBtn.style.display = 'flex';
+  }
 
-        // 4. Audio Control Logic
-        const audio = document.getElementById('introSpeech');
-        const btn = document.getElementById('audioControl');
-        const icon = document.getElementById('speakerIcon');
-        const txt = document.getElementById('btnText');
+  /* ── Download ── */
+  function downloadQR() {
+    const img = document.querySelector('#qrcode img');
+    if (!img) return;
+    const a = document.createElement('a');
+    a.href = img.src;
+    a.download = 'qr-toolify.png';
+    a.click();
+  }
 
-        function toggleAudio() {
-            if (!audio) return; // Safety check
-            if (audio.paused) {
-                audio.play().catch(e => console.log("Audio play blocked by browser. Click again!"));
-                btn.classList.add('playing');
-                icon.innerText = "⏸️";
-                txt.innerText = "Playing...";
-            } else {
-                audio.pause();
-                stopStyling();
-            }
-        }
+  /* ── Live input listeners ── */
+  ['in-url','in-text','in-ssid','in-wpass','in-wtype','in-name','in-phone','in-email','c-fg','c-bg']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.addEventListener('input', generateQR); el.addEventListener('change', generateQR); }
+    });
 
-        if (audio) {
-            audio.onended = function() {
-                stopStyling();
-            };
-        }
+  /* ── Camera scanner ── */
+  async function startCamera() {
+    if (scanner) return;
+    scanner = new Html5Qrcode('reader');
+    try {
+      await scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 240, height: 240 } },
+        text => showResult(text)
+      );
+    } catch(e) {
+      document.getElementById('reader').innerHTML =
+        `<div style="padding:16px; font-size:13px; color:var(--text-muted); text-align:center;">Camera unavailable — use the upload option below.</div>`;
+      scanner = null;
+    }
+  }
 
-        function stopStyling() {
-            if (btn) btn.classList.remove('playing');
-            if (icon) icon.innerText = "🔊";
-            if (txt) txt.innerText = "Listen Intro";
-        }
+  function stopCamera() {
+    if (scanner && scanner.isScanning) {
+      scanner.stop().then(() => {
+        document.getElementById('reader').innerHTML = '';
+        scanner = null;
+      }).catch(() => { scanner = null; });
+    }
+  }
 
-        !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
-    </script>
+  /* ── File scan ── */
+  document.getElementById('file-input').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    stopCamera();
+    const tmp = new Html5Qrcode('reader');
+    try {
+      const text = await tmp.scanFile(file, true);
+      showResult(text);
+    } catch {
+      showToast('No QR code found in that image.', true);
+    }
+    e.target.value = '';
+  });
+
+  /* ── Show scan result ── */
+  function showResult(text) {
+    scannedText = text;
+    const box = document.getElementById('scan-result');
+    const content = document.getElementById('result-content');
+    const openBtn = document.getElementById('open-link-btn');
+    box.style.display = 'block';
+    const isUrl = /^https?:\/\//i.test(text);
+    content.innerHTML = isUrl
+      ? `<a href="${escHtml(text)}" target="_blank" rel="noopener" class="result-link">${escHtml(text)}</a>`
+      : escHtml(text);
+    openBtn.style.display = isUrl ? 'flex' : 'none';
+    saveHistory(text);
+    renderHistory();
+  }
+
+  function openScannedLink() { window.open(scannedText, '_blank', 'noopener'); }
+
+  function copyResult() {
+    navigator.clipboard.writeText(scannedText)
+      .then(() => showToast('Copied to clipboard'))
+      .catch(() => showToast('Copy failed', true));
+  }
+
+  /* ── History ── */
+  function saveHistory(text) {
+    let h = getHistory();
+    if (h.length && h[0].text === text) return;
+    h.unshift({ text, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+    if (h.length > 25) h.pop();
+    localStorage.setItem('qrpro_history', JSON.stringify(h));
+  }
+
+  function getHistory() {
+    try { return JSON.parse(localStorage.getItem('qrpro_history') || '[]'); } catch { return []; }
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('history-list');
+    const h = getHistory();
+    if (!h.length) {
+      list.innerHTML = '<div class="history-empty">No scans yet</div>';
+      return;
+    }
+    list.innerHTML = h.map(item => `
+      <div class="history-item" onclick="showResult(${JSON.stringify(item.text)})">
+        <div class="history-text">${escHtml(item.text)}</div>
+        <div class="history-time">${item.time}</div>
+      </div>
+    `).join('');
+  }
+
+  function clearHistory() {
+    localStorage.removeItem('qrpro_history');
+    renderHistory();
+  }
+
+  /* ── Toast ── */
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  /* ── Utils ── */
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Init ── */
+  generateQR();
+</script>
+
 </body>
 </html>
