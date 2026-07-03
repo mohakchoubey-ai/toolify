@@ -4,107 +4,1272 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Speech Generator</title>
-      <link rel="stylesheet" href="assets/speech.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      color-scheme: dark;
+      --bg-0: #020617;
+      --bg-1: #0f172a;
+      --bg-2: #1e293b;
+      --bg-3: #334155;
+      --surface: rgba(15, 23, 42, 0.72);
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(99,102,241,0.4);
+      --indigo: #6366f1;
+      --indigo-light: #818cf8;
+      --indigo-dim: rgba(99,102,241,0.18);
+      --cyan: #22d3ee;
+      --emerald: #34d399;
+      --amber: #fbbf24;
+      --red: #f87171;
+      --text-1: #f1f5f9;
+      --text-2: #94a3b8;
+      --text-3: #475569;
+      --radius-xl: 20px;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 7px;
+      --shadow-card: 0 24px 64px rgba(0,0,0,0.42);
+      --shadow-indigo: 0 8px 28px rgba(99,102,241,0.25);
+      --mono: 'JetBrains Mono', 'Courier New', monospace;
+      --sans: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    html { font-size: 15px; }
+    body {
+      font-family: var(--sans);
+      min-height: 100svh;
+      color: var(--text-1);
+      background:
+        radial-gradient(ellipse 70% 55% at 0% 0%, rgba(79,70,229,0.28) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 40% at 100% 100%, rgba(14,165,233,0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 35% at 55% 80%, rgba(34,211,238,0.06) 0%, transparent 50%),
+        linear-gradient(135deg, #020617 0%, #0f172a 50%, #111827 100%);
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 2rem 1rem 3rem;
+      gap: 1.5rem;
+    }
+
+    .header {
+      text-align: center;
+      max-width: 600px;
+    }
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--indigo-light);
+      margin-bottom: 0.75rem;
+    }
+    .badge-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--indigo-light);
+      box-shadow: 0 0 14px rgba(99,102,241,0.9);
+      animation: pulse-dot 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { box-shadow: 0 0 8px rgba(99,102,241,0.7); }
+      50% { box-shadow: 0 0 20px rgba(99,102,241,1); }
+    }
+    .header h1 {
+      font-size: clamp(1.7rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: #fff;
+    }
+    .header p {
+      margin-top: 0.6rem;
+      font-size: 0.9rem;
+      color: var(--text-2);
+      line-height: 1.65;
+    }
+
+    /* ── CARD ── */
+    .card {
+      width: 100%;
+      max-width: 780px;
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-card);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .card-section-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-3);
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── TABS ── */
+    .tab-bar {
+      display: flex;
+      gap: 6px;
+      background: rgba(15,23,42,0.7);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 5px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 0.55rem 0.75rem;
+      border: none;
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--text-2);
+      font: 500 0.82rem/1 var(--sans);
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      white-space: nowrap;
+    }
+    .tab-btn.active {
+      background: var(--indigo);
+      color: #fff;
+      box-shadow: var(--shadow-indigo);
+    }
+    .tab-btn:not(.active):hover { background: var(--bg-2); color: var(--text-1); }
+
+    .tab-panel { display: none; flex-direction: column; gap: 1.25rem; }
+    .tab-panel.active { display: flex; }
+
+    /* ── FORM ELEMENTS ── */
+    label.field-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-2);
+      margin-bottom: 0.45rem;
+    }
+    .field-group { display: flex; flex-direction: column; }
+
+    .select-wrap { position: relative; }
+    select, .text-input {
+      width: 100%;
+      background: rgba(2,6,23,0.7);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-md);
+      color: var(--text-1);
+      font: 400 0.9rem/1 var(--sans);
+      padding: 0.7rem 1rem;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      appearance: none;
+    }
+    select:focus, .text-input:focus {
+      outline: none;
+      border-color: var(--indigo);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.22);
+    }
+    .select-arrow {
+      pointer-events: none;
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+    }
+    .select-arrow svg { display: block; }
+
+    /* ── TEXTAREA ── */
+    .textarea-wrap { position: relative; }
+    textarea.text-input {
+      resize: none;
+      border-radius: var(--radius-lg);
+      padding: 0.85rem 2.8rem 0.85rem 1rem;
+      font-family: var(--sans);
+      line-height: 1.65;
+      min-height: 200px;
+    }
+    textarea.text-input::-webkit-scrollbar { width: 8px; }
+    textarea.text-input::-webkit-scrollbar-thumb {
+      background: rgba(148,163,184,0.25);
+      border-radius: 99px;
+    }
+    textarea.text-input::-webkit-scrollbar-track { background: transparent; }
+
+    .clear-btn {
+      position: absolute;
+      right: 10px; top: 10px;
+      width: 30px; height: 30px;
+      border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 50%;
+      background: rgba(248,113,113,0.1);
+      color: var(--red);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, transform 0.12s;
+    }
+    .clear-btn:hover { background: var(--red); color: #fff; }
+    .clear-btn:active { transform: scale(0.9); }
+    .clear-btn.visible { display: flex; }
+
+    /* ── CHAR COUNTER ── */
+    .char-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.45rem;
+    }
+    .char-badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-3);
+      background: rgba(15,23,42,0.7);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 3px 10px;
+    }
+    .progress-track {
+      flex: 1;
+      max-width: 180px;
+      height: 5px;
+      background: rgba(51,65,85,0.8);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--indigo), var(--cyan));
+      transition: width 0.12s;
+    }
+
+    /* ── CONTROLS ROW ── */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    @media (max-width: 520px) { .controls-grid { grid-template-columns: 1fr; } }
+
+    /* ── SLIDERS ── */
+    .slider-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .slider-header { display: flex; justify-content: space-between; align-items: center; }
+    .slider-val {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--indigo-light);
+      background: var(--indigo-dim);
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 6px;
+      padding: 2px 7px;
+      min-width: 40px;
+      text-align: center;
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      background: rgba(51,65,85,0.9);
+      border-radius: 99px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 17px; height: 17px;
+      border-radius: 50%;
+      background: var(--indigo);
+      border: 2px solid rgba(99,102,241,0.4);
+      box-shadow: 0 2px 8px rgba(99,102,241,0.45);
+      transition: transform 0.12s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      border: none;
+      border-radius: var(--radius-md);
+      font: 600 0.88rem/1 var(--sans);
+      cursor: pointer;
+      padding: 0.7rem 1.1rem;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s, opacity 0.15s;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--indigo);
+      color: #fff;
+      box-shadow: var(--shadow-indigo);
+    }
+    .btn-primary:hover:not(:disabled) { background: #818cf8; }
+
+    .btn-danger {
+      background: rgba(248,113,113,0.15);
+      color: var(--red);
+      border: 1px solid rgba(248,113,113,0.25);
+    }
+    .btn-danger:hover:not(:disabled) { background: var(--red); color: #fff; }
+
+    .btn-ghost {
+      background: rgba(255,255,255,0.05);
+      color: var(--text-2);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,0.1); color: var(--text-1); }
+
+    .btn-emerald {
+      background: rgba(52,211,153,0.15);
+      color: var(--emerald);
+      border: 1px solid rgba(52,211,153,0.25);
+    }
+    .btn-emerald:hover:not(:disabled) { background: var(--emerald); color: #022c22; }
+
+    .btn-full { width: 100%; border-radius: var(--radius-lg); padding: 0.85rem 1.25rem; font-size: 0.92rem; }
+
+    @keyframes pulse-glow {
+      0%,100% { box-shadow: 0 8px 28px rgba(99,102,241,0.3); transform: scale(1); }
+      50% { box-shadow: 0 12px 38px rgba(99,102,241,0.55); transform: scale(1.012); }
+    }
+    .btn-speaking { animation: pulse-glow 1s ease-in-out infinite; }
+
+    /* ── ACTION ROW ── */
+    .action-row {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .action-row .btn-primary { flex: 2; min-width: 140px; }
+    .action-row .btn { flex: 1; min-width: 80px; }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.8rem 1rem;
+      border-radius: var(--radius-md);
+      background: rgba(2,6,23,0.6);
+      border: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--text-3);
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .status-dot.ok { background: var(--emerald); box-shadow: 0 0 8px rgba(52,211,153,0.6); }
+    .status-dot.warn { background: var(--amber); }
+    .status-dot.err { background: var(--red); }
+    .status-dot.speaking { background: var(--indigo-light); animation: pulse-dot 0.8s ease-in-out infinite; }
+    .status-text { color: var(--text-2); flex: 1; }
+
+    /* ── VOICE CHIP ── */
+    .voice-chip {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--indigo-light);
+      background: var(--indigo-dim);
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 99px;
+      padding: 3px 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+
+    /* ── HISTORY ── */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      max-height: 360px;
+      overflow-y: auto;
+    }
+    .history-list::-webkit-scrollbar { width: 6px; }
+    .history-list::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.2); border-radius: 99px; }
+
+    .history-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.8rem;
+      border-radius: var(--radius-md);
+      background: rgba(2,6,23,0.5);
+      border: 1px solid var(--border);
+      transition: border-color 0.15s;
+      cursor: pointer;
+    }
+    .history-item:hover { border-color: var(--border-hover); }
+    .history-item-text {
+      flex: 1;
+      font-size: 0.82rem;
+      color: var(--text-2);
+      line-height: 1.55;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .history-item-meta {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-3);
+      white-space: nowrap;
+    }
+    .history-badge {
+      font-size: 0.65rem;
+      background: var(--indigo-dim);
+      color: var(--indigo-light);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 6px;
+      padding: 2px 6px;
+      white-space: nowrap;
+    }
+    .history-empty {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-3);
+      font-size: 0.85rem;
+    }
+
+    /* ── PRESETS TAB ── */
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.6rem;
+    }
+    .preset-card {
+      padding: 0.9rem;
+      border-radius: var(--radius-md);
+      background: rgba(2,6,23,0.5);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .preset-card:hover { border-color: var(--border-hover); background: rgba(99,102,241,0.07); }
+    .preset-card-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-1);
+      margin-bottom: 0.3rem;
+    }
+    .preset-card-text {
+      font-size: 0.75rem;
+      color: var(--text-3);
+      line-height: 1.5;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .preset-tag {
+      display: inline-block;
+      margin-top: 0.45rem;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--indigo-light);
+    }
+
+    /* ── SETTINGS TAB ── */
+    .settings-section {
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: rgba(2,6,23,0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .toggle-info { flex: 1; }
+    .toggle-info strong { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-1); }
+    .toggle-info small { font-size: 0.75rem; color: var(--text-3); }
+    .toggle {
+      position: relative;
+      width: 44px; height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: rgba(51,65,85,0.9);
+      border-radius: 99px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      left: 3px; top: 3px;
+      transition: transform 0.2s;
+    }
+    .toggle input:checked + .toggle-track { background: var(--indigo); }
+    .toggle input:checked + .toggle-track::after { transform: translateX(20px); }
+
+    /* ── VOICE MAP TABLE ── */
+    .voice-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    .voice-table th {
+      text-align: left;
+      color: var(--text-3);
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0 0 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .voice-table td {
+      padding: 0.55rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text-2);
+      vertical-align: top;
+    }
+    .voice-table td:first-child { width: 110px; color: var(--indigo-light); font-family: var(--mono); font-size: 0.72rem; }
+    .voice-table td.voice-found { color: var(--emerald); }
+    .voice-table td.voice-missing { color: var(--red); }
+
+    /* ── WAVEFORM ── */
+    .waveform-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 36px;
+    }
+    .wave-bar {
+      width: 4px;
+      border-radius: 99px;
+      background: var(--indigo-light);
+      opacity: 0.2;
+      transition: opacity 0.15s;
+    }
+    .waveform-wrap.active .wave-bar {
+      opacity: 1;
+      animation: wave-bounce var(--dur, 0.8s) ease-in-out infinite var(--delay, 0s) alternate;
+    }
+    @keyframes wave-bounce {
+      from { height: 4px; }
+      to { height: var(--h, 28px); }
+    }
+
+    /* ── DOWNLOAD SECTION ── */
+    .download-note {
+      font-size: 0.78rem;
+      color: var(--text-3);
+      line-height: 1.6;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(251,191,36,0.2);
+      background: rgba(251,191,36,0.05);
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      font-size: 0.72rem;
+      color: var(--text-3);
+      text-align: center;
+    }
+    .footer a { color: var(--indigo-light); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .card { padding: 1.25rem; }
+      .controls-grid { grid-template-columns: 1fr; }
+      .voice-chip { max-width: 130px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, .wave-bar, .badge-dot, .status-dot.speaking { animation: none !important; }
+    }
+
+    /* ── COPY TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: rgba(15,23,42,0.95);
+      border: 1px solid var(--border-hover);
+      color: var(--text-1);
+      font-size: 0.82rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 99px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      pointer-events: none;
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s;
+      opacity: 0;
+      z-index: 999;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
 </head>
-<body class="min-h-screen text-slate-100 antialiased">
-  <main class="min-h-screen flex items-center justify-center p-4 sm:p-6">
-    <section class="glass w-full max-w-3xl rounded-[28px] p-5 sm:p-8">
-      <div class="mb-6">
-        <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.28em] text-indigo-300/90">
-          <span class="h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_18px_rgba(99,102,241,0.95)]"></span>
-          AI Speech Generator
+<body>
+
+<div class="page">
+  <div class="header">
+    <div class="header-badge">
+      <span class="badge-dot"></span>
+      AI Speech Generator
+    </div>
+    <h1>Text to voice,<br>clean and focused</h1>
+    <p>Strict language matching · Adjustable rate, pitch &amp; volume · History · Presets</p>
+  </div>
+
+  <div class="card">
+    <!-- TABS -->
+    <div class="tab-bar" role="tablist">
+      <button class="tab-btn active" data-tab="compose" role="tab">✦ Compose</button>
+      <button class="tab-btn" data-tab="presets" role="tab">Presets</button>
+      <button class="tab-btn" data-tab="history" role="tab">History</button>
+      <button class="tab-btn" data-tab="settings" role="tab">Settings</button>
+    </div>
+
+    <!-- ── COMPOSE TAB ── -->
+    <div class="tab-panel active" id="tab-compose">
+      <!-- Voice Select -->
+      <div class="field-group">
+        <label class="field-label" for="voiceSelect">Voice preset</label>
+        <div class="select-wrap">
+          <select id="voiceSelect" class="text-input">
+            <option value="hi-male">🇮🇳 Hindi — Male</option>
+            <option value="hi-female">🇮🇳 Hindi — Female</option>
+            <option value="en-male">🇺🇸 English — Male</option>
+            <option value="en-female">🇺🇸 English — Female</option>
+            <option value="en-gb-male">🇬🇧 English UK — Male</option>
+            <option value="en-gb-female">🇬🇧 English UK — Female</option>
+          </select>
+          <span class="select-arrow">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
         </div>
-        <h1 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-white">
-          Text to voice, clean and focused
-        </h1>
-        <p class="mt-2 text-sm sm:text-base text-slate-300 max-w-2xl">
-          Choose a preset, type your text, and play it instantly. Voice selection uses strict language matching for Hindi and English.
-        </p>
       </div>
 
-      <div class="grid gap-5">
-        <div class="grid gap-2">
-          <label for="voiceSelect" class="text-sm font-medium text-slate-200">Voice preset</label>
-          <div class="relative">
-            <select id="voiceSelect" class="soft-ring w-full rounded-2xl bg-slate-950/70 border border-slate-700/70 px-4 py-3 text-slate-100 shadow-lg appearance-none">
-              <option value="hi-male">Hindi Male</option>
-              <option value="hi-female">Hindi Female</option>
-              <option value="en-male">English Male</option>
-              <option value="en-female">English Female</option>
-            </select>
-            <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-slate-400">
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-          </div>
-          <p id="voiceStatus" class="text-xs text-slate-400"></p>
-        </div>
-
-        <div class="grid gap-2">
-          <div class="flex items-center justify-between gap-3">
-            <label for="textInput" class="text-sm font-medium text-slate-200">Text to speak</label>
-            <div class="w-full max-w-[190px]">
-              <div class="h-2 rounded-full bg-slate-800 overflow-hidden border border-slate-700">
-                <div id="progressBar" class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 transition-all duration-150" style="width: 0%;"></div>
-              </div>
-              <div class="mt-2 inline-flex items-center rounded-full border border-slate-700 bg-slate-950/60 px-3 py-1 text-xs text-slate-300">
-                <span id="charCount">0</span><span class="mx-1">/</span><span>1000</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="relative">
-            <textarea
-              id="textInput"
-              maxlength="1000"
-              rows="8"
-              class="soft-ring w-full resize-none rounded-[22px] border border-slate-700/70 bg-slate-950/70 px-4 py-4 pr-12 text-slate-100 placeholder:text-slate-500 shadow-inner"
-              placeholder="Type or paste your text here..."
-            ></textarea>
-
-            <button
-              id="clearBtn"
-              type="button"
-              aria-label="Clear text"
-              class="hidden absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-red-500/30 bg-red-500/10 text-red-300 transition hover:bg-red-500 hover:text-white hover:scale-105 active:scale-95"
-              title="Clear text"
-            >
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="grid gap-3">
-          <button
-            id="playBtn"
-            type="button"
-            class="soft-ring inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-500 px-5 py-3.5 font-semibold text-white shadow-lg shadow-indigo-500/20 transition hover:bg-indigo-400 active:scale-[0.99]"
-          >
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M6 4.75C6 4.32 6.47 4.05 6.84 4.25L15.28 9.5C15.64 9.72 15.64 10.28 15.28 10.5L6.84 15.75C6.47 15.95 6 15.68 6 15.25V4.75Z" fill="currentColor"/>
-            </svg>
-            Generate / Play
+      <!-- Textarea -->
+      <div class="field-group">
+        <label class="field-label" for="textInput">Text to speak</label>
+        <div class="textarea-wrap">
+          <textarea
+            id="textInput"
+            class="text-input"
+            maxlength="1000"
+            rows="8"
+            placeholder="Type or paste text here…"
+          ></textarea>
+          <button id="clearBtn" class="clear-btn" type="button" aria-label="Clear text">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
           </button>
         </div>
-
-        <div class="grid gap-3 rounded-2xl border border-slate-700/70 bg-slate-950/55 p-4">
-          <div class="flex flex-wrap items-center gap-2 text-sm">
-            <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-300 border border-emerald-500/20">Speech synthesis</span>
-            <span class="rounded-full bg-slate-800/70 px-3 py-1 text-slate-300 border border-slate-700">Strict voice matching</span>
-            <span class="rounded-full bg-slate-800/70 px-3 py-1 text-slate-300 border border-slate-700">1000 characters</span>
-          </div>
-          <p id="status" class="text-sm text-slate-300">Ready.</p>
+        <div class="char-row">
+          <span class="char-badge"><span id="charCount">0</span> / 1000</span>
+          <div class="progress-track"><div class="progress-fill" id="progressBar" style="width:0%"></div></div>
         </div>
       </div>
-    </section>
-  </main>
-        <script type="module" src="assets/speech.js"></script>
 
+      <!-- Controls -->
+      <div>
+        <div class="card-section-title">Playback controls</div>
+        <div class="controls-grid">
+          <div class="slider-group">
+            <div class="slider-header">
+              <label class="field-label" for="rateSlider" style="margin:0">Rate</label>
+              <span class="slider-val" id="rateVal">1.0×</span>
+            </div>
+            <input type="range" id="rateSlider" min="0.5" max="2.0" step="0.05" value="1.0">
+          </div>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label class="field-label" for="pitchSlider" style="margin:0">Pitch</label>
+              <span class="slider-val" id="pitchVal">1.0</span>
+            </div>
+            <input type="range" id="pitchSlider" min="0.5" max="2.0" step="0.05" value="1.0">
+          </div>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label class="field-label" for="volSlider" style="margin:0">Volume</label>
+              <span class="slider-val" id="volVal">100%</span>
+            </div>
+            <input type="range" id="volSlider" min="0" max="1" step="0.05" value="1">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="chunkSelect">Long-text mode</label>
+            <div class="select-wrap">
+              <select id="chunkSelect" class="text-input">
+                <option value="full">Speak full text</option>
+                <option value="sentence">Sentence by sentence</option>
+                <option value="word">Word by word</option>
+              </select>
+              <span class="select-arrow">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Waveform -->
+      <div class="waveform-wrap" id="waveform" aria-hidden="true"></div>
+
+      <!-- Actions -->
+      <div class="action-row">
+        <button id="playBtn" class="btn btn-primary btn-full" type="button">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 4.75C6 4.32 6.47 4.05 6.84 4.25L15.28 9.5C15.64 9.72 15.64 10.28 15.28 10.5L6.84 15.75C6.47 15.95 6 15.68 6 15.25V4.75Z" fill="currentColor"/></svg>
+          Play
+        </button>
+        <button id="pauseBtn" class="btn btn-ghost" type="button" disabled>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="5" y="4" width="3.5" height="12" rx="1.5" fill="currentColor"/><rect x="11.5" y="4" width="3.5" height="12" rx="1.5" fill="currentColor"/></svg>
+          Pause
+        </button>
+        <button id="stopBtn" class="btn btn-danger" type="button" disabled>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="5" y="5" width="10" height="10" rx="2" fill="currentColor"/></svg>
+          Stop
+        </button>
+        <button id="copyBtn" class="btn btn-ghost" type="button">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="7" y="3" width="10" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M5 5H4a2 2 0 00-2 2v10a2 2 0 002 2h9a2 2 0 002-2v-1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Copy
+        </button>
+      </div>
+
+      <!-- Status -->
+      <div class="status-bar">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">Ready.</span>
+        <span class="voice-chip" id="voiceChip">—</span>
+      </div>
+    </div>
+
+    <!-- ── PRESETS TAB ── -->
+    <div class="tab-panel" id="tab-presets">
+      <p style="font-size:0.8rem;color:var(--text-3);margin-bottom:0.25rem">Click a preset to load it into the composer.</p>
+      <div class="presets-grid" id="presetsGrid"></div>
+    </div>
+
+    <!-- ── HISTORY TAB ── -->
+    <div class="tab-panel" id="tab-history">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem">
+        <span style="font-size:0.8rem;color:var(--text-3)">Click any item to reload it in the composer.</span>
+        <button id="clearHistoryBtn" class="btn btn-danger" type="button" style="font-size:0.75rem;padding:0.45rem 0.85rem">Clear all</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="history-empty">No history yet. Speak something first.</div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS TAB ── -->
+    <div class="tab-panel" id="tab-settings">
+      <div class="settings-section">
+        <div class="card-section-title">Behaviour</div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <strong>Auto-speak on paste</strong>
+            <small>Play immediately when text is pasted into the composer.</small>
+          </div>
+          <label class="toggle"><input type="checkbox" id="autoPlayPaste"><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <strong>Save to history</strong>
+            <small>Store each spoken text in session history.</small>
+          </div>
+          <label class="toggle"><input type="checkbox" id="saveHistory" checked><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <strong>Highlight words (visual)</strong>
+            <small>Show a progress-pulse during playback. (Requires browser boundary support.)</small>
+          </div>
+          <label class="toggle"><input type="checkbox" id="wordHighlight" checked><span class="toggle-track"></span></label>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="card-section-title">Available voices on this device</div>
+        <table class="voice-table">
+          <thead><tr><th>Preset</th><th>Mapped Voice</th><th>Lang</th></tr></thead>
+          <tbody id="voiceMapBody"></tbody>
+        </table>
+        <button id="refreshVoicesBtn" class="btn btn-ghost" type="button" style="align-self:flex-start;font-size:0.78rem;margin-top:0.25rem">↻ Refresh voices</button>
+      </div>
+
+      <div class="download-note">
+        ⚠️ Web Speech API uses your browser / OS voices. To get more voices (e.g. Hindi), enable them in your system's <strong>Text-to-Speech</strong> settings (Windows: Settings → Time &amp; Language → Speech; macOS: System Settings → Accessibility → Spoken Content).
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Built with Web Speech API &nbsp;·&nbsp; Works offline after load &nbsp;·&nbsp;
+    <a href="#" id="aboutLink">No audio is sent to any server</a>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ───────────────────────────────────────────────────────────
+   AI Speech Generator — Single File Production Build
+   Features: multi-voice strict match, rate/pitch/vol sliders,
+   chunk modes, history, presets, settings, waveform, copy
+─────────────────────────────────────────────────────────── */
+
+const $ = id => document.getElementById(id);
+const MAX_CHARS = 1000;
+
+// ── State ──
+let allVoices = [];
+let isSpeaking = false;
+let isPaused = false;
+let chunkQueue = [];
+let chunkIndex = 0;
+let history = JSON.parse(sessionStorage.getItem('speech-history') || '[]');
+
+// ── DOM refs ──
+const textInput    = $('textInput');
+const charCount    = $('charCount');
+const progressBar  = $('progressBar');
+const clearBtn     = $('clearBtn');
+const playBtn      = $('playBtn');
+const pauseBtn     = $('pauseBtn');
+const stopBtn      = $('stopBtn');
+const copyBtn      = $('copyBtn');
+const voiceSelect  = $('voiceSelect');
+const statusDot    = $('statusDot');
+const statusText   = $('statusText');
+const voiceChip    = $('voiceChip');
+const rateSlider   = $('rateSlider');
+const rateVal      = $('rateVal');
+const pitchSlider  = $('pitchSlider');
+const pitchVal     = $('pitchVal');
+const volSlider    = $('volSlider');
+const volVal       = $('volVal');
+const chunkSelect  = $('chunkSelect');
+const waveform     = $('waveform');
+const historyList  = $('historyList');
+const voiceMapBody = $('voiceMapBody');
+const toast        = $('toast');
+
+// ── Waveform init ──
+(function buildWaveform() {
+  const heights = [8,14,22,28,24,18,12,22,30,24,16,10,20,28,22,14];
+  const delays  = [0,.1,.07,.15,.2,.05,.12,.18,.08,.22,.03,.17,.09,.13,.06,.2];
+  const durs    = [.7,.85,.65,.9,.75,.8,.7,.85,.6,.9,.75,.8,.65,.9,.7,.85];
+  heights.forEach((h, i) => {
+    const bar = document.createElement('div');
+    bar.className = 'wave-bar';
+    bar.style.cssText = `height:${h}px;--h:${h}px;--dur:${durs[i]}s;--delay:${delays[i]}s`;
+    waveform.appendChild(bar);
+  });
+})();
+
+// ── Tabs ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    $('tab-' + tab).classList.add('active');
+    if (tab === 'history') renderHistory();
+    if (tab === 'settings') renderVoiceMap();
+  });
+});
+
+// ── Sliders ──
+rateSlider.addEventListener('input', () => {
+  rateVal.textContent = parseFloat(rateSlider.value).toFixed(1) + '×';
+});
+pitchSlider.addEventListener('input', () => {
+  pitchVal.textContent = parseFloat(pitchSlider.value).toFixed(1);
+});
+volSlider.addEventListener('input', () => {
+  volVal.textContent = Math.round(volSlider.value * 100) + '%';
+});
+
+// ── Status helpers ──
+function setStatus(msg, tone = 'normal') {
+  statusText.textContent = msg;
+  statusDot.className = 'status-dot' + (
+    tone === 'ok'       ? ' ok' :
+    tone === 'warn'     ? ' warn' :
+    tone === 'err'      ? ' err' :
+    tone === 'speaking' ? ' speaking ok' : ''
+  );
+}
+
+function showToast(msg, dur = 2200) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), dur);
+}
+
+// ── Char counter ──
+function updateUI() {
+  const v = textInput.value.slice(0, MAX_CHARS);
+  if (textInput.value !== v) textInput.value = v;
+  const len = v.length;
+  charCount.textContent = len;
+  progressBar.style.width = (len / MAX_CHARS * 100) + '%';
+  clearBtn.classList.toggle('visible', len > 0);
+}
+
+textInput.addEventListener('input', updateUI);
+textInput.addEventListener('paste', () => {
+  setTimeout(() => {
+    updateUI();
+    if ($('autoPlayPaste').checked && textInput.value.trim()) speakText();
+  }, 30);
+});
+
+clearBtn.addEventListener('click', () => {
+  textInput.value = '';
+  updateUI();
+  textInput.focus();
+  setStatus('Cleared.', 'ok');
+});
+
+// ── Voice logic ──
+const VOICE_OPTS = [
+  { val: 'hi-male',     label: '🇮🇳 Hindi Male',      lang: ['hi-in', 'hi'], female: false },
+  { val: 'hi-female',   label: '🇮🇳 Hindi Female',    lang: ['hi-in', 'hi'], female: true  },
+  { val: 'en-male',     label: '🇺🇸 English Male',    lang: ['en-us', 'en'], female: false },
+  { val: 'en-female',   label: '🇺🇸 English Female',  lang: ['en-us', 'en'], female: true  },
+  { val: 'en-gb-male',  label: '🇬🇧 English UK Male', lang: ['en-gb', 'en'], female: false },
+  { val: 'en-gb-female',label: '🇬🇧 English UK Female',lang:['en-gb','en'], female: true  },
+];
+
+const FEMALE_HINTS = ['female','woman','girl','zira','susan','samantha','karen','tessa','linda','rani','neural2-f','wavenet-f','f0','flo'];
+const MALE_HINTS   = ['male','man','boy','david','daniel','james','alex','mark','michael','liam','ravi','neural2-m','wavenet-m','m0'];
+
+function normLang(v) { return String(v.lang || '').trim().toLowerCase(); }
+
+function langScore(voice, langs) {
+  const l = normLang(voice);
+  for (let i = 0; i < langs.length; i++) if (l === langs[i] || l.startsWith(langs[i])) return langs.length - i;
+  return 0;
+}
+
+function genderScore(voice, female) {
+  const n = (voice.name || '').toLowerCase();
+  return (female ? FEMALE_HINTS : MALE_HINTS).some(h => n.includes(h)) ? 1 : 0;
+}
+
+function getVoice(option) {
+  const opt = VOICE_OPTS.find(o => o.val === option);
+  if (!opt) return null;
+  const candidates = allVoices
+    .map(v => ({ v, ls: langScore(v, opt.lang), gs: genderScore(v, opt.female) }))
+    .filter(x => x.ls > 0)
+    .sort((a, b) => b.ls - a.ls || b.gs - a.gs);
+  return candidates.length ? candidates[0].v : null;
+}
+
+function refreshVoiceHint() {
+  if (!('speechSynthesis' in window)) {
+    setStatus('Speech synthesis not supported in this browser.', 'err');
+    playBtn.disabled = true;
+    return;
+  }
+  allVoices = speechSynthesis.getVoices() || [];
+  const v = getVoice(voiceSelect.value);
+  if (v) {
+    voiceChip.textContent = v.name + ' · ' + v.lang;
+    setStatus('Voice ready.', 'ok');
+  } else {
+    const l = voiceSelect.value.startsWith('hi') ? 'Hindi' : 'English';
+    voiceChip.textContent = 'No ' + l + ' voice found';
+    setStatus('No ' + l + ' voice on this device. Enable one in system settings.', 'warn');
+  }
+}
+
+// ── Playback state helpers ──
+function setPlaying(yes) {
+  isSpeaking = yes;
+  playBtn.disabled = yes;
+  pauseBtn.disabled = !yes;
+  stopBtn.disabled = !yes;
+  waveform.classList.toggle('active', yes);
+  if (yes) playBtn.classList.add('btn-speaking');
+  else { playBtn.classList.remove('btn-speaking'); isPaused = false; }
+}
+
+function stopAll() {
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  chunkQueue = [];
+  chunkIndex = 0;
+  setPlaying(false);
+  pauseBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="5" y="4" width="3.5" height="12" rx="1.5" fill="currentColor"/><rect x="11.5" y="4" width="3.5" height="12" rx="1.5" fill="currentColor"/></svg> Pause';
+}
+
+// ── Build utterance ──
+function buildUtterance(text) {
+  const u = new SpeechSynthesisUtterance(text);
+  const opt = VOICE_OPTS.find(o => o.val === voiceSelect.value);
+  u.lang = opt ? (opt.lang[0] === 'en-gb' ? 'en-GB' : opt.lang[0].toUpperCase().replace('-', '-')) : 'en-US';
+  // Normalise lang string
+  if (opt) {
+    const map = { 'hi-in': 'hi-IN', 'en-us': 'en-US', 'en-gb': 'en-GB', 'hi': 'hi-IN', 'en': 'en-US' };
+    u.lang = map[opt.lang[0]] || opt.lang[0];
+  }
+  const voice = getVoice(voiceSelect.value);
+  if (voice) { u.voice = voice; u.lang = voice.lang || u.lang; }
+  u.rate   = parseFloat(rateSlider.value);
+  u.pitch  = parseFloat(pitchSlider.value);
+  u.volume = parseFloat(volSlider.value);
+  return u;
+}
+
+// ── Chunk logic ──
+function chunkText(text, mode) {
+  if (mode === 'sentence') return text.match(/[^.!?।]+[.!?।]*/g)?.map(s => s.trim()).filter(Boolean) || [text];
+  if (mode === 'word')     return text.split(/\s+/).filter(Boolean);
+  return [text];
+}
+
+function speakChunkAt(idx) {
+  if (idx >= chunkQueue.length) {
+    setPlaying(false);
+    setStatus('Playback finished.', 'ok');
+    if ($('saveHistory').checked) addHistory(textInput.value.trim(), voiceSelect.value);
+    return;
+  }
+  const u = buildUtterance(chunkQueue[idx]);
+  u.onend = () => speakChunkAt(idx + 1);
+  u.onerror = e => {
+    if (e.error === 'interrupted') return;
+    setPlaying(false);
+    setStatus('Error: ' + (e.error || 'unknown'), 'err');
+  };
+  if ($('wordHighlight').checked) {
+    u.onboundary = ev => {
+      if (ev.name === 'word') setStatus('Speaking… "' + chunkQueue[idx].substr(ev.charIndex, ev.charLength || 6) + '"', 'speaking');
+    };
+  }
+  speechSynthesis.speak(u);
+  chunkIndex = idx;
+}
+
+function speakText() {
+  if (!('speechSynthesis' in window)) { setStatus('Not supported.', 'err'); return; }
+  const text = textInput.value.trim();
+  if (!text) { setStatus('Type some text first.', 'warn'); return; }
+  const v = getVoice(voiceSelect.value);
+  if (!v) { setStatus('No matching voice found.', 'err'); return; }
+  stopAll();
+  setPlaying(true);
+  setStatus('Speaking…', 'speaking');
+  chunkQueue = chunkText(text, chunkSelect.value);
+  speechSynthesis.cancel();
+  setTimeout(() => speakChunkAt(0), 80);
+}
+
+// ── Pause / Resume ──
+pauseBtn.addEventListener('click', () => {
+  if (!('speechSynthesis' in window)) return;
+  if (isPaused) {
+    speechSynthesis.resume();
+    isPaused = false;
+    waveform.classList.add('active');
+    pauseBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="5" y="4" width="3.5" height="12" rx="1.5" fill="currentColor"/><rect x="11.5" y="4" width="3.5" height="12" rx="1.5" fill="currentColor"/></svg> Pause';
+    setStatus('Resumed.', 'speaking');
+  } else {
+    speechSynthesis.pause();
+    isPaused = true;
+    waveform.classList.remove('active');
+    pauseBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M6 4.75C6 4.32 6.47 4.05 6.84 4.25L15.28 9.5C15.64 9.72 15.64 10.28 15.28 10.5L6.84 15.75C6.47 15.95 6 15.68 6 15.25V4.75Z" fill="currentColor"/></svg> Resume';
+    setStatus('Paused.', 'warn');
+  }
+});
+
+stopBtn.addEventListener('click', () => { stopAll(); setStatus('Stopped.', 'warn'); });
+playBtn.addEventListener('click', speakText);
+
+// ── Copy ──
+copyBtn.addEventListener('click', () => {
+  const t = textInput.value;
+  if (!t) { showToast('Nothing to copy'); return; }
+  navigator.clipboard.writeText(t).then(() => showToast('Copied to clipboard ✓')).catch(() => showToast('Copy failed'));
+});
+
+// ── Voice select change ──
+voiceSelect.addEventListener('change', () => {
+  refreshVoiceHint();
+  if (isSpeaking) stopAll();
+});
+
+// ── History ──
+function addHistory(text, voice) {
+  if (!text) return;
+  const entry = { text, voice, ts: Date.now() };
+  history = [entry, ...history.filter(h => h.text !== text)].slice(0, 50);
+  sessionStorage.setItem('speech-history', JSON.stringify(history));
+}
+
+function renderHistory() {
+  if (!history.length) {
+    historyList.innerHTML = '<div class="history-empty">No history yet. Speak something first.</div>';
+    return;
+  }
+  historyList.innerHTML = history.map((h, i) => {
+    const d = new Date(h.ts);
+    const t = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const opt = VOICE_OPTS.find(o => o.val === h.voice);
+    return `<div class="history-item" data-index="${i}">
+      <div class="history-item-text">${escHtml(h.text)}</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <span class="history-badge">${escHtml(opt ? opt.label : h.voice)}</span>
+        <span class="history-item-meta">${t}</span>
+      </div>
+    </div>`;
+  }).join('');
+  historyList.querySelectorAll('.history-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const h = history[+el.dataset.index];
+      textInput.value = h.text;
+      if (h.voice) voiceSelect.value = h.voice;
+      updateUI(); refreshVoiceHint();
+      document.querySelector('[data-tab="compose"]').click();
+      showToast('Loaded from history');
+    });
+  });
+}
+
+$('clearHistoryBtn').addEventListener('click', () => {
+  history = [];
+  sessionStorage.removeItem('speech-history');
+  renderHistory();
+  showToast('History cleared');
+});
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Presets ──
+const PRESETS = [
+  { title: 'Welcome greeting',   voice: 'en-female', text: 'Welcome! We are glad to have you here. How can we assist you today?' },
+  { title: 'Hindi namaste',      voice: 'hi-female', text: 'नमस्ते! आपका स्वागत है। कृपया बताइए, मैं आपकी किस प्रकार सहायता कर सकती हूँ?' },
+  { title: 'Announcement',       voice: 'en-male',   text: 'Attention please. This is an important announcement. Please remain calm and follow the instructions.' },
+  { title: 'News intro',         voice: 'en-gb-male',text: 'Good evening. Here is the news at six. Our top story tonight comes from the capital.' },
+  { title: 'Hindi news',         voice: 'hi-male',   text: 'शुभ संध्या। आज की मुख्य खबरें सुनिए। देश और दुनिया की ताज़ा ख़बरें हम लाए हैं आपके लिए।' },
+  { title: 'Motivational',       voice: 'en-male',   text: 'Believe in yourself. Every great achievement starts with the decision to try. You have the power to make it happen.' },
+  { title: 'Product demo',       voice: 'en-female', text: 'Introducing our latest product. Designed for performance, built for you. Experience the difference today.' },
+  { title: 'Error message',      voice: 'en-us-male',text: 'An error has occurred. Please check your connection and try again. If the problem persists, contact support.' },
+  { title: 'Meditation guide',   voice: 'en-female', text: 'Close your eyes. Take a deep breath in... and slowly breathe out. Let go of all tension. You are at peace.' },
+  { title: 'Hindi motivational', voice: 'hi-male',   text: 'हिम्मत रखो, मेहनत करो। सफलता एक दिन जरूर मिलेगी। तुम्हारे अंदर वो ताकत है जो दुनिया बदल सकती है।' },
+  { title: 'Time announcement',  voice: 'en-gb-female', text: 'The time is now twelve noon. Please prepare for the afternoon session.' },
+  { title: 'Short story',        voice: 'en-female', text: 'Once upon a time, in a land far away, there lived a young inventor who dreamed of building a machine that could speak every language in the world.' },
+];
+
+function renderPresets() {
+  $('presetsGrid').innerHTML = PRESETS.map((p, i) => {
+    const opt = VOICE_OPTS.find(o => o.val === p.voice);
+    return `<div class="preset-card" data-index="${i}">
+      <div class="preset-card-title">${escHtml(p.title)}</div>
+      <div class="preset-card-text">${escHtml(p.text)}</div>
+      <span class="preset-tag">${opt ? opt.label : p.voice}</span>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.preset-card').forEach(el => {
+    el.addEventListener('click', () => {
+      const p = PRESETS[+el.dataset.index];
+      textInput.value = p.text;
+      voiceSelect.value = p.voice;
+      updateUI(); refreshVoiceHint();
+      document.querySelector('[data-tab="compose"]').click();
+      showToast('Preset loaded');
+    });
+  });
+}
+
+// ── Voice map table (settings) ──
+function renderVoiceMap() {
+  voiceMapBody.innerHTML = VOICE_OPTS.map(opt => {
+    const v = getVoice(opt.val);
+    return `<tr>
+      <td>${escHtml(opt.label.replace(/^.+ /,''))}</td>
+      <td class="${v ? 'voice-found' : 'voice-missing'}">${v ? escHtml(v.name) : '— not found'}</td>
+      <td style="font-family:var(--mono);font-size:0.68rem;color:var(--text-3)">${v ? v.lang : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+$('refreshVoicesBtn').addEventListener('click', () => {
+  allVoices = speechSynthesis.getVoices() || [];
+  refreshVoiceHint();
+  renderVoiceMap();
+  showToast('Voices refreshed');
+});
+
+// ── Init ──
+function init() {
+  if (!('speechSynthesis' in window)) {
+    setStatus('Speech synthesis is not supported in this browser.', 'err');
+    playBtn.disabled = true;
+    return;
+  }
+  allVoices = speechSynthesis.getVoices() || [];
+  refreshVoiceHint();
+  speechSynthesis.onvoiceschanged = () => {
+    allVoices = speechSynthesis.getVoices() || [];
+    refreshVoiceHint();
+  };
+}
+
+renderPresets();
+updateUI();
+init();
+
+// Starter text
+textInput.value = 'Hello! Select a voice and press Play.';
+updateUI();
+
+window.addEventListener('beforeunload', () => { try { speechSynthesis.cancel(); } catch {} });
+</script>
+  <script type="module" src="/toolify/protect.js"></script>
 </body>
 </html>
