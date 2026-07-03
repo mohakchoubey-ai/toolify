@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -600,18 +601,5 @@
   generateQR();
 </script>
 
-<!-- Firebase auth guard -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  const app = initializeApp({
-    apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
-    authDomain: "toolbox-hub-98c03.firebaseapp.com",
-    projectId: "toolbox-hub-98c03",
-    appId: "1:321020105472:web:356e7c2903def7b9d859e5"
-  });
-  onAuthStateChanged(getAuth(app), u => { if (!u) window.location.href = "login.html"; });
-</script>
-<script type="module" src="protect.js"></script>
 </body>
 </html>
