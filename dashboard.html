@@ -36,6 +36,7 @@
       </div>
 
       <div class="header-right">
+        <button class="btn-theme" id="themeToggle" title="Toggle theme">🌙</button>
         <div class="user-pill" id="userPill">
           <img id="userAvatar" src="" alt="" class="avatar-img" />
           <span id="userName"></span>
@@ -223,6 +224,16 @@
       // Sign out handler
       signOutBtn.addEventListener("click", async () => {
         await signOut(auth);
+      });
+
+      // Theme toggle
+      const themeBtn = document.getElementById("themeToggle");
+      const saved = localStorage.getItem("toolify-theme");
+      if (saved === "light") { document.body.classList.add("light"); themeBtn.textContent = "☀️"; }
+      themeBtn.addEventListener("click", () => {
+        const isLight = document.body.classList.toggle("light");
+        themeBtn.textContent = isLight ? "☀️" : "🌙";
+        localStorage.setItem("toolify-theme", isLight ? "light" : "dark");
       });
 
       // Cursor glow effect
