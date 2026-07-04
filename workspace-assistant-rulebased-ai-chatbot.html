@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Toolify Workspace — Assistant Demo</title>
+  <title>Toolify Workspace — Assistant</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -123,8 +124,8 @@
     ────────────────────────────────────────────── */
     #chatBubble {
       position: fixed;
-      bottom: 28px;
-      right: 28px;
+      bottom: calc(1.5rem + env(safe-area-inset-bottom));
+      right: 1.5rem;
       z-index: 9998;
     }
     .bubble-btn {
@@ -169,14 +170,14 @@
     .bubble-badge.show { display: block; }
 
     /* ──────────────────────────────────────────────
-       CHAT WINDOW
+       CHAT WINDOW (FLUID SIZING ON ALL DEVICES)
     ────────────────────────────────────────────── */
     #chatWindow {
       position: fixed;
-      bottom: 104px;
+      bottom: 96px;
       right: 28px;
-      width: 400px;
-      max-height: 640px;
+      width: min(440px, calc(100vw - 56px));
+      height: min(720px, calc(100vh - 140px));
       display: flex;
       flex-direction: column;
       border-radius: var(--radius);
@@ -184,13 +185,12 @@
       box-shadow: var(--shadow);
       z-index: 9999;
       overflow: hidden;
-      transform: scale(0.92) translateY(20px);
+      transform: scale(0.95) translateY(15px);
       opacity: 0;
       pointer-events: none;
       transform-origin: bottom right;
-      transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
+      transition: transform .25s cubic-bezier(.34,1.3,.64,1), opacity .2s ease;
       border: 1px solid var(--border2);
-      /* Animated gradient border glow — the signature element */
     }
     #chatWindow::before {
       content: '';
@@ -214,6 +214,35 @@
       transform: scale(1) translateY(0);
       opacity: 1;
       pointer-events: all;
+    }
+
+    /* ──────────────────────────────────────────────
+       MOBILE & TABLET RESPONSIVE
+    ────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      #chatWindow {
+        bottom: 0; right: 0; left: 0;
+        width: 100vw;
+        height: 100dvh;
+        max-height: 100dvh;
+        border-radius: 0;
+        border: none;
+      }
+      #chatWindow::before { display: none; }
+      #chatBubble { bottom: calc(1rem + env(safe-area-inset-bottom)); right: 1rem; }
+      .chat-header { padding: 1.2rem 1.1rem; }
+    }
+    @media (max-height: 550px) and (min-width: 601px) {
+      #chatWindow { height: calc(100vh - 30px); bottom: 15px; }
+    }
+    @media (max-width: 480px) {
+      #chatWindow {
+        bottom: 0; right: 0; left: 0;
+        width: 100%;
+        max-height: 92dvh;
+        border-radius: var(--radius) var(--radius) 0 0;
+      }
+      #chatBubble { bottom: 20px; right: 20px; }
     }
 
     /* ──────────────────────────────────────────────
@@ -483,7 +512,7 @@
     }
 
     /* ──────────────────────────────────────────────
-       TOOL CARDS (main menu grid)
+       TOOL CARDS
     ────────────────────────────────────────────── */
     .tool-grid {
       display: grid;
@@ -510,21 +539,6 @@
       color: var(--text);
     }
     .tool-card .tc-emoji { font-size: 1rem; flex-shrink: 0; }
-
-    /* ──────────────────────────────────────────────
-       MOBILE RESPONSIVE
-    ────────────────────────────────────────────── */
-    @media (max-width: 480px) {
-      #chatWindow {
-        bottom: 0;
-        right: 0;
-        left: 0;
-        width: 100%;
-        max-height: 92dvh;
-        border-radius: var(--radius) var(--radius) 0 0;
-      }
-      #chatBubble { bottom: 20px; right: 20px; }
-    }
 
     /* ──────────────────────────────────────────────
        MISC
@@ -565,6 +579,7 @@
       </div>
       <div class="header-actions">
         <button class="hdr-btn" onclick="toggleTheme()" title="Toggle theme">☀️</button>
+        <button class="hdr-btn" onclick="clearHistory()" title="Clear chat history">🗑️</button>
         <button class="hdr-btn" onclick="toggleChat()" title="Close">✕</button>
       </div>
     </div>
@@ -597,23 +612,103 @@
   </div>
 
 <script>
-/* ════════════════════════════════════════════════════════════
-   TOOLIFY WORKSPACE ASSISTANT — Rules-Based Engine
+/* ════════════════════════════════════════════════════════════════════════════
+   TOOLIFY WORKSPACE ASSISTANT — Optimised Rules-Based Engine  v2.0
    by Mohak @2026
-════════════════════════════════════════════════════════════ */
 
-// ── STATE ──────────────────────────────────────────────────
+   ARCHITECTURE OVERVIEW
+   ─────────────────────
+   1. KB (Knowledge Base)          — Single source of truth for all tools.
+                                     Add new tools here ONLY; no other code
+                                     changes are required.
+
+   2. TOKEN_INDEX (Map)            — Pre-computed at init. Maps every keyword
+                                     string → tool ID for O(1) lookup instead
+                                     of O(n×k) nested loops.
+
+   3. renderMessages()             — Uses DocumentFragment to batch all DOM
+                                     writes in a single reflow, eliminating
+                                     layout thrashing.
+
+   4. localStorage persistence     — state.messages persists across sessions.
+                                     hydrateFromStorage() rebuilds the UI on
+                                     page load; saveToStorage() is called on
+                                     every message mutation.
+
+   5. sanitizeInput()              — Strips line breaks, excessive whitespace,
+                                     and dangerous HTML-injection characters
+                                     before the keyword parser ever sees text.
+════════════════════════════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════
+   §1  CONSTANTS — Storage keys & config
+══════════════════════════════════════════════════ */
+
+/** @type {string} localStorage key for persisted chat messages */
+const LS_MESSAGES = 'toolify_chat_messages';
+
+/** @type {string} localStorage key for persisted feedback states */
+const LS_FEEDBACK  = 'toolify_feedback_state';
+
+/** @type {string} localStorage key for the colour theme */
+const LS_THEME     = 'toolify-theme';
+
+/** Maximum messages kept in localStorage (prevents unbounded growth) */
+const MAX_HISTORY  = 80;
+
+/** Typing indicator delay range in milliseconds [min, max] */
+const TYPING_DELAY = [700, 1300];
+
+
+/* ══════════════════════════════════════════════════
+   §2  RUNTIME STATE
+══════════════════════════════════════════════════ */
+
+/**
+ * Central mutable state object.
+ * All properties are either restored from localStorage on init
+ * or set to their defaults.
+ *
+ * @type {{
+ *   open:          boolean,
+ *   theme:         string,
+ *   messages:      Array<{role:string, text:string, time:string, isHtml:boolean}>,
+ *   feedbackPhase: null|'text'|'email',
+ *   feedbackText:  string,
+ *   userName:      string
+ * }}
+ */
 const state = {
-  open: false,
-  chatOpen: false,
-  theme: localStorage.getItem('toolify-theme') || 'dark',
-  messages: [],
-  feedbackPhase: null,   // null | 'text' | 'email'
-  feedbackText: '',
-  userName: 'there',
+  open:          false,
+  theme:         localStorage.getItem(LS_THEME) || 'dark',
+  messages:      [],          // Populated by hydrateFromStorage()
+  feedbackPhase: null,        // Populated by hydrateFromStorage()
+  feedbackText:  '',          // Populated by hydrateFromStorage()
+  userName:      'there',
 };
 
-// ── KNOWLEDGE BASE ─────────────────────────────────────────
+
+/* ══════════════════════════════════════════════════
+   §3  KNOWLEDGE BASE  (KB)
+   ─────────────────────────────────────────────
+   ➕ TO ADD A NEW TOOL:
+      Append a new object to this array following the
+      same shape. The TOKEN_INDEX is rebuilt automatically
+      on the next page load — zero other code to touch.
+══════════════════════════════════════════════════ */
+
+/**
+ * @typedef {Object} KBEntry
+ * @property {string}        id        — Unique camelCase identifier
+ * @property {string}        emoji     — Display emoji
+ * @property {string}        label     — Human-readable name
+ * @property {string|null}   url       — Navigation target (null = no direct URL)
+ * @property {string[]}      keywords  — Words/phrases that trigger this entry
+ * @property {(()=>string)|null} response — Returns the formatted HTML response string
+ */
+
+/** @type {KBEntry[]} */
 const KB = [
   {
     id: 'ai_chatbot',
@@ -1139,13 +1234,13 @@ Full legal terms available in the <strong>Terms & Conditions</strong> page.`
     id: 'feedback',
     emoji: '💬',
     label: 'Send Feedback',
-    url: null,   // handled via multi-turn
+    url: null,          // Handled by multi-turn flow — no direct URL
     keywords: [
       'feedback','bug','report','contact','suggestion','complaint','help',
       'problem','issue','error','bata do','kuch galat','feature request',
       'improve','sujhav','shikayat','support'
     ],
-    response: null   // handled by feedbackFlow
+    response: null      // Handled by startFeedbackFlow()
   },
   {
     id: 'other_sites',
@@ -1165,7 +1260,7 @@ Explore more projects from the Toolify developer:
   <a href="https://mohakdev1220.github.io/gatividhiya/" target="_blank">mohakdev1220.github.io/gatividhiya</a>
 
 • <strong>📰 Daily Echo</strong> — Private journal & reflection app<br>
-  mohakdev1220.github.io/daily echo
+  mohakdev1220.github.io/daily-echo
 
 • <strong>💬 Telebey</strong> — Real-time messaging platform<br>
   mohakdev1220.github.io/telebey
@@ -1205,7 +1300,58 @@ Support by using Toolify and sharing it with friends! 🙏`
   }
 ];
 
-// ── MAIN MENU TOOLS (20 items for quick-reply grid) ────────
+
+/* ══════════════════════════════════════════════════
+   §4  TOKEN INDEX  ─── O(1) KEYWORD LOOKUP MAP
+   ─────────────────────────────────────────────
+   Pre-computed ONCE at init. Maps every keyword →
+   tool ID. matchQuery() does a single Map.get()
+   instead of nested loops.
+
+   Complexity: O(k) to build (k = total keywords),
+               O(1) per query lookup thereafter.
+══════════════════════════════════════════════════ */
+
+/**
+ * Maps lowercase keyword/token string → KB entry ID.
+ * Built once by buildTokenIndex(); never mutated after that.
+ *
+ * @type {Map<string, string>}
+ */
+const TOKEN_INDEX = new Map();
+
+/**
+ * Iterates the KB once and populates TOKEN_INDEX.
+ * Multi-word keywords are stored as-is so substring
+ * matching in matchQuery() still works correctly.
+ *
+ * Called immediately at the bottom of this block.
+ *
+ * @returns {void}
+ */
+function buildTokenIndex() {
+  for (const entry of KB) {
+    for (const kw of entry.keywords) {
+      const normalised = kw.toLowerCase().trim();
+      // First writer wins — prevents accidental overwrites
+      // when two KB entries share an identical keyword.
+      if (!TOKEN_INDEX.has(normalised)) {
+        TOKEN_INDEX.set(normalised, entry.id);
+      }
+    }
+  }
+}
+
+// Build immediately — this is synchronous and very fast
+buildTokenIndex();
+
+
+/* ══════════════════════════════════════════════════
+   §5  MAIN MENU TOOL IDs
+   Order controls the display sequence in the grid.
+══════════════════════════════════════════════════ */
+
+/** @type {string[]} */
 const MAIN_MENU_TOOLS = [
   'ai_chatbot','world_clock','converter','finance','game',
   'activities','alarm','calculator','paragraph_editor','weather',
@@ -1213,7 +1359,508 @@ const MAIN_MENU_TOOLS = [
   'calendar','pdf','stopwatch','password','feedback'
 ];
 
-// ── GREETING by time ───────────────────────────────────────
+
+/* ══════════════════════════════════════════════════
+   §6  DOM REFERENCES
+   Cached once on load — never re-queried.
+══════════════════════════════════════════════════ */
+
+const chatWindow   = document.getElementById('chatWindow');
+const chatMessages = document.getElementById('chatMessages');
+const quickReplies = document.getElementById('quickReplies');
+const msgInput     = document.getElementById('msgInput');
+const bubbleIcon   = document.getElementById('bubbleIcon');
+const bubbleBadge  = document.getElementById('bubbleBadge');
+
+
+/* ══════════════════════════════════════════════════
+   §7  THEME
+══════════════════════════════════════════════════ */
+
+function applyTheme() {
+  document.body.classList.toggle('light-mode', state.theme === 'light');
+}
+
+function toggleTheme() {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(LS_THEME, state.theme);
+  applyTheme();
+}
+
+// Alias used by the page-level button outside the chat window
+function togglePageTheme() { toggleTheme(); }
+
+applyTheme();
+
+
+/* ══════════════════════════════════════════════════
+   §8  INPUT SANITIZATION
+   ─────────────────────────────────────────────
+   Aggressively clean raw textarea value BEFORE any
+   other code sees it. This prevents:
+     • Accidental HTML injection via innerHTML paths
+     • Keyword parser confusion from stray newlines
+     • XSS if response templates ever echo user text
+══════════════════════════════════════════════════ */
+
+/**
+ * Sanitize raw text from the textarea.
+ *
+ * Pipeline (in order):
+ *   1. Collapse all newlines / carriage returns to a single space
+ *   2. Collapse runs of 2+ whitespace characters to a single space
+ *   3. Strip leading and trailing whitespace
+ *   4. Remove HTML-significant characters to prevent injection
+ *
+ * @param  {string} raw — Raw value straight from msgInput.value
+ * @returns {string}    — Clean, safe, single-line string
+ */
+function sanitizeInput(raw) {
+  return raw
+    // Step 1: any newline variant → space
+    .replace(/[\r\n\u2028\u2029]+/g, ' ')
+    // Step 2: collapse multiple spaces/tabs to one
+    .replace(/[ \t]{2,}/g, ' ')
+    // Step 3: trim ends
+    .trim()
+    // Step 4: strip characters that break the keyword parser or cause XSS
+    //         (we keep @ for email input during feedback flow)
+    .replace(/[<>'"`;\\]/g, '');
+}
+
+/**
+ * Escape a plain string for safe insertion into innerHTML.
+ * Used wherever user text is reflected inside bot messages.
+ *
+ * @param  {string} str
+ * @returns {string}
+ */
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+
+/* ══════════════════════════════════════════════════
+   §9  LOCALSTORAGE PERSISTENCE
+   ─────────────────────────────────────────────
+   saveToStorage()   — Write state to localStorage
+   hydrateFromStorage() — Read state and rebuild DOM
+   clearHistory()    — Wipe storage and reset chat
+══════════════════════════════════════════════════ */
+
+/**
+ * Persist the current chat messages and feedback state.
+ * Trims the array to MAX_HISTORY entries so storage never bloats.
+ *
+ * @returns {void}
+ */
+function saveToStorage() {
+  try {
+    // Keep only the most recent MAX_HISTORY messages
+    const trimmed = state.messages.slice(-MAX_HISTORY);
+    localStorage.setItem(LS_MESSAGES, JSON.stringify(trimmed));
+
+    // Persist feedback state so a mid-flow page refresh doesn't
+    // leave the user in a broken state
+    const feedbackSnap = {
+      phase: state.feedbackPhase,
+      text:  state.feedbackText,
+    };
+    localStorage.setItem(LS_FEEDBACK, JSON.stringify(feedbackSnap));
+  } catch (e) {
+    // Swallow QuotaExceededError gracefully — chat still works in-memory
+    console.warn('[Toolify] localStorage save failed:', e.message);
+  }
+}
+
+/**
+ * On page load: restore state.messages from localStorage,
+ * then rebuild the visual message list via renderMessages().
+ * If nothing is stored (first visit), starts the greeting instead.
+ *
+ * @returns {void}
+ */
+function hydrateFromStorage() {
+  try {
+    // ── Restore messages ──────────────────────────────
+    const raw = localStorage.getItem(LS_MESSAGES);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        state.messages = parsed;
+        renderMessages(parsed);
+        return; // Don't show greeting — history already rendered
+      }
+    }
+
+    // ── Restore feedback flow state ───────────────────
+    const fb = localStorage.getItem(LS_FEEDBACK);
+    if (fb) {
+      const { phase, text } = JSON.parse(fb);
+      state.feedbackPhase = phase || null;
+      state.feedbackText  = text  || '';
+    }
+  } catch (e) {
+    console.warn('[Toolify] localStorage hydration failed:', e.message);
+    // Fall through — will show greeting as normal
+  }
+
+  // No stored history → show welcome message
+  initGreeting();
+}
+
+/**
+ * Build the full chat DOM from a messages array
+ * using a single DocumentFragment (zero live-DOM writes
+ * until the fragment is fully assembled).
+ *
+ * @param {Array<{role:string, text:string, time:string, isHtml?:boolean}>} messages
+ * @returns {void}
+ */
+function renderMessages(messages) {
+  // DocumentFragment: all child creation happens off-screen
+  const frag = document.createDocumentFragment();
+
+  for (const msg of messages) {
+    const row = buildMessageRow(msg.role, msg.text, msg.time, msg.isHtml);
+    frag.appendChild(row);
+  }
+
+  // ONE reflow: append the whole fragment to the live DOM
+  chatMessages.appendChild(frag);
+  scrollBottom();
+}
+
+/**
+ * Wipe the chat history from storage and reset the UI
+ * to a fresh greeting state.
+ *
+ * @returns {void}
+ */
+function clearHistory() {
+  try {
+    localStorage.removeItem(LS_MESSAGES);
+    localStorage.removeItem(LS_FEEDBACK);
+  } catch (_) { /* ignore */ }
+
+  state.messages      = [];
+  state.feedbackPhase = null;
+  state.feedbackText  = '';
+
+  chatMessages.innerHTML = '';
+  quickReplies.innerHTML = '';
+
+  initGreeting();
+}
+
+
+/* ══════════════════════════════════════════════════
+   §10  DOM BUILDERS  (DocumentFragment pattern)
+   ─────────────────────────────────────────────
+   All message and button DOM is assembled entirely
+   INSIDE these functions. Nothing writes to the live
+   DOM until the final appendChild(fragment) call in
+   the public API functions below.
+══════════════════════════════════════════════════ */
+
+/**
+ * Build a single message row element (not yet in the DOM).
+ *
+ * @param {string}  role   — 'bot' | 'user'
+ * @param {string}  text   — Message content
+ * @param {string}  time   — Pre-formatted time string
+ * @param {boolean} isHtml — true → set via innerHTML; false → textContent
+ * @returns {HTMLDivElement}
+ */
+function buildMessageRow(role, text, time, isHtml = false) {
+  const isUser = role === 'user';
+
+  /* row */
+  const row = document.createElement('div');
+  row.className = `msg-row ${isUser ? 'user' : 'bot'}`;
+
+  /* avatar */
+  const av = document.createElement('div');
+  av.className = `msg-avatar ${isUser ? 'user-av' : 'bot'}`;
+  av.textContent = isUser ? state.userName.charAt(0).toUpperCase() : '⚙️';
+
+  /* inner column */
+  const inner = document.createElement('div');
+  inner.className = 'msg-inner';
+
+  /* bubble */
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+
+  if (isHtml) {
+    // Bot messages: rich HTML (controlled content — not user input)
+    bubble.innerHTML = text;
+  } else {
+    // User messages: always plain text to prevent injection
+    bubble.textContent = text;
+  }
+
+  /* timestamp */
+  const ts = document.createElement('div');
+  ts.className = 'msg-time';
+  ts.textContent = time;
+
+  // Assemble inner → row without touching the live DOM
+  inner.appendChild(bubble);
+  inner.appendChild(ts);
+
+  if (isUser) {
+    row.appendChild(inner);
+    row.appendChild(av);
+  } else {
+    row.appendChild(av);
+    row.appendChild(inner);
+  }
+
+  return row;
+}
+
+/**
+ * Build a DocumentFragment containing all quick-reply buttons.
+ * No button is appended to the live DOM during construction.
+ *
+ * @param {Array<{label:string, action:function}>} items
+ * @returns {DocumentFragment}
+ */
+function buildQuickReplyFragment(items) {
+  const frag = document.createDocumentFragment();
+
+  for (const item of items) {
+    const btn = document.createElement('button');
+    btn.className = 'qr-btn';
+    btn.textContent = item.label;
+
+    // Closure captures each item correctly inside the loop
+    btn.addEventListener('click', () => {
+      // Clear quick replies first, then run the action
+      quickReplies.innerHTML = '';
+      item.action();
+    });
+
+    frag.appendChild(btn);
+  }
+
+  return frag;
+}
+
+
+/* ══════════════════════════════════════════════════
+   §11  PUBLIC MESSAGE API
+   These are the functions called by all game logic.
+   Each commits ONE DocumentFragment to the live DOM.
+══════════════════════════════════════════════════ */
+
+/**
+ * Append a user message bubble to the chat.
+ *
+ * @param {string} text — The sanitized message text
+ * @returns {void}
+ */
+function addUserMessage(text) {
+  const time = formatTime();
+  const row  = buildMessageRow('user', text, time, false);
+
+  chatMessages.appendChild(row);
+  scrollBottom();
+
+  // Persist to state + storage
+  state.messages.push({ role: 'user', text, time, isHtml: false });
+  saveToStorage();
+}
+
+/**
+ * Append a bot message bubble (HTML content) to the chat.
+ *
+ * @param {string} html     — Trusted HTML string from KB responses
+ * @param {number} [delay]  — Optional ms delay before appending (default 0)
+ * @returns {void}
+ */
+function addBotMessage(html, delay = 0) {
+  const time = formatTime();
+  const row  = buildMessageRow('bot', html, time, true);
+
+  if (delay > 0) {
+    setTimeout(() => {
+      chatMessages.appendChild(row);
+      scrollBottom();
+    }, delay);
+  } else {
+    chatMessages.appendChild(row);
+    scrollBottom();
+  }
+
+  // Persist to state + storage
+  state.messages.push({ role: 'bot', text: html, time, isHtml: true });
+  saveToStorage();
+}
+
+/**
+ * Replace the quick-reply strip with a new set of buttons.
+ * Uses a DocumentFragment so all buttons mount in one reflow.
+ *
+ * @param {Array<{label:string, action:function}>} items
+ * @returns {void}
+ */
+function setQuickReplies(items) {
+  // Clear current buttons
+  quickReplies.innerHTML = '';
+
+  if (!items.length) return;
+
+  // Build off-screen, then mount once
+  const frag = buildQuickReplyFragment(items);
+  quickReplies.appendChild(frag);
+}
+
+
+/* ══════════════════════════════════════════════════
+   §12  TYPING INDICATOR
+══════════════════════════════════════════════════ */
+
+/**
+ * Show an animated typing bubble, then invoke callback after a
+ * randomised delay to simulate realistic response time.
+ *
+ * @param {function} callback — Executed when the typing bubble is removed
+ * @returns {void}
+ */
+function showTyping(callback) {
+  const [minMs, maxMs] = TYPING_DELAY;
+  const delay = minMs + Math.random() * (maxMs - minMs);
+
+  // Build the typing row (off-screen first, then one append)
+  const frag = document.createDocumentFragment();
+
+  const row  = document.createElement('div');
+  row.className = 'typing-row';
+
+  const av   = document.createElement('div');
+  av.className = 'msg-avatar bot';
+  av.textContent = '⚙️';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'typing-bubble';
+
+  // Three bouncing dots
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'typing-dot';
+    bubble.appendChild(dot);
+  }
+
+  row.appendChild(av);
+  row.appendChild(bubble);
+  frag.appendChild(row);
+  chatMessages.appendChild(frag);
+  scrollBottom();
+
+  setTimeout(() => {
+    row.remove();
+    callback();
+  }, delay);
+}
+
+
+/* ══════════════════════════════════════════════════
+   §13  KEYWORD MATCHING  ─── O(1) LOOKUP
+   ─────────────────────────────────────────────
+   Instead of looping through every KB entry and
+   every keyword array, we:
+     1. Normalise the user query once
+     2. Split into tokens
+     3. Check TOKEN_INDEX.get(token) → O(1) per token
+     4. Also check if any full multi-word keyword is a
+        substring of the query (handles phrases like
+        "usd to inr" or "world clock")
+══════════════════════════════════════════════════ */
+
+/**
+ * Find the best KB match for a user's input string.
+ *
+ * Strategy:
+ *   Phase A — Exact multi-word substring match (highest priority)
+ *   Phase B — Single-token Map lookup (covers most simple queries)
+ *
+ * Returns the first match found; no match returns null.
+ *
+ * @param  {string} input — Already sanitized user input
+ * @returns {KBEntry|null}
+ */
+function matchQuery(input) {
+  const q = input.toLowerCase();
+
+  // ── Phase A: Full multi-word keyword match ────────────────────
+  // Check if the query contains any stored keyword as a substring.
+  // TOKEN_INDEX keys include multi-word phrases, so this catches
+  // "usd to inr", "world clock", "strong password", etc.
+  for (const [kw, id] of TOKEN_INDEX) {
+    if (q.includes(kw)) {
+      // Fast O(1) KB lookup by ID via the toolMap (built below)
+      return toolMap.get(id) ?? null;
+    }
+  }
+
+  // ── Phase B: Single-token fallback ───────────────────────────
+  // Split the query by whitespace and look up each word.
+  // Catches queries like "alarm?" → token "alarm" → ⏰ Alarm.
+  const tokens = q.split(/\s+/);
+  for (const token of tokens) {
+    if (TOKEN_INDEX.has(token)) {
+      return toolMap.get(TOKEN_INDEX.get(token)) ?? null;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * O(1) KB entry lookup by ID.
+ * Built once after KB is defined.
+ *
+ * @type {Map<string, KBEntry>}
+ */
+const toolMap = new Map(KB.map(entry => [entry.id, entry]));
+
+
+/* ══════════════════════════════════════════════════
+   §14  CHAT OPEN / CLOSE
+══════════════════════════════════════════════════ */
+
+function toggleChat() {
+  state.open = !state.open;
+  chatWindow.classList.toggle('open', state.open);
+  bubbleIcon.textContent = state.open ? '✕' : '⚙️';
+  bubbleBadge.classList.remove('show');
+
+  if (state.open) {
+    // If the messages area is empty (e.g. first open after clearHistory),
+    // show the greeting; otherwise history is already rendered.
+    if (chatMessages.children.length === 0) {
+      initGreeting();
+    }
+    msgInput.focus();
+  }
+}
+
+
+/* ══════════════════════════════════════════════════
+   §15  GREETING
+══════════════════════════════════════════════════ */
+
+/**
+ * Return a time-appropriate greeting string.
+ * @returns {string}
+ */
 function getGreeting() {
   const h = new Date().getHours();
   if (h >= 5  && h < 12) return 'Good morning';
@@ -1222,39 +1869,12 @@ function getGreeting() {
   return 'Hey there';
 }
 
-// ── DOM refs ───────────────────────────────────────────────
-const chatWindow   = document.getElementById('chatWindow');
-const chatMessages = document.getElementById('chatMessages');
-const quickReplies = document.getElementById('quickReplies');
-const msgInput     = document.getElementById('msgInput');
-const bubbleIcon   = document.getElementById('bubbleIcon');
-const bubbleBadge  = document.getElementById('bubbleBadge');
-
-// ── THEME ──────────────────────────────────────────────────
-function applyTheme() {
-  document.body.classList.toggle('light-mode', state.theme === 'light');
-}
-function toggleTheme() {
-  state.theme = state.theme === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('toolify-theme', state.theme);
-  applyTheme();
-}
-function togglePageTheme() { toggleTheme(); }
-applyTheme();
-
-// ── CHAT OPEN/CLOSE ────────────────────────────────────────
-function toggleChat() {
-  state.open = !state.open;
-  chatWindow.classList.toggle('open', state.open);
-  bubbleIcon.textContent = state.open ? '✕' : '⚙️';
-  bubbleBadge.classList.remove('show');
-  if (state.open && chatMessages.children.length === 0) {
-    initGreeting();
-  }
-  if (state.open) msgInput.focus();
-}
-
-// ── INIT GREETING ──────────────────────────────────────────
+/**
+ * Display the welcome bot message, then show the main menu.
+ * Only called when there is no persisted history to restore.
+ *
+ * @returns {void}
+ */
 function initGreeting() {
   const greeting = getGreeting();
   addBotMessage(
@@ -1264,46 +1884,55 @@ function initGreeting() {
   setTimeout(() => showMainMenu(true), 900);
 }
 
-// ── MAIN MENU ──────────────────────────────────────────────
+
+/* ══════════════════════════════════════════════════
+   §16  MAIN MENU
+══════════════════════════════════════════════════ */
+
+/**
+ * Render the full tool grid as quick-reply buttons.
+ *
+ * @param {boolean} [fromGreeting=false] — Skip the "here's the menu" message
+ *                                         when showing immediately after greeting
+ * @returns {void}
+ */
 function showMainMenu(fromGreeting = false) {
   if (!fromGreeting) {
-    addBotMessage('Here\'s the full tool menu. Tap anything or type a question:', 0);
+    addBotMessage("Here's the full tool menu. Tap anything or type a question:", 0);
   }
+
   setTimeout(() => {
-    setQuickReplies(
-      MAIN_MENU_TOOLS.map(id => {
-        const tool = KB.find(t => t.id === id);
+    // Build items array from MAIN_MENU_TOOLS + extras
+    const items = MAIN_MENU_TOOLS
+      .map(id => {
+        const tool = toolMap.get(id);
         return { label: `${tool.emoji} ${tool.label}`, action: () => handleToolSelect(id) };
-      }).concat([
+      })
+      .concat([
         { label: '🌐 Other Sites', action: () => handleToolSelect('other_sites') },
-        { label: '👨‍💻 About Mohak', action: () => handleToolSelect('about') }
-      ]),
-      true
-    );
+        { label: '👨‍💻 About Mohak', action: () => handleToolSelect('about') },
+      ]);
+
+    setQuickReplies(items);
   }, fromGreeting ? 800 : 400);
 }
 
-// ── QUICK REPLIES RENDERER ─────────────────────────────────
-function setQuickReplies(items, isGrid = false) {
-  quickReplies.innerHTML = '';
-  items.forEach(item => {
-    const btn = document.createElement('button');
-    btn.className = 'qr-btn';
-    btn.textContent = item.label;
-    btn.onclick = () => {
-      quickReplies.innerHTML = '';
-      item.action();
-    };
-    quickReplies.appendChild(btn);
-  });
-}
 
-// ── HANDLE TOOL SELECT ─────────────────────────────────────
+/* ══════════════════════════════════════════════════
+   §17  TOOL SELECTION HANDLER
+══════════════════════════════════════════════════ */
+
+/**
+ * Handle tapping a tool button (from quick replies or matched query).
+ *
+ * @param {string} toolId — KB entry ID
+ * @returns {void}
+ */
 function handleToolSelect(toolId) {
-  const tool = KB.find(t => t.id === toolId);
+  const tool = toolMap.get(toolId);
   if (!tool) return;
 
-  addUserMessage(tool.emoji + ' ' + tool.label);
+  addUserMessage(`${tool.emoji} ${tool.label}`);
 
   if (toolId === 'feedback') {
     startFeedbackFlow();
@@ -1314,101 +1943,143 @@ function handleToolSelect(toolId) {
     const resp = tool.response ? tool.response() : `Opening <strong>${tool.label}</strong>…`;
     addBotMessage(resp);
 
-    // Follow-up quick replies
     setTimeout(() => {
-      const followUps = [
-        { label: '☰ Back to Menu',    action: showMainMenu },
-        { label: '🔗 Open ' + tool.label, action: () => navigateToTool(tool) },
-        { label: '❓ Ask another question', action: () => { setQuickReplies([]); msgInput.focus(); } }
-      ];
-      setQuickReplies(followUps);
+      setQuickReplies([
+        { label: '☰ Back to Menu',         action: showMainMenu },
+        { label: `🔗 Open ${tool.label}`,  action: () => navigateToTool(tool) },
+        { label: '❓ Ask another question', action: () => { setQuickReplies([]); msgInput.focus(); } },
+      ]);
     }, 300);
   });
 }
 
-// ── NAVIGATE TO TOOL ───────────────────────────────────────
+
+/* ══════════════════════════════════════════════════
+   §18  NAVIGATION
+══════════════════════════════════════════════════ */
+
+/**
+ * Open a tool URL in a new tab, with a brief bot confirmation.
+ *
+ * @param {KBEntry} tool
+ * @returns {void}
+ */
 function navigateToTool(tool) {
-  const msg = `Redirecting you to <strong>${tool.emoji} ${tool.label}</strong>…`;
-  addBotMessage(msg, 0);
+  addBotMessage(`Redirecting you to <strong>${tool.emoji} ${tool.label}</strong>…`, 0);
   setTimeout(() => {
-    if (tool.url) {
-      window.open(tool.url, '_blank');
-    }
-    console.log(`[Toolify Router] Navigating to: ${tool.url || 'N/A'} for tool: ${tool.label}`);
+    if (tool.url) window.open(tool.url, '_blank');
   }, 400);
 }
 
-// ── FEEDBACK FLOW ──────────────────────────────────────────
+
+/* ══════════════════════════════════════════════════
+   §19  FEEDBACK MULTI-TURN FLOW
+══════════════════════════════════════════════════ */
+
 function startFeedbackFlow() {
   state.feedbackPhase = 'text';
-  state.feedbackText = '';
+  state.feedbackText  = '';
+  saveToStorage(); // Persist phase so a refresh doesn't lose context
+
   showTyping(() => {
-    addBotMessage(`💬 <strong>We'd love to hear from you!</strong><br><br>Please describe your feedback, bug report, or suggestion in detail — the more specific, the better.`);
+    addBotMessage(
+      `💬 <strong>We'd love to hear from you!</strong><br><br>Please describe your feedback, bug report, or suggestion in detail — the more specific, the better.`
+    );
     setQuickReplies([{ label: '❌ Cancel feedback', action: cancelFeedback }]);
   });
 }
 
 function cancelFeedback() {
   state.feedbackPhase = null;
+  state.feedbackText  = '';
+  saveToStorage();
+
   addBotMessage('Feedback cancelled. How else can I help you?', 0);
   setTimeout(showMainMenu, 400);
 }
 
+/**
+ * Route user input through the two-step feedback flow.
+ * Returns true if the input was consumed by the flow, false otherwise.
+ *
+ * @param  {string} text — Sanitized user text
+ * @returns {boolean}
+ */
 function handleFeedbackInput(text) {
   if (state.feedbackPhase === 'text') {
-    state.feedbackText = text;
+    state.feedbackText  = text;
     state.feedbackPhase = 'email';
+    saveToStorage();
+
     addUserMessage(text);
     showTyping(() => {
-      addBotMessage(`Got it, thanks! 📝 Now please enter your <strong>email address</strong> so we can follow up if needed. (Must contain @ and a domain like .com)`);
+      addBotMessage(
+        `Got it, thanks! 📝 Now please enter your <strong>email address</strong> so we can follow up if needed. (Must contain @ and a domain like .com)`
+      );
       setQuickReplies([{ label: '❌ Cancel', action: cancelFeedback }]);
     });
     return true;
   }
+
   if (state.feedbackPhase === 'email') {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    addUserMessage(text);
+
     if (!emailRegex.test(text.trim())) {
-      addUserMessage(text);
       showTyping(() => {
-        addBotMessage(`⚠️ That doesn't look like a valid email — it must include <strong>@</strong> and a domain (e.g. you@gmail.com). Please try again.`);
+        addBotMessage(
+          `⚠️ That doesn't look like a valid email — it must include <strong>@</strong> and a domain (e.g. you@gmail.com). Please try again.`
+        );
         setQuickReplies([{ label: '❌ Cancel', action: cancelFeedback }]);
       });
       return true;
     }
-    addUserMessage(text);
-    const email = text.trim();
+
+    const email = escapeHtml(text.trim());
+    const summary = escapeHtml(state.feedbackText.substring(0, 120));
+    const ellipsis = state.feedbackText.length > 120 ? '…' : '';
+
     state.feedbackPhase = null;
+    state.feedbackText  = '';
+    saveToStorage();
+
     showTyping(() => {
-      addBotMessage(`✅ <strong>Feedback submitted — thank you!</strong><br><br>We received your message and will follow up at <strong>${email}</strong> if needed.<br><br>Summary:<br><em>${state.feedbackText.substring(0, 120)}${state.feedbackText.length > 120 ? '…' : ''}</em>`);
-      state.feedbackText = '';
+      addBotMessage(
+        `✅ <strong>Feedback submitted — thank you!</strong><br><br>We received your message and will follow up at <strong>${email}</strong> if needed.<br><br>Summary:<br><em>${summary}${ellipsis}</em>`
+      );
       setTimeout(() => {
         setQuickReplies([{ label: '☰ Back to Menu', action: showMainMenu }]);
       }, 300);
     });
     return true;
   }
+
   return false;
 }
 
-// ── KEYWORD MATCHING ───────────────────────────────────────
-function matchQuery(input) {
-  const q = input.toLowerCase().trim();
-  for (const tool of KB) {
-    if (tool.keywords.some(kw => q.includes(kw.toLowerCase()))) {
-      return tool;
-    }
-  }
-  return null;
-}
 
-// ── SEND MESSAGE ───────────────────────────────────────────
+/* ══════════════════════════════════════════════════
+   §20  SEND MESSAGE  (main entry point from UI)
+══════════════════════════════════════════════════ */
+
+/**
+ * Read, sanitize, and dispatch the current textarea value.
+ * Feedback flow takes priority over keyword matching.
+ *
+ * @returns {void}
+ */
 function sendMessage() {
-  const text = msgInput.value.trim();
-  if (!text) return;
+  // ── Sanitize raw input ────────────────────────────────────────
+  const raw  = msgInput.value;
+  const text = sanitizeInput(raw);
+
+  if (!text) return; // Nothing to send after sanitization
+
+  // Reset the textarea
   msgInput.value = '';
   msgInput.style.height = 'auto';
 
-  // Feedback flow takes priority
+  // ── Feedback flow has priority ────────────────────────────────
   if (state.feedbackPhase) {
     handleFeedbackInput(text);
     return;
@@ -1417,6 +2088,7 @@ function sendMessage() {
   addUserMessage(text);
   quickReplies.innerHTML = '';
 
+  // ── Keyword matching ─────────────────────────────────────────
   const matched = matchQuery(text);
 
   if (matched) {
@@ -1424,136 +2096,96 @@ function sendMessage() {
       startFeedbackFlow();
     } else {
       showTyping(() => {
-        const resp = matched.response ? matched.response() : `I found <strong>${matched.emoji} ${matched.label}</strong> — here's what you need to know:`;
+        const resp = matched.response
+          ? matched.response()
+          : `I found <strong>${matched.emoji} ${matched.label}</strong> — here's what you need to know:`;
         addBotMessage(resp);
+
         setTimeout(() => {
           setQuickReplies([
-            { label: '☰ Main Menu',            action: showMainMenu },
-            { label: `🔗 Open ${matched.label}`, action: () => navigateToTool(matched) }
+            { label: '☰ Main Menu',              action: showMainMenu },
+            { label: `🔗 Open ${matched.label}`, action: () => navigateToTool(matched) },
           ]);
         }, 300);
       });
     }
   } else {
+    // No match — show friendly fallback with menu
     showTyping(() => {
       addBotMessage(
-        `Sorry, I couldn't quite map <em>"${escapeHtml(text)}"</em> to our workspace utilities. 🤔<br><br>Please select a category from the options below, or use the <strong>☰ menu button</strong> to restart.`
+        `Sorry, I couldn't map <em>"${escapeHtml(text)}"</em> to a workspace tool. 🤔<br><br>Please pick a category below, or use <strong>☰</strong> to browse the full menu.`
       );
       setTimeout(showMainMenu, 300);
     });
   }
 }
 
-// ── MESSAGE RENDERERS ──────────────────────────────────────
-function addUserMessage(text) {
-  const row = document.createElement('div');
-  row.className = 'msg-row user';
-  const av = document.createElement('div');
-  av.className = 'msg-avatar user-av';
-  av.textContent = state.userName.charAt(0).toUpperCase();
-  const inner = document.createElement('div');
-  inner.className = 'msg-inner';
-  const bubble = document.createElement('div');
-  bubble.className = 'msg-bubble';
-  bubble.textContent = text;
-  const time = document.createElement('div');
-  time.className = 'msg-time';
-  time.textContent = formatTime();
-  inner.appendChild(bubble);
-  inner.appendChild(time);
-  row.appendChild(inner);
-  row.appendChild(av);
-  chatMessages.appendChild(row);
-  scrollBottom();
-  state.messages.push({ role: 'user', text, time: formatTime() });
-}
 
-function addBotMessage(html, delay = 0) {
-  const row = document.createElement('div');
-  row.className = 'msg-row bot';
-  const av = document.createElement('div');
-  av.className = 'msg-avatar bot';
-  av.textContent = '⚙️';
-  const inner = document.createElement('div');
-  inner.className = 'msg-inner';
-  const bubble = document.createElement('div');
-  bubble.className = 'msg-bubble';
-  bubble.innerHTML = html;
-  const time = document.createElement('div');
-  time.className = 'msg-time';
-  time.textContent = formatTime();
-  inner.appendChild(bubble);
-  inner.appendChild(time);
-  row.appendChild(av);
-  row.appendChild(inner);
-  if (delay > 0) {
-    setTimeout(() => {
-      chatMessages.appendChild(row);
-      scrollBottom();
-    }, delay);
-  } else {
-    chatMessages.appendChild(row);
-    scrollBottom();
-  }
-  state.messages.push({ role: 'bot', text: html, time: formatTime() });
-}
+/* ══════════════════════════════════════════════════
+   §21  UTILITY HELPERS
+══════════════════════════════════════════════════ */
 
-// ── TYPING INDICATOR ───────────────────────────────────────
-function showTyping(callback) {
-  const delay = 800 + Math.random() * 700;  // 800–1500ms
-
-  const row = document.createElement('div');
-  row.className = 'typing-row';
-  const av = document.createElement('div');
-  av.className = 'msg-avatar bot';
-  av.textContent = '⚙️';
-  const bubble = document.createElement('div');
-  bubble.className = 'typing-bubble';
-  [1,2,3].forEach(() => {
-    const dot = document.createElement('div');
-    dot.className = 'typing-dot';
-    bubble.appendChild(dot);
-  });
-  row.appendChild(av);
-  row.appendChild(bubble);
-  chatMessages.appendChild(row);
-  scrollBottom();
-
-  setTimeout(() => {
-    row.remove();
-    callback();
-  }, delay);
-}
-
-// ── UTILS ──────────────────────────────────────────────────
+/**
+ * Scroll the messages container to the very bottom.
+ * Wrapped in rAF to let the browser paint first.
+ *
+ * @returns {void}
+ */
 function scrollBottom() {
   requestAnimationFrame(() => {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   });
 }
+
+/**
+ * Return the current local time as HH:MM (12-hour format).
+ * @returns {string}
+ */
 function formatTime() {
   return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
-function escapeHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
 
-// ── INPUT EVENTS ───────────────────────────────────────────
+
+/* ══════════════════════════════════════════════════
+   §22  INPUT EVENT LISTENERS
+══════════════════════════════════════════════════ */
+
+// Enter to send (Shift+Enter = newline allowed if you want — currently blocked)
 msgInput.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
     sendMessage();
   }
 });
+
+// Auto-resize textarea as user types
 msgInput.addEventListener('input', () => {
   msgInput.style.height = 'auto';
   msgInput.style.height = Math.min(msgInput.scrollHeight, 100) + 'px';
 });
 
-// ── SHOW UNREAD BADGE on first open attempt ────────────────
+
+/* ══════════════════════════════════════════════════
+   §23  INIT SEQUENCE
+   ─────────────────────────────────────────────
+   On page load:
+     1. TOKEN_INDEX & toolMap are already built (§4)
+     2. Theme is applied (§7)
+     3. Chat history is restored or greeting is shown
+     4. Unread badge appears after 3 s if chat is closed
+══════════════════════════════════════════════════ */
+
+// Restore chat history from localStorage, or show greeting
+// (called when the chat window first opens via toggleChat,
+//  but we hydrate state NOW so state.messages is ready)
+hydrateFromStorage();
+
+// Show the unread notification badge 3 s after load
+// if the user hasn't opened the chat yet
 setTimeout(() => {
   if (!state.open) bubbleBadge.classList.add('show');
 }, 3000);
+
 </script>
 
 </body>
