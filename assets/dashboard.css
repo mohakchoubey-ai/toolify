@@ -25,6 +25,50 @@
   --transition:  0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* --- LIGHT MODE TOKENS --- */
+body.light {
+  --bg:          #f0f4ff;
+  --bg2:         #e4eaf7;
+  --surface:     rgba(0,0,0,0.04);
+  --surface-hov: rgba(0,0,0,0.07);
+  --border:      rgba(0,0,0,0.10);
+  --border-hov:  rgba(0,150,200,0.5);
+  --text:        #0d1117;
+  --text-muted:  rgba(13,17,23,0.5);
+  --cyan:        #0077aa;
+  --cyan-dim:    rgba(0,119,170,0.12);
+  --cyan-glow:   rgba(0,119,170,0.35);
+}
+
+body.light .dash-header  { background: rgba(240,244,255,0.85); }
+body.light .site-footer  { background: rgba(228,234,247,0.9); }
+body.light #dashboard-screen { background: var(--bg); }
+body.light .dash-main    { background: var(--bg); }
+body.light .card h4      { color: rgba(13,17,23,0.85); }
+body.light .orb-1 { background: radial-gradient(circle, rgba(0,119,170,0.08), transparent 70%); }
+body.light .orb-2 { background: radial-gradient(circle, rgba(124,58,237,0.07), transparent 70%); }
+body.light .orb-3 { background: radial-gradient(circle, rgba(0,119,170,0.05), transparent 70%); }
+body.light .cursor-glow  { background: radial-gradient(circle, rgba(0,119,170,0.06) 0%, transparent 70%); }
+
+/* --- THEME TOGGLE BUTTON --- */
+.btn-theme {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.btn-theme:hover {
+  border-color: var(--border-hov);
+  color: var(--cyan);
+  transform: rotate(20deg);
+}
+
 /* --- RESET --- */
 *, *::before, *::after {
   margin: 0; padding: 0;
