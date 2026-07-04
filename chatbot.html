@@ -2,271 +2,1559 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Toolify Assistant - Rules-Based Helper</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/png" href="favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Toolify Workspace — Assistant Demo</title>
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/chatbot.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ──────────────────────────────────────────────
+       TOKENS
+    ────────────────────────────────────────────── */
+    :root {
+      --navy:     #0a0e1a;
+      --surface:  #131929;
+      --surface2: #1c2540;
+      --surface3: #242d4d;
+      --cyan:     #00d4ff;
+      --cyan-dim: rgba(0, 212, 255, 0.12);
+      --purple:   #8b5cf6;
+      --purple-dim: rgba(139, 92, 246, 0.15);
+      --green:    #10d48a;
+      --green-dim: rgba(16, 212, 138, 0.12);
+      --danger:   #f87171;
+      --text:     #e8eaf0;
+      --text-2:   #9aa5c4;
+      --text-3:   #5b6b8a;
+      --border:   rgba(255,255,255,0.07);
+      --border2:  rgba(255,255,255,0.12);
+      --font-display: 'Poppins', sans-serif;
+      --font-body:    'Inter', sans-serif;
+      --radius:   14px;
+      --radius-sm: 8px;
+      --shadow:   0 24px 64px rgba(0,0,0,0.6);
+      --trans:    0.25s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* Light mode overrides */
+    .light-mode {
+      --navy:     #f0f4ff;
+      --surface:  #ffffff;
+      --surface2: #f5f7ff;
+      --surface3: #eaedfa;
+      --text:     #1a1f36;
+      --text-2:   #4a5275;
+      --text-3:   #8892b0;
+      --border:   rgba(0,0,50,0.07);
+      --border2:  rgba(0,0,50,0.12);
+      --cyan-dim: rgba(0,180,220,0.10);
+      --purple-dim: rgba(100,60,200,0.10);
+      --green-dim: rgba(10,160,100,0.10);
+    }
+
+    /* ──────────────────────────────────────────────
+       DEMO PAGE BODY
+    ────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--navy);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background var(--trans), color var(--trans);
+    }
+    .page-hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      gap: 1rem;
+      background: radial-gradient(ellipse 70% 60% at 50% 30%, rgba(0,212,255,0.06) 0%, transparent 70%),
+                  radial-gradient(ellipse 50% 50% at 80% 80%, rgba(139,92,246,0.05) 0%, transparent 60%);
+    }
+    .page-hero h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--text) 40%, var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .page-hero p { color: var(--text-2); font-size: 1.05rem; max-width: 480px; line-height: 1.7; }
+    .page-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: var(--cyan-dim);
+      border: 1px solid rgba(0,212,255,0.25);
+      border-radius: 999px;
+      padding: .35rem 1rem;
+      font-size: .78rem;
+      color: var(--cyan);
+      font-weight: 600;
+      letter-spacing: .04em;
+    }
+    .theme-page-btn {
+      margin-top: 1.5rem;
+      padding: .6rem 1.4rem;
+      border-radius: 999px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text-2);
+      font-size: .85rem;
+      cursor: pointer;
+      transition: var(--trans);
+      font-family: var(--font-body);
+    }
+    .theme-page-btn:hover { background: var(--surface3); color: var(--text); }
+    .credit-page { font-size: .78rem; color: var(--text-3); }
+
+    /* ──────────────────────────────────────────────
+       FLOATING BUBBLE
+    ────────────────────────────────────────────── */
+    #chatBubble {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 9998;
+    }
+    .bubble-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--purple));
+      box-shadow: 0 6px 32px rgba(0,212,255,0.35);
+      position: relative;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .bubble-btn:hover { transform: scale(1.08); box-shadow: 0 10px 40px rgba(0,212,255,0.45); }
+    .bubble-btn::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      opacity: 0.3;
+      animation: bubblePulse 2.2s ease-in-out infinite;
+      z-index: -1;
+    }
+    @keyframes bubblePulse {
+      0%,100% { transform: scale(1); opacity:.3; }
+      50%      { transform: scale(1.3); opacity:0; }
+    }
+    .bubble-badge {
+      position: absolute;
+      top: 0; right: 0;
+      width: 16px; height: 16px;
+      background: var(--green);
+      border: 2px solid var(--navy);
+      border-radius: 50%;
+      display: none;
+    }
+    .bubble-badge.show { display: block; }
+
+    /* ──────────────────────────────────────────────
+       CHAT WINDOW
+    ────────────────────────────────────────────── */
+    #chatWindow {
+      position: fixed;
+      bottom: 104px;
+      right: 28px;
+      width: 400px;
+      max-height: 640px;
+      display: flex;
+      flex-direction: column;
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      z-index: 9999;
+      overflow: hidden;
+      transform: scale(0.92) translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transform-origin: bottom right;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
+      border: 1px solid var(--border2);
+      /* Animated gradient border glow — the signature element */
+    }
+    #chatWindow::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: calc(var(--radius) + 1px);
+      background: linear-gradient(120deg, var(--cyan), var(--purple), var(--cyan));
+      background-size: 200% 200%;
+      animation: borderGlow 4s linear infinite;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    #chatWindow.open::before { opacity: 1; }
+    @keyframes borderGlow {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    #chatWindow.open {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ──────────────────────────────────────────────
+       CHAT HEADER
+    ────────────────────────────────────────────── */
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: 1rem 1.1rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .chat-avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .chat-header-info { flex: 1; }
+    .chat-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: .95rem;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .chat-status {
+      font-size: .72rem;
+      color: var(--green);
+      display: flex; align-items: center; gap: .3rem;
+    }
+    .chat-status::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: statusBlink 2s ease infinite;
+    }
+    @keyframes statusBlink { 50% { opacity: .4; } }
+    .chat-credit { font-size: .65rem; color: var(--text-3); }
+    .header-actions { display: flex; gap: .4rem; }
+    .hdr-btn {
+      width: 32px; height: 32px;
+      border: none; background: none;
+      color: var(--text-2);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      transition: background var(--trans), color var(--trans);
+    }
+    .hdr-btn:hover { background: var(--surface3); color: var(--text); }
+
+    /* ──────────────────────────────────────────────
+       MESSAGES AREA
+    ────────────────────────────────────────────── */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--surface3) transparent;
+    }
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-track { background: transparent; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+
+    .msg-row {
+      display: flex;
+      align-items: flex-end;
+      gap: .5rem;
+      animation: msgIn .25s ease;
+    }
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .msg-row.user { flex-direction: row-reverse; }
+    .msg-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      font-family: var(--font-display);
+    }
+    .msg-avatar.bot {
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      font-size: .9rem;
+    }
+    .msg-avatar.user-av {
+      background: linear-gradient(135deg, var(--purple), #ec4899);
+      color: #fff;
+    }
+    .msg-bubble {
+      max-width: 78%;
+      padding: .65rem .9rem;
+      border-radius: 14px;
+      font-size: .85rem;
+      line-height: 1.65;
+      word-break: break-word;
+      position: relative;
+    }
+    .msg-row.bot .msg-bubble {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+    .msg-row.user .msg-bubble {
+      background: linear-gradient(135deg, #1a4a8a, var(--purple));
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-time {
+      font-size: .65rem;
+      color: var(--text-3);
+      margin-top: .25rem;
+      text-align: right;
+    }
+    .msg-row.bot .msg-time { text-align: left; }
+    .msg-inner { display: flex; flex-direction: column; }
+
+    /* Typing indicator */
+    .typing-row { display: flex; align-items: center; gap: .5rem; animation: msgIn .2s ease; }
+    .typing-bubble {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px 14px 14px 4px;
+      padding: .65rem .9rem;
+      display: flex; gap: 4px; align-items: center;
+    }
+    .typing-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--text-3);
+      animation: typingBounce 1.2s ease infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: .2s; }
+    .typing-dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes typingBounce {
+      0%,80%,100% { transform: translateY(0); opacity: .4; }
+      40%          { transform: translateY(-6px); opacity: 1; }
+    }
+
+    /* Formatted bot message content */
+    .msg-bubble strong { color: var(--cyan); font-weight: 600; }
+    .light-mode .msg-row.bot .msg-bubble strong { color: var(--purple); }
+    .msg-bubble a { color: var(--cyan); text-decoration: underline; }
+    .msg-bubble ul { padding-left: 1.2rem; margin-top: .3rem; }
+    .msg-bubble li { margin-bottom: .2rem; }
+    .msg-bubble .section-head {
+      font-weight: 700;
+      font-family: var(--font-display);
+      font-size: .82rem;
+      color: var(--cyan);
+      margin-top: .5rem;
+      margin-bottom: .1rem;
+    }
+
+    /* ──────────────────────────────────────────────
+       QUICK REPLIES
+    ────────────────────────────────────────────── */
+    .quick-replies {
+      padding: .6rem 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+      max-height: 140px;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .quick-replies::-webkit-scrollbar { display: none; }
+    .qr-btn {
+      padding: .35rem .8rem;
+      border-radius: 999px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text-2);
+      font-size: .78rem;
+      cursor: pointer;
+      transition: all .18s ease;
+      font-family: var(--font-body);
+      white-space: nowrap;
+    }
+    .qr-btn:hover {
+      background: var(--cyan-dim);
+      border-color: rgba(0,212,255,0.4);
+      color: var(--cyan);
+    }
+
+    /* ──────────────────────────────────────────────
+       INPUT AREA
+    ────────────────────────────────────────────── */
+    .chat-input-area {
+      display: flex;
+      align-items: flex-end;
+      gap: .5rem;
+      padding: .75rem 1rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface2);
+      flex-shrink: 0;
+    }
+    .menu-btn {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border2);
+      background: var(--surface3);
+      color: var(--text-2);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: var(--trans);
+    }
+    .menu-btn:hover { background: var(--purple-dim); color: var(--purple); border-color: var(--purple); }
+    .msg-input-wrap { flex: 1; position: relative; }
+    .msg-input {
+      width: 100%;
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: .55rem .9rem;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: .875rem;
+      resize: none;
+      max-height: 100px;
+      min-height: 36px;
+      line-height: 1.5;
+      transition: border-color .18s;
+      scrollbar-width: thin;
+    }
+    .msg-input:focus { outline: none; border-color: rgba(0,212,255,0.4); }
+    .msg-input::placeholder { color: var(--text-3); }
+    .send-btn {
+      width: 36px; height: 36px;
+      border: none;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: #fff;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .send-btn:hover { transform: scale(1.07); box-shadow: 0 4px 16px rgba(0,212,255,.3); }
+    .send-btn:active { transform: scale(.95); }
+    .chat-footer-hint {
+      text-align: center;
+      font-size: .65rem;
+      color: var(--text-3);
+      padding: .3rem 1rem .6rem;
+      background: var(--surface2);
+    }
+
+    /* ──────────────────────────────────────────────
+       TOOL CARDS (main menu grid)
+    ────────────────────────────────────────────── */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .5rem;
+      margin-top: .5rem;
+    }
+    .tool-card {
+      padding: .6rem .75rem;
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: .8rem;
+      display: flex; align-items: center; gap: .45rem;
+      color: var(--text-2);
+      transition: all .18s;
+      font-family: var(--font-body);
+      text-align: left;
+    }
+    .tool-card:hover {
+      background: var(--cyan-dim);
+      border-color: rgba(0,212,255,0.35);
+      color: var(--text);
+    }
+    .tool-card .tc-emoji { font-size: 1rem; flex-shrink: 0; }
+
+    /* ──────────────────────────────────────────────
+       MOBILE RESPONSIVE
+    ────────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      #chatWindow {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        max-height: 92dvh;
+        border-radius: var(--radius) var(--radius) 0 0;
+      }
+      #chatBubble { bottom: 20px; right: 20px; }
+    }
+
+    /* ──────────────────────────────────────────────
+       MISC
+    ────────────────────────────────────────────── */
+    ::selection { background: rgba(0,212,255,0.2); }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+  </style>
 </head>
 <body>
 
-  <div id="authCheck" style="display:none;"></div>
-
-  <div class="chatbot-container">
-    <!-- Header Section -->
-    <div class="chatbot-header">
-      <div class="header-left">
-        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-        <div class="header-brand">
-          <span class="ai-indicator">
-            <span class="ai-badge">⚙️</span>
-            Toolify Assistant
-          </span>
-          <span class="not-ai-label">
-            <button class="info-btn" id="notAiBtn" title="Learn more">
-              <span class="info-icon">ℹ️</span> Not AI
-            </button>
-          </span>
-        </div>
-      </div>
-
-      <div class="header-right">
-        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <div class="chatbot-main">
-      <!-- Sidebar -->
-      <aside class="chatbot-sidebar">
-        <div class="sidebar-content">
-          <button class="new-chat-btn" id="newChatBtn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            New Chat
-          </button>
-
-          <div class="sidebar-section">
-            <div class="sidebar-title">Chat History</div>
-            <div class="chat-history" id="chatHistory">
-              <!-- Chat history items will be added here -->
-            </div>
-          </div>
-        </div>
-
-        <div class="sidebar-footer">
-          <button class="sidebar-btn" id="clearHistoryBtn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              <line x1="10" y1="11" x2="10" y2="17"></line>
-              <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg>
-            Clear History
-          </button>
-
-          <button class="sidebar-btn" id="signOutBtn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            Sign Out
-          </button>
-        </div>
-      </aside>
-
-      <!-- Chat Area -->
-      <main class="chatbot-content">
-        <!-- Empty State -->
-        <div class="chat-empty" id="chatEmpty">
-          <div class="empty-container">
-            <div class="empty-icon">🤖</div>
-            <h2>Welcome to Toolify Assistant</h2>
-            <p>I'm a rules-based assistant that knows everything about your workspace.</p>
-            <p>Ask me about tools, features, or how to get the most out of Toolify!</p>
-
-            <div class="quick-prompts">
-              <button class="quick-prompt" data-prompt="What tools are available in Toolify?">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"></path>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                </svg>
-                What tools are available?
-              </button>
-
-              <button class="quick-prompt" data-prompt="How do I use the alarm feature?">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="13" r="8"></circle>
-                  <path d="M12 9v4l3 2"></path>
-                  <path d="M9 2h6M3 2l3 3M15 2l3 3"></path>
-                </svg>
-                How to use Alarm?
-              </button>
-
-              <button class="quick-prompt" data-prompt="What are other websites by Mohak?">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M2 12h20"></path>
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                </svg>
-                Other websites?
-              </button>
-
-              <button class="quick-prompt" data-prompt="Can you tell me about your privacy policy?">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
-                Privacy & Terms?
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Messages Container -->
-        <div class="messages-container" id="messagesContainer">
-          <!-- Messages will be added here -->
-        </div>
-
-        <!-- Input Area -->
-        <div class="chat-input-area">
-          <div class="input-wrapper">
-            <textarea
-              id="messageInput"
-              class="message-input"
-              placeholder="Ask me anything about Toolify..."
-              rows="1"
-            ></textarea>
-            <button class="send-btn" id="sendBtn" title="Send message">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.9429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16346273 C3.34915502,0.9 2.40734225,1.00636533 1.77946707,1.4776575 C0.994623095,2.10604706 0.837654326,3.0486314 1.15159189,3.99701575 L3.03521743,10.4379774 C3.03521743,10.5950748 3.19218622,10.7521722 3.50612381,10.7521722 L16.6915026,11.5376591 C16.6915026,11.5376591 17.1624089,11.5376591 17.1624089,12.0089513 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z"></path>
-              </svg>
-            </button>
-          </div>
-          <p class="input-hint">This chatbot uses rules-based logic to answer your questions accurately.</p>
-        </div>
-      </main>
-    </div>
+  <!-- ── Demo background page ── -->
+  <div class="page-hero">
+    <div class="page-badge">⚙️ Rules-Based · No AI hallucinations</div>
+    <h1>Toolify Workspace</h1>
+    <p>Your all-in-one productivity dashboard. 20+ tools, zero distractions. Hit the chat button to get started.</p>
+    <p class="credit-page">Developed with ♥ by Mohak @2026</p>
+    <button class="theme-page-btn" onclick="togglePageTheme()">☀️ Toggle Light Mode</button>
   </div>
 
-  <!-- Info Popup -->
-  <div class="info-popup" id="infoPopup" style="display:none;">
-    <div class="popup-overlay" id="popupOverlay"></div>
-    <div class="popup-content">
-      <button class="popup-close" id="popupClose">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
+  <!-- ── Floating Bubble ── -->
+  <div id="chatBubble">
+    <button class="bubble-btn" onclick="toggleChat()" aria-label="Open Toolify Assistant">
+      <span id="bubbleIcon">⚙️</span>
+    </button>
+    <div class="bubble-badge" id="bubbleBadge"></div>
+  </div>
+
+  <!-- ── Chat Window ── -->
+  <div id="chatWindow" role="dialog" aria-label="Toolify Assistant">
+
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="chat-avatar">⚙️</div>
+      <div class="chat-header-info">
+        <div class="chat-title">Workspace Assistant</div>
+        <div class="chat-status">Online · Rules-Based</div>
+        <div class="chat-credit">by Mohak @2026</div>
+      </div>
+      <div class="header-actions">
+        <button class="hdr-btn" onclick="toggleTheme()" title="Toggle theme">☀️</button>
+        <button class="hdr-btn" onclick="toggleChat()" title="Close">✕</button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" id="chatMessages"></div>
+
+    <!-- Quick replies -->
+    <div class="quick-replies" id="quickReplies"></div>
+
+    <!-- Input -->
+    <div class="chat-input-area">
+      <button class="menu-btn" onclick="showMainMenu()" title="Main Menu">☰</button>
+      <div class="msg-input-wrap">
+        <textarea
+          class="msg-input"
+          id="msgInput"
+          placeholder="Ask about any Toolify feature…"
+          rows="1"
+          aria-label="Message input"
+        ></textarea>
+      </div>
+      <button class="send-btn" onclick="sendMessage()" aria-label="Send message">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16.69 12.47L3.5 13.26c-.31 0-.47.16-.47.31L1.15 20.02c-.29.78-.13 1.87.66 2.5.62.47 1.72.57 2.34.41l17.58-8.9c.94-.47 1.41-1.41 1.25-2.35L4.13 1.16c-.78-.26-1.72-.15-2.35.31-.78.63-.94 1.57-.63 2.51l1.88 6.44c0 .16.16.31.47.31l13.19.78s.47 0 .47.47c0 .47-.47.47-.47.47z"/>
         </svg>
       </button>
-
-      <h2>How This Works</h2>
-
-      <div class="popup-section">
-        <h3>🔧 Not an AI</h3>
-        <p>This is NOT an artificial intelligence. It's a rules-based assistant that uses pre-programmed knowledge about Toolify to answer your questions accurately.</p>
-      </div>
-
-      <div class="popup-section">
-        <h3>📚 What It Knows</h3>
-        <ul>
-          <li>All tools available in Toolify (Calculator, Weather, QR Maker, PDF, etc.)</li>
-          <li>How to use each tool</li>
-          <li>Privacy Policy and Terms & Conditions</li>
-          <li>Other websites by Mohak</li>
-          <li>Your account information</li>
-          <li>Feature details and updates</li>
-        </ul>
-      </div>
-
-      <div class="popup-section">
-        <h3>💾 Chat History</h3>
-        <p>Your conversations are saved locally in your browser. You can:</p>
-        <ul>
-          <li>Start a new chat anytime</li>
-          <li>View previous conversations</li>
-          <li>Clear all history with one click</li>
-        </ul>
-      </div>
-
-      <div class="popup-section">
-        <h3>🔗 Session URLs</h3>
-        <p>Each chat session gets a unique URL (like ChatGPT and Claude). You can share or bookmark these URLs to revisit conversations.</p>
-      </div>
-
-      <div class="popup-section">
-        <h3>✨ Accuracy</h3>
-        <p>All answers are based on verified information about Toolify. The assistant doesn't guess or make predictions—it only provides information from its knowledge base.</p>
-      </div>
-
-      <button class="popup-close-btn" id="popupCloseBtn">Got it</button>
     </div>
+    <div class="chat-footer-hint">Accurate answers · No guessing · 20 tools covered</div>
   </div>
 
-  <!-- Loading Indicator -->
-  <div class="loading-indicator" id="loadingIndicator" style="display:none;">
-    <div class="loader"></div>
-  </div>
+<script>
+/* ════════════════════════════════════════════════════════════
+   TOOLIFY WORKSPACE ASSISTANT — Rules-Based Engine
+   by Mohak @2026
+════════════════════════════════════════════════════════════ */
 
-  <!-- Firebase Auth -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+// ── STATE ──────────────────────────────────────────────────
+const state = {
+  open: false,
+  chatOpen: false,
+  theme: localStorage.getItem('toolify-theme') || 'dark',
+  messages: [],
+  feedbackPhase: null,   // null | 'text' | 'email'
+  feedbackText: '',
+  userName: 'there',
+};
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
-      authDomain: "toolbox-hub-98c03.firebaseapp.com",
-      projectId: "toolbox-hub-98c03",
-      storageBucket: "toolbox-hub-98c03.firebasestorage.app",
-      messagingSenderId: "321020105472",
-      appId: "1:321020105472:web:356e7c2903def7b9d859e5"
+// ── KNOWLEDGE BASE ─────────────────────────────────────────
+const KB = [
+  {
+    id: 'ai_chatbot',
+    emoji: '🤖',
+    label: 'AI Chatbot',
+    url: 'chatbot.html',
+    keywords: [
+      'ai','chatbot','gpt','llm','artificial intelligence','talk to ai','chat ai',
+      'smart bot','language model','ai chat','ai baat','ai se baat','intelligent',
+      'bot','machine learning','nlp','openai','bard','chatgpt'
+    ],
+    response: () => `🤖 <strong>AI Chatbot</strong>
+
+This is our AI-powered conversational tool for deep queries, content generation, and brainstorming.
+
+<span class="section-head">What it can do:</span>
+• Generate content, summaries, and ideas
+• Answer complex questions
+• Help with code, essays, emails
+• Multi-turn conversation support
+
+<span class="section-head">How to use:</span>
+Open <strong>AI Chatbot</strong> from the dashboard, type your query, and press Enter. No sign-up required beyond your Toolify login.`
+  },
+  {
+    id: 'world_clock',
+    emoji: '🌍',
+    label: 'World Clock',
+    url: 'world-clock.html',
+    keywords: [
+      'world clock','time zone','global time','international time','time india',
+      'duniya ka samay','different countries time','timezone','gmt','utc','ist',
+      'new york time','london time','tokyo time','dubai time','different time'
+    ],
+    response: () => `🌍 <strong>World Clock</strong>
+
+See the current time in any city or timezone, all at once.
+
+<span class="section-head">Features:</span>
+• Simultaneous display of multiple timezones
+• Live updates every second
+• Search any city or timezone
+• Supports IST, GMT, UTC, EST, PST, and 200+ zones
+
+<span class="section-head">How to use:</span>
+Open <strong>World Clock</strong>, search or select timezones, and pin your favorites for quick reference.`
+  },
+  {
+    id: 'converter',
+    emoji: '📏',
+    label: 'Unit & Currency Converter',
+    url: 'converter.html',
+    keywords: [
+      'convert','currency','exchange rate','usd to inr','unit','kg to lbs',
+      'measurement','converter','dollar','rupee','euro','pound','celsius','fahrenheit',
+      'km to miles','feet to meter','cm to inches','paisa','badlo','badalna',
+      'weight','length','area','volume','temperature conversion','foreign exchange'
+    ],
+    response: () => `📏 <strong>Unit, Measurement & Currency Converter</strong>
+
+Convert anything — from currencies to physical measurements — instantly.
+
+<span class="section-head">Supported categories:</span>
+• <strong>Currency:</strong> USD, INR, EUR, GBP, JPY, AED, and 150+ more (live rates)
+• <strong>Weight:</strong> kg, lbs, g, oz, ton
+• <strong>Length:</strong> m, km, ft, miles, cm, inches
+• <strong>Temperature:</strong> °C, °F, K
+• <strong>Area, Volume, Speed, and more</strong>
+
+<span class="section-head">How to use:</span>
+Select category → enter value → pick source & target units → result is instant.`
+  },
+  {
+    id: 'finance',
+    emoji: '💸',
+    label: 'Finance Calculator',
+    url: 'finance.html',
+    keywords: [
+      'finance','loan','sip','emi','interest','tax','money','investment',
+      'calculator loan','mutual fund','return','roi','compound interest',
+      'simple interest','paisa','bachat','paise','saving','savings','budget',
+      'retirement','fd','fixed deposit','recurring deposit','rd','breakeven'
+    ],
+    response: () => `💸 <strong>Finance Calculations</strong>
+
+Plan your financial future with smart calculators built for Indian users.
+
+<span class="section-head">Available calculators:</span>
+• <strong>EMI Calculator</strong> — loan repayment planning
+• <strong>SIP Calculator</strong> — mutual fund returns
+• <strong>FD/RD Calculator</strong> — fixed/recurring deposit maturity
+• <strong>Compound & Simple Interest</strong>
+• <strong>Tax Estimator</strong>
+• <strong>Savings Goal Tracker</strong>
+
+<span class="section-head">How to use:</span>
+Select the calculator type, fill in the fields (principal, rate, tenure), and your result updates live.`
+  },
+  {
+    id: 'game',
+    emoji: '🎮',
+    label: 'Games',
+    url: 'games.html',
+    keywords: [
+      'game','games','play','entertainment','timepass','mini game','fun',
+      'khelo','khel','flappy','2048','neon district','puzzle','score',
+      'leaderboard','highscore','snake','tetris','adventure'
+    ],
+    response: () => `🎮 <strong>Games</strong>
+
+Take a break and enjoy Toolify's built-in game collection!
+
+<span class="section-head">Available games:</span>
+• <strong>Neon District</strong> — Cyberpunk adventure RPG with skill trees
+• <strong>2048</strong> — Addictive number-tile puzzle
+• <strong>Flappy Bird</strong> — Classic reflex test
+
+<span class="section-head">How to play:</span>
+Go to <strong>Games</strong> on your dashboard → select a game → hit Start. No downloads needed.
+
+More games coming soon! 🕹️`
+  },
+  {
+    id: 'activities',
+    emoji: '🚴',
+    label: 'Activities Tracker',
+    url: 'https://mohakdev1220.github.io/gatividhiya/',
+    keywords: [
+      'activity tracker','fitness','steps','workout','health','track daily',
+      'exercise','calories','distance','gym','running','cycling','steps count',
+      'gatividhiya','daily activity','vyayam','sehat','jogging','walk tracker'
+    ],
+    response: () => `🚴 <strong>Activities Tracker (Gatividhiya)</strong>
+
+Track your daily fitness activities and stay motivated!
+
+<span class="section-head">Features:</span>
+• Log workouts: running, cycling, gym, yoga, and more
+• Track distance, duration, and calories
+• Weekly & monthly progress charts
+• Set personal fitness goals
+
+<span class="section-head">Access:</span>
+This is an external app — visit <a href="https://mohakdev1220.github.io/gatividhiya/" target="_blank">Gatividhiya</a> to start tracking.`
+  },
+  {
+    id: 'alarm',
+    emoji: '⏰',
+    label: 'Alarm',
+    url: 'alarm.html',
+    keywords: [
+      'alarm','wake up','ringtone','set alarm','alert','reminder','neend','uthna',
+      'alarm lagao','bell','notification alarm','morning alarm','multiple alarm'
+    ],
+    response: () => `⏰ <strong>Alarm</strong>
+
+Set smart alarms right from your browser — no app install needed.
+
+<span class="section-head">How to set an alarm:</span>
+1. Open the <strong>Alarm</strong> tool from the dashboard
+2. Click <strong>+ New Alarm</strong>
+3. Pick your time and (optionally) add a label
+4. Choose a ringtone
+5. Click <strong>Set Alarm</strong> — done!
+
+<span class="section-head">Tips:</span>
+• Enable browser notifications for alarms to fire even when the tab is inactive
+• You can set multiple alarms simultaneously
+• Works perfectly for morning wake-ups, Pomodoro breaks, and event reminders`
+  },
+  {
+    id: 'calculator',
+    emoji: '🧮',
+    label: 'Calculator',
+    url: 'calculator.html',
+    keywords: [
+      'calculator','math','plus','calculate','divide','sum','multiply',
+      'arithmetic','numbers','calculation','minus','subtract','gana',
+      'percent','power','square root','scientific','basic math','ganit'
+    ],
+    response: () => `🧮 <strong>Calculator</strong>
+
+A full-featured calculator for everyday math and beyond.
+
+<span class="section-head">Supports:</span>
+• Basic: addition, subtraction, multiplication, division
+• Percentage and power calculations
+• Square root and scientific functions
+• Trigonometry (sin, cos, tan)
+• Calculation history log
+
+<span class="section-head">How to use:</span>
+Click <strong>Calculator</strong> on the dashboard. You can also use your physical keyboard for faster input.`
+  },
+  {
+    id: 'paragraph_editor',
+    emoji: '✍️',
+    label: 'Paragraph Editor',
+    url: 'editor.html',
+    keywords: [
+      'paragraph editor','write','text editor','notepad','edit essay','typing',
+      'grammar','spelling','writing tool','check text','likhna','essay',
+      'report writing','correct grammar','proofreading','text correction',
+      'tone','readability','article','blog','content'
+    ],
+    response: () => `✍️ <strong>Paragraph Editor</strong>
+
+Write, edit, and polish your text with smart suggestions.
+
+<span class="section-head">Features:</span>
+• Live grammar and spelling correction
+• Tone analysis (formal, casual, persuasive)
+• Readability score
+• Word and character count
+• Export to TXT or PDF
+
+<span class="section-head">How to use:</span>
+Open <strong>Paragraph Editor</strong> → paste or type your content → review the highlighted suggestions → copy or export the corrected text.`
+  },
+  {
+    id: 'weather',
+    emoji: '☀️',
+    label: 'Weather',
+    url: 'weather.html',
+    keywords: [
+      'weather','mausam','rain','temperature','forecast','climate','sunny',
+      'barish','thand','garmi','wind','humidity','uv index','aaj ka mausam',
+      'kal ka mausam','weather today','weather tomorrow','storm','clouds'
+    ],
+    response: () => `☀️ <strong>Weather</strong>
+
+Real-time weather data for any city in the world.
+
+<span class="section-head">What you get:</span>
+• Current temperature, feels-like, and conditions
+• Humidity, wind speed, UV index
+• 5-day hourly forecast
+• Precipitation probability
+• Location auto-detect or manual city search
+
+<span class="section-head">How to use:</span>
+Open <strong>Weather</strong> → allow location or type your city → your full forecast loads instantly.`
+  },
+  {
+    id: 'qr',
+    emoji: '🔍',
+    label: 'QR Maker',
+    url: 'qr.html',
+    keywords: [
+      'qr','qr code','qr maker','barcode','scan code','generate qr',
+      'quick response','qr banana','link to qr','url to qr','qr generator',
+      'scan qr','contact qr','wifi qr','payment qr'
+    ],
+    response: () => `🔍 <strong>QR Code Maker</strong>
+
+Generate professional QR codes in seconds — fully customizable.
+
+<span class="section-head">What you can encode:</span>
+• URLs and website links
+• Plain text or contact info
+• WiFi credentials
+• Payment UPI IDs
+
+<span class="section-head">Customization:</span>
+• Custom colors and logo overlay
+• Size control (up to 2048×2048)
+• Download as PNG or SVG
+
+<span class="section-head">How to use:</span>
+Open <strong>QR Pro</strong> → enter your content → customize → click Generate → download instantly.`
+  },
+  {
+    id: 'colors',
+    emoji: '🎨',
+    label: 'Color Picker',
+    url: 'colors.html',
+    keywords: [
+      'colors','palette','hex code','rgb','picker','color scheme','design',
+      'colour','hex','hsl','hsv','rgb values','color palette','brand color',
+      'color wheel','gradient','accessibility','contrast checker'
+    ],
+    response: () => `🎨 <strong>Colors</strong>
+
+A designer's toolkit for picking, converting, and generating colors.
+
+<span class="section-head">Features:</span>
+• Visual color picker (click anywhere on the wheel)
+• HEX, RGB, HSL, and HSV value display
+• One-click copy for any format
+• Palette generator (complementary, triadic, analogous)
+• Contrast ratio checker for accessibility
+
+<span class="section-head">How to use:</span>
+Open <strong>Colors</strong> → drag the picker or enter a value → copy the format you need.`
+  },
+  {
+    id: 'clock',
+    emoji: '🕓',
+    label: 'Clock',
+    url: 'clock.html',
+    keywords: [
+      'clock','current time','watch','samay','local time','time now','abhi kya baja hai',
+      'what time is it','analog clock','digital clock','live clock'
+    ],
+    response: () => `🕓 <strong>Clock</strong>
+
+A clean, live clock showing your device's local time.
+
+<span class="section-head">Modes:</span>
+• <strong>Digital</strong> — HH:MM:SS with AM/PM toggle
+• <strong>Analog</strong> — classic face with smooth sweep second hand
+• <strong>Full-screen</strong> — great for desk displays
+
+<span class="section-head">How to use:</span>
+Open <strong>Clock</strong> from the dashboard. Toggle between analog and digital with one click. Press F for full-screen mode.`
+  },
+  {
+    id: 'timer',
+    emoji: '⌛',
+    label: 'Timer',
+    url: 'timer.html',
+    keywords: [
+      'timer','countdown','focus','pomodoro','countdown timer',
+      'time limit','set timer','kitchen timer','study timer',
+      'ghantekar','time karo','25 minutes','5 minute timer'
+    ],
+    response: () => `⌛ <strong>Timer</strong>
+
+Countdown timer built for focused work sessions.
+
+<span class="section-head">Features:</span>
+• Custom countdown: set any hours / minutes / seconds
+• <strong>Pomodoro mode</strong>: 25 min work + 5 min break cycles
+• Audio alert when countdown reaches zero
+• Pause, resume, and reset
+
+<span class="section-head">How to use:</span>
+Open <strong>Timer</strong> → enter your duration → hit Start. You'll hear an alert when time's up.`
+  },
+  {
+    id: 'speech',
+    emoji: '🗣️',
+    label: 'Speech',
+    url: 'speech.html',
+    keywords: [
+      'speech','text to speech','voice','audio','mic','dictation',
+      'tts','read aloud','bolo','awaaz','listen','convert text to voice',
+      'text padh do','hindi speech','english speech','narrate'
+    ],
+    response: () => `🗣️ <strong>Speech (Text-to-Speech)</strong>
+
+Convert any text to natural-sounding audio with one click.
+
+<span class="section-head">Features:</span>
+• 50+ voices across English, Hindi, and 15+ languages
+• Speed control (0.5× to 2×)
+• Pause, resume, download
+• Supports long passages without cutoff
+
+<span class="section-head">How to use:</span>
+Open <strong>Speech</strong> → paste or type your text → pick a voice and speed → press <strong>Speak</strong>. Optionally download the audio file.`
+  },
+  {
+    id: 'calendar',
+    emoji: '📅',
+    label: 'Calendar',
+    url: 'calendar.html',
+    keywords: [
+      'calendar','date','month','year','schedule','dinank','events',
+      'appointments','timetable','planner','view dates','today date',
+      'kaunsa mahina','kya tarikh hai','event planner','agenda'
+    ],
+    response: () => `📅 <strong>Calendar</strong>
+
+A clean monthly calendar with event management built-in.
+
+<span class="section-head">Features:</span>
+• Navigate months and years
+• Add color-coded events to any date
+• Set reminders for upcoming events
+• Week and month views
+• Export your schedule
+
+<span class="section-head">How to use:</span>
+Open <strong>Calendar</strong> → click any date to add an event → fill in title, time, and color → save. Events persist locally across sessions.`
+  },
+  {
+    id: 'pdf',
+    emoji: '📄',
+    label: 'PDF Maker',
+    url: 'pdf.html',
+    keywords: [
+      'pdf maker','jpg to pdf','document','create pdf','convert file',
+      'pdf banana','image to pdf','word to pdf','pdf generate',
+      'pdf export','pdf download','report pdf','pdf creator'
+    ],
+    response: () => `📄 <strong>PDF Maker</strong>
+
+Create and convert documents to professional PDFs instantly.
+
+<span class="section-head">Supports:</span>
+• Image(s) → PDF (JPG, PNG, WebP)
+• Text → PDF with custom formatting
+• Multiple pages, custom orientation
+
+<span class="section-head">How to use:</span>
+1. Open <strong>PDF Maker</strong>
+2. Upload images or paste text
+3. Arrange page order
+4. Set page size (A4, Letter, etc.)
+5. Click <strong>Generate PDF</strong> → download instantly
+
+No file size limit and nothing gets uploaded to a server — fully browser-based.`
+  },
+  {
+    id: 'stopwatch',
+    emoji: '⏱️',
+    label: 'Stopwatch',
+    url: 'stopwatch.html',
+    keywords: [
+      'stopwatch','lap time','runner','counter','precision time',
+      'stop watch','timing','lap','split time','race timing',
+      'exercise time','samay rokna','time measure'
+    ],
+    response: () => `⏱️ <strong>Stopwatch</strong>
+
+Precision stopwatch with lap recording for athletes, coders, and study sessions.
+
+<span class="section-head">Features:</span>
+• Millisecond precision display
+• Unlimited lap recording with split times
+• Pause and resume without losing data
+• Export lap data as CSV
+
+<span class="section-head">How to use:</span>
+Open <strong>Stopwatch</strong> → press Start → press <strong>Lap</strong> for each split → Stop when done. All laps are listed below the timer.`
+  },
+  {
+    id: 'password',
+    emoji: '🔒',
+    label: 'Password Generator',
+    url: 'password.html',
+    keywords: [
+      'password','password gen','secure','strong password','hack protection',
+      'generator','random password','passphrase','password strength',
+      'safe password','create password','password banana','security password'
+    ],
+    response: () => `🔒 <strong>Password Generator</strong>
+
+Generate strong, random, hack-proof passwords instantly.
+
+<span class="section-head">Options:</span>
+• Length: 8 to 128 characters
+• Include: uppercase, lowercase, numbers, symbols
+• Exclude ambiguous characters (0, O, l, I)
+• Passphrase mode (memorable word combos)
+• Strength indicator
+
+<span class="section-head">How to use:</span>
+Open <strong>Password Gen</strong> → set your options → click <strong>Generate</strong> → copy with one click. Generate as many as you need — nothing is stored.`
+  },
+  {
+    id: 'privacy',
+    emoji: '🔐',
+    label: 'Privacy Policy',
+    url: 'privacy.html',
+    keywords: [
+      'privacy','policy','data safety','security','personal data','gdpr',
+      'privacy policy','information collected','data sharing','cookie',
+      'user data','mera data','data kahan jata hai','safe hai'
+    ],
+    response: () => `🔐 <strong>Privacy Policy</strong>
+
+Toolify takes your privacy seriously. Here's a plain-English summary:
+
+<span class="section-head">What we collect:</span>
+• Your name and email (via Google Sign-In)
+• Usage data to improve the platform
+• No payment data — Toolify is free
+
+<span class="section-head">What we never do:</span>
+• Sell your data to third parties
+• Store your generated content on servers
+• Track you across other websites
+
+<span class="section-head">Your rights:</span>
+• Request data export or deletion anytime
+• Opt out of any non-essential data collection
+
+Read the full policy at <strong>Privacy Policy</strong> in the dashboard footer.`
+  },
+  {
+    id: 'terms',
+    emoji: '⚖️',
+    label: 'Terms & Conditions',
+    url: 'terms.html',
+    keywords: [
+      'terms','conditions','rules','agreement','tos','terms of service',
+      'legal','niyam','agreement toolify','disclaimer','liability'
+    ],
+    response: () => `⚖️ <strong>Terms & Conditions</strong>
+
+By using Toolify, you agree to these fair-use rules:
+
+<span class="section-head">You agree to:</span>
+• Use tools only for lawful purposes
+• Keep your login credentials private
+• Report security vulnerabilities responsibly
+
+<span class="section-head">We commit to:</span>
+• Best-effort uptime and maintenance windows
+• Notifying you of major feature changes
+• Not selling your data
+
+<span class="section-head">Limitations:</span>
+• No commercial reselling without permission
+• No automated scraping of tools
+• Single user per account
+
+Full legal terms available in the <strong>Terms & Conditions</strong> page.`
+  },
+  {
+    id: 'feedback',
+    emoji: '💬',
+    label: 'Send Feedback',
+    url: null,   // handled via multi-turn
+    keywords: [
+      'feedback','bug','report','contact','suggestion','complaint','help',
+      'problem','issue','error','bata do','kuch galat','feature request',
+      'improve','sujhav','shikayat','support'
+    ],
+    response: null   // handled by feedbackFlow
+  },
+  {
+    id: 'other_sites',
+    emoji: '🌐',
+    label: 'Other Sites by Mohak',
+    url: 'https://mohakdev1220.github.io/websites_link/',
+    keywords: [
+      'other sites','portfolio','external links','networks','other websites',
+      'mohak projects','more sites','daily echo','telebey','chrome portal',
+      'facts site','gatividhiya','doosri websites','aur websites'
+    ],
+    response: () => `🌐 <strong>Other Sites by Mohak</strong>
+
+Explore more projects from the Toolify developer:
+
+• <strong>🚴 Gatividhiya</strong> — Activities & fitness tracker<br>
+  <a href="https://mohakdev1220.github.io/gatividhiya/" target="_blank">mohakdev1220.github.io/gatividhiya</a>
+
+• <strong>📰 Daily Echo</strong> — Private journal & reflection app<br>
+  mohakdev1220.github.io/daily echo
+
+• <strong>💬 Telebey</strong> — Real-time messaging platform<br>
+  mohakdev1220.github.io/telebey
+
+• <strong>📺 YouTube</strong> — Tutorials and project updates<br>
+  <a href="https://www.youtube.com/@MOHAKCHOUBEY" target="_blank">@MOHAKCHOUBEY</a>
+
+• <strong>📂 All Projects</strong><br>
+  <a href="https://mohakdev1220.github.io/websites_link/" target="_blank">mohakdev1220.github.io/websites_link</a>`
+  },
+  {
+    id: 'about',
+    emoji: '👨‍💻',
+    label: 'About Mohak',
+    url: null,
+    keywords: [
+      'mohak','developer','creator','who created','who made','about the creator',
+      'who built','toolify creator','dev kaun hai','kisne banaya','mohak choubey'
+    ],
+    response: () => `👨‍💻 <strong>About Mohak</strong>
+
+Mohak Choubey is the developer and designer behind Toolify and several other web projects.
+
+<span class="section-head">Stack:</span>
+• Frontend: HTML, CSS, Vanilla JS, Firebase
+• Backend: Firebase Auth + Firestore, Supabase
+• Hosting: GitHub Pages
+
+<span class="section-head">Other projects:</span>
+Gatividhiya · Daily Echo · Telebey · Chrome Portal · Facts Site
+
+<span class="section-head">Connect:</span>
+• YouTube: <a href="https://www.youtube.com/@MOHAKCHOUBEY" target="_blank">@MOHAKCHOUBEY</a>
+• GitHub: <a href="https://github.com/mohakdev1220" target="_blank">mohakdev1220</a>
+
+Support by using Toolify and sharing it with friends! 🙏`
+  }
+];
+
+// ── MAIN MENU TOOLS (20 items for quick-reply grid) ────────
+const MAIN_MENU_TOOLS = [
+  'ai_chatbot','world_clock','converter','finance','game',
+  'activities','alarm','calculator','paragraph_editor','weather',
+  'qr','colors','clock','timer','speech',
+  'calendar','pdf','stopwatch','password','feedback'
+];
+
+// ── GREETING by time ───────────────────────────────────────
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h >= 5  && h < 12) return 'Good morning';
+  if (h >= 12 && h < 17) return 'Good afternoon';
+  if (h >= 17 && h < 21) return 'Good evening';
+  return 'Hey there';
+}
+
+// ── DOM refs ───────────────────────────────────────────────
+const chatWindow   = document.getElementById('chatWindow');
+const chatMessages = document.getElementById('chatMessages');
+const quickReplies = document.getElementById('quickReplies');
+const msgInput     = document.getElementById('msgInput');
+const bubbleIcon   = document.getElementById('bubbleIcon');
+const bubbleBadge  = document.getElementById('bubbleBadge');
+
+// ── THEME ──────────────────────────────────────────────────
+function applyTheme() {
+  document.body.classList.toggle('light-mode', state.theme === 'light');
+}
+function toggleTheme() {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('toolify-theme', state.theme);
+  applyTheme();
+}
+function togglePageTheme() { toggleTheme(); }
+applyTheme();
+
+// ── CHAT OPEN/CLOSE ────────────────────────────────────────
+function toggleChat() {
+  state.open = !state.open;
+  chatWindow.classList.toggle('open', state.open);
+  bubbleIcon.textContent = state.open ? '✕' : '⚙️';
+  bubbleBadge.classList.remove('show');
+  if (state.open && chatMessages.children.length === 0) {
+    initGreeting();
+  }
+  if (state.open) msgInput.focus();
+}
+
+// ── INIT GREETING ──────────────────────────────────────────
+function initGreeting() {
+  const greeting = getGreeting();
+  addBotMessage(
+    `${greeting}, ${state.userName}! 👋 I'm the <strong>Toolify Workspace Assistant</strong> — a rules-based navigator for all 20+ tools in your dashboard.<br><br>I can explain any tool, guide you step-by-step, share links, and collect feedback. What would you like to explore?`,
+    0
+  );
+  setTimeout(() => showMainMenu(true), 900);
+}
+
+// ── MAIN MENU ──────────────────────────────────────────────
+function showMainMenu(fromGreeting = false) {
+  if (!fromGreeting) {
+    addBotMessage('Here\'s the full tool menu. Tap anything or type a question:', 0);
+  }
+  setTimeout(() => {
+    setQuickReplies(
+      MAIN_MENU_TOOLS.map(id => {
+        const tool = KB.find(t => t.id === id);
+        return { label: `${tool.emoji} ${tool.label}`, action: () => handleToolSelect(id) };
+      }).concat([
+        { label: '🌐 Other Sites', action: () => handleToolSelect('other_sites') },
+        { label: '👨‍💻 About Mohak', action: () => handleToolSelect('about') }
+      ]),
+      true
+    );
+  }, fromGreeting ? 800 : 400);
+}
+
+// ── QUICK REPLIES RENDERER ─────────────────────────────────
+function setQuickReplies(items, isGrid = false) {
+  quickReplies.innerHTML = '';
+  items.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'qr-btn';
+    btn.textContent = item.label;
+    btn.onclick = () => {
+      quickReplies.innerHTML = '';
+      item.action();
     };
+    quickReplies.appendChild(btn);
+  });
+}
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    window.auth = auth;
+// ── HANDLE TOOL SELECT ─────────────────────────────────────
+function handleToolSelect(toolId) {
+  const tool = KB.find(t => t.id === toolId);
+  if (!tool) return;
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-      } else {
-        window.currentUser = user;
-        document.getElementById('authCheck').style.display = 'none';
-        initChatbot();
-      }
+  addUserMessage(tool.emoji + ' ' + tool.label);
+
+  if (toolId === 'feedback') {
+    startFeedbackFlow();
+    return;
+  }
+
+  showTyping(() => {
+    const resp = tool.response ? tool.response() : `Opening <strong>${tool.label}</strong>…`;
+    addBotMessage(resp);
+
+    // Follow-up quick replies
+    setTimeout(() => {
+      const followUps = [
+        { label: '☰ Back to Menu',    action: showMainMenu },
+        { label: '🔗 Open ' + tool.label, action: () => navigateToTool(tool) },
+        { label: '❓ Ask another question', action: () => { setQuickReplies([]); msgInput.focus(); } }
+      ];
+      setQuickReplies(followUps);
+    }, 300);
+  });
+}
+
+// ── NAVIGATE TO TOOL ───────────────────────────────────────
+function navigateToTool(tool) {
+  const msg = `Redirecting you to <strong>${tool.emoji} ${tool.label}</strong>…`;
+  addBotMessage(msg, 0);
+  setTimeout(() => {
+    if (tool.url) {
+      window.open(tool.url, '_blank');
+    }
+    console.log(`[Toolify Router] Navigating to: ${tool.url || 'N/A'} for tool: ${tool.label}`);
+  }, 400);
+}
+
+// ── FEEDBACK FLOW ──────────────────────────────────────────
+function startFeedbackFlow() {
+  state.feedbackPhase = 'text';
+  state.feedbackText = '';
+  showTyping(() => {
+    addBotMessage(`💬 <strong>We'd love to hear from you!</strong><br><br>Please describe your feedback, bug report, or suggestion in detail — the more specific, the better.`);
+    setQuickReplies([{ label: '❌ Cancel feedback', action: cancelFeedback }]);
+  });
+}
+
+function cancelFeedback() {
+  state.feedbackPhase = null;
+  addBotMessage('Feedback cancelled. How else can I help you?', 0);
+  setTimeout(showMainMenu, 400);
+}
+
+function handleFeedbackInput(text) {
+  if (state.feedbackPhase === 'text') {
+    state.feedbackText = text;
+    state.feedbackPhase = 'email';
+    addUserMessage(text);
+    showTyping(() => {
+      addBotMessage(`Got it, thanks! 📝 Now please enter your <strong>email address</strong> so we can follow up if needed. (Must contain @ and a domain like .com)`);
+      setQuickReplies([{ label: '❌ Cancel', action: cancelFeedback }]);
     });
+    return true;
+  }
+  if (state.feedbackPhase === 'email') {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(text.trim())) {
+      addUserMessage(text);
+      showTyping(() => {
+        addBotMessage(`⚠️ That doesn't look like a valid email — it must include <strong>@</strong> and a domain (e.g. you@gmail.com). Please try again.`);
+        setQuickReplies([{ label: '❌ Cancel', action: cancelFeedback }]);
+      });
+      return true;
+    }
+    addUserMessage(text);
+    const email = text.trim();
+    state.feedbackPhase = null;
+    showTyping(() => {
+      addBotMessage(`✅ <strong>Feedback submitted — thank you!</strong><br><br>We received your message and will follow up at <strong>${email}</strong> if needed.<br><br>Summary:<br><em>${state.feedbackText.substring(0, 120)}${state.feedbackText.length > 120 ? '…' : ''}</em>`);
+      state.feedbackText = '';
+      setTimeout(() => {
+        setQuickReplies([{ label: '☰ Back to Menu', action: showMainMenu }]);
+      }, 300);
+    });
+    return true;
+  }
+  return false;
+}
 
-    window.signOutUser = async () => {
-      await signOut(auth);
-    };
-  </script>
+// ── KEYWORD MATCHING ───────────────────────────────────────
+function matchQuery(input) {
+  const q = input.toLowerCase().trim();
+  for (const tool of KB) {
+    if (tool.keywords.some(kw => q.includes(kw.toLowerCase()))) {
+      return tool;
+    }
+  }
+  return null;
+}
 
-  <!-- Chatbot Script -->
-  <script src="assets/chatbot.js"></script>
+// ── SEND MESSAGE ───────────────────────────────────────────
+function sendMessage() {
+  const text = msgInput.value.trim();
+  if (!text) return;
+  msgInput.value = '';
+  msgInput.style.height = 'auto';
+
+  // Feedback flow takes priority
+  if (state.feedbackPhase) {
+    handleFeedbackInput(text);
+    return;
+  }
+
+  addUserMessage(text);
+  quickReplies.innerHTML = '';
+
+  const matched = matchQuery(text);
+
+  if (matched) {
+    if (matched.id === 'feedback') {
+      startFeedbackFlow();
+    } else {
+      showTyping(() => {
+        const resp = matched.response ? matched.response() : `I found <strong>${matched.emoji} ${matched.label}</strong> — here's what you need to know:`;
+        addBotMessage(resp);
+        setTimeout(() => {
+          setQuickReplies([
+            { label: '☰ Main Menu',            action: showMainMenu },
+            { label: `🔗 Open ${matched.label}`, action: () => navigateToTool(matched) }
+          ]);
+        }, 300);
+      });
+    }
+  } else {
+    showTyping(() => {
+      addBotMessage(
+        `Sorry, I couldn't quite map <em>"${escapeHtml(text)}"</em> to our workspace utilities. 🤔<br><br>Please select a category from the options below, or use the <strong>☰ menu button</strong> to restart.`
+      );
+      setTimeout(showMainMenu, 300);
+    });
+  }
+}
+
+// ── MESSAGE RENDERERS ──────────────────────────────────────
+function addUserMessage(text) {
+  const row = document.createElement('div');
+  row.className = 'msg-row user';
+  const av = document.createElement('div');
+  av.className = 'msg-avatar user-av';
+  av.textContent = state.userName.charAt(0).toUpperCase();
+  const inner = document.createElement('div');
+  inner.className = 'msg-inner';
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.textContent = text;
+  const time = document.createElement('div');
+  time.className = 'msg-time';
+  time.textContent = formatTime();
+  inner.appendChild(bubble);
+  inner.appendChild(time);
+  row.appendChild(inner);
+  row.appendChild(av);
+  chatMessages.appendChild(row);
+  scrollBottom();
+  state.messages.push({ role: 'user', text, time: formatTime() });
+}
+
+function addBotMessage(html, delay = 0) {
+  const row = document.createElement('div');
+  row.className = 'msg-row bot';
+  const av = document.createElement('div');
+  av.className = 'msg-avatar bot';
+  av.textContent = '⚙️';
+  const inner = document.createElement('div');
+  inner.className = 'msg-inner';
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.innerHTML = html;
+  const time = document.createElement('div');
+  time.className = 'msg-time';
+  time.textContent = formatTime();
+  inner.appendChild(bubble);
+  inner.appendChild(time);
+  row.appendChild(av);
+  row.appendChild(inner);
+  if (delay > 0) {
+    setTimeout(() => {
+      chatMessages.appendChild(row);
+      scrollBottom();
+    }, delay);
+  } else {
+    chatMessages.appendChild(row);
+    scrollBottom();
+  }
+  state.messages.push({ role: 'bot', text: html, time: formatTime() });
+}
+
+// ── TYPING INDICATOR ───────────────────────────────────────
+function showTyping(callback) {
+  const delay = 800 + Math.random() * 700;  // 800–1500ms
+
+  const row = document.createElement('div');
+  row.className = 'typing-row';
+  const av = document.createElement('div');
+  av.className = 'msg-avatar bot';
+  av.textContent = '⚙️';
+  const bubble = document.createElement('div');
+  bubble.className = 'typing-bubble';
+  [1,2,3].forEach(() => {
+    const dot = document.createElement('div');
+    dot.className = 'typing-dot';
+    bubble.appendChild(dot);
+  });
+  row.appendChild(av);
+  row.appendChild(bubble);
+  chatMessages.appendChild(row);
+  scrollBottom();
+
+  setTimeout(() => {
+    row.remove();
+    callback();
+  }, delay);
+}
+
+// ── UTILS ──────────────────────────────────────────────────
+function scrollBottom() {
+  requestAnimationFrame(() => {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+}
+function formatTime() {
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── INPUT EVENTS ───────────────────────────────────────────
+msgInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+msgInput.addEventListener('input', () => {
+  msgInput.style.height = 'auto';
+  msgInput.style.height = Math.min(msgInput.scrollHeight, 100) + 'px';
+});
+
+// ── SHOW UNREAD BADGE on first open attempt ────────────────
+setTimeout(() => {
+  if (!state.open) bubbleBadge.classList.add('show');
+}, 3000);
+</script>
 
 </body>
 </html>
