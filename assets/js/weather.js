@@ -3,35 +3,45 @@
    APIs: Open-Meteo (weather + geocoding) + Nominatim (reverse geocoding) + ipapi (IP fallback)
 ───────────────────────────────────────────── */
 
+// ── Icon base — OpenWeatherMap CDN (always reliable, purpose-built for weather) ──
+// Format: https://openweathermap.org/img/wn/{code}@2x.png
+// d = day icons, n = night icons (we use day for all)
+const OWM = (code) => `https://openweathermap.org/img/wn/${code}@2x.png`;
+
 // ── Weather code → label, icon, sky class ──
 const WEATHER_MAP = {
-    0:  { label: "Clear skies",       icon: "https://img.icons8.com/emoji/96/sun-emoji.png",                         sky: "sky-clear" },
-    1:  { label: "Mainly clear",      icon: "https://img.icons8.com/emoji/96/sun-emoji.png",                         sky: "sky-clear" },
-    2:  { label: "Partly cloudy",     icon: "https://img.icons8.com/emoji/96/sun-behind-cloud.png",                  sky: "sky-cloudy" },
-    3:  { label: "Overcast",          icon: "https://img.icons8.com/emoji/96/cloud-emoji.png",                       sky: "sky-cloudy" },
-    45: { label: "Foggy",             icon: "https://img.icons8.com/emoji/96/fog.png",                               sky: "sky-cloudy" },
-    48: { label: "Depositing fog",    icon: "https://img.icons8.com/emoji/96/fog.png",                               sky: "sky-cloudy" },
-    51: { label: "Light drizzle",     icon: "https://img.icons8.com/emoji/96/cloud-with-rain.png",                   sky: "sky-rain" },
-    53: { label: "Drizzle",           icon: "https://img.icons8.com/emoji/96/cloud-with-rain.png",                   sky: "sky-rain" },
-    55: { label: "Heavy drizzle",     icon: "https://img.icons8.com/emoji/96/cloud-with-rain.png",                   sky: "sky-rain" },
-    61: { label: "Slight rain",       icon: "https://img.icons8.com/emoji/96/cloud-with-rain.png",                   sky: "sky-rain" },
-    63: { label: "Moderate rain",     icon: "https://img.icons8.com/emoji/96/cloud-with-rain.png",                   sky: "sky-rain" },
-    65: { label: "Heavy rain",        icon: "https://img.icons8.com/emoji/96/cloud-with-rain.png",                   sky: "sky-rain" },
-    71: { label: "Slight snow",       icon: "https://img.icons8.com/emoji/96/snowflake.png",                         sky: "sky-cloudy" },
-    73: { label: "Moderate snow",     icon: "https://img.icons8.com/emoji/96/snowflake.png",                         sky: "sky-cloudy" },
-    75: { label: "Heavy snow",        icon: "https://img.icons8.com/emoji/96/snowflake.png",                         sky: "sky-cloudy" },
-    80: { label: "Rain showers",      icon: "https://img.icons8.com/emoji/96/cloud-with-rain.png",                   sky: "sky-rain" },
-    81: { label: "Rain showers",      icon: "https://img.icons8.com/emoji/96/cloud-with-rain.png",                   sky: "sky-rain" },
-    82: { label: "Violent showers",   icon: "https://img.icons8.com/emoji/96/cloud-with-rain.png",                   sky: "sky-rain" },
-    85: { label: "Snow showers",      icon: "https://img.icons8.com/emoji/96/snowflake.png",                         sky: "sky-cloudy" },
-    86: { label: "Heavy snow showers",icon: "https://img.icons8.com/emoji/96/snowflake.png",                         sky: "sky-cloudy" },
-    95: { label: "Thunderstorm",      icon: "https://img.icons8.com/emoji/96/cloud-with-lightning-and-rain.png",     sky: "sky-rain" },
-    96: { label: "Thunderstorm + hail",icon:"https://img.icons8.com/emoji/96/cloud-with-lightning-and-rain.png",    sky: "sky-rain" },
-    99: { label: "Thunderstorm + heavy hail",icon:"https://img.icons8.com/emoji/96/cloud-with-lightning-and-rain.png",sky: "sky-rain" },
+    0:  { label: "Clear skies",            icon: OWM("01d"), sky: "sky-clear"  },
+    1:  { label: "Mainly clear",           icon: OWM("01d"), sky: "sky-clear"  },
+    2:  { label: "Partly cloudy",          icon: OWM("02d"), sky: "sky-cloudy" },
+    3:  { label: "Overcast",               icon: OWM("04d"), sky: "sky-cloudy" },
+    45: { label: "Foggy",                  icon: OWM("50d"), sky: "sky-cloudy" },
+    48: { label: "Depositing fog",         icon: OWM("50d"), sky: "sky-cloudy" },
+    51: { label: "Light drizzle",          icon: OWM("09d"), sky: "sky-rain"   },
+    53: { label: "Drizzle",               icon: OWM("09d"), sky: "sky-rain"   },
+    55: { label: "Heavy drizzle",          icon: OWM("09d"), sky: "sky-rain"   },
+    56: { label: "Freezing drizzle",       icon: OWM("09d"), sky: "sky-rain"   },
+    57: { label: "Heavy freezing drizzle", icon: OWM("09d"), sky: "sky-rain"   },
+    61: { label: "Slight rain",            icon: OWM("10d"), sky: "sky-rain"   },
+    63: { label: "Moderate rain",          icon: OWM("10d"), sky: "sky-rain"   },
+    65: { label: "Heavy rain",             icon: OWM("10d"), sky: "sky-rain"   },
+    66: { label: "Freezing rain",          icon: OWM("13d"), sky: "sky-rain"   },
+    67: { label: "Heavy freezing rain",    icon: OWM("13d"), sky: "sky-rain"   },
+    71: { label: "Slight snow",            icon: OWM("13d"), sky: "sky-cloudy" },
+    73: { label: "Moderate snow",          icon: OWM("13d"), sky: "sky-cloudy" },
+    75: { label: "Heavy snow",             icon: OWM("13d"), sky: "sky-cloudy" },
+    77: { label: "Snow grains",            icon: OWM("13d"), sky: "sky-cloudy" },
+    80: { label: "Rain showers",           icon: OWM("09d"), sky: "sky-rain"   },
+    81: { label: "Moderate showers",       icon: OWM("09d"), sky: "sky-rain"   },
+    82: { label: "Violent showers",        icon: OWM("09d"), sky: "sky-rain"   },
+    85: { label: "Snow showers",           icon: OWM("13d"), sky: "sky-cloudy" },
+    86: { label: "Heavy snow showers",     icon: OWM("13d"), sky: "sky-cloudy" },
+    95: { label: "Thunderstorm",           icon: OWM("11d"), sky: "sky-rain"   },
+    96: { label: "Thunderstorm + hail",    icon: OWM("11d"), sky: "sky-rain"   },
+    99: { label: "Thunderstorm + hail",    icon: OWM("11d"), sky: "sky-rain"   },
 };
 
 function getWeatherMeta(code) {
-    return WEATHER_MAP[code] || { label: "Cloudy", icon: "https://img.icons8.com/emoji/96/cloud-emoji.png", sky: "sky-cloudy" };
+    return WEATHER_MAP[code] || { label: "Cloudy", icon: OWM("03d"), sky: "sky-cloudy" };
 }
 
 // ── UV description ──
