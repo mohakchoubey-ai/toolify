@@ -3,305 +3,1076 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pro Calculator | Toolbox Hub</title>
+<meta name="description" content="Professional multi-mode calculator with scientific, converter, and history features">
+<meta name="theme-color" content="#0f172a">
+<title>Professional Calculator | Toolify</title>
 
 <style>
-:root{
-  --glass: rgba(255, 255, 255, 0.12);
-  --primary: #7efaff;
-  --accent: #e0c3fc;
-  --text: #ffffff;
-  --bg-gradient: linear-gradient(-45deg, #1e3c72, #2a5298, #7b4397);
+:root {
+  --primary: #3b82f6;
+  --primary-dark: #1e40af;
+  --secondary: #8b5cf6;
+  --accent: #06b6d4;
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --bg-dark: #0f172a;
+  --bg-darker: #0a0e27;
+  --surface: #1e293b;
+  --surface-light: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --border: rgba(148, 163, 184, 0.2);
 }
 
-/* Light Mode Variables */
 .light-mode {
-  --glass: rgba(255, 255, 255, 0.8);
-  --primary: #2a5298;
-  --accent: #7b4397;
-  --text: #333;
-  --bg-gradient: linear-gradient(-45deg, #e0eafc, #cfdef3);
+  --primary: #1e40af;
+  --primary-dark: #1e3a8a;
+  --secondary: #7c3aed;
+  --accent: #0891b2;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+  --bg-dark: #f8fafc;
+  --bg-darker: #f1f5f9;
+  --surface: #e2e8f0;
+  --surface-light: #cbd5e1;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border: rgba(30, 41, 59, 0.2);
 }
 
-*{box-sizing: border-box; margin: 0; padding: 0}
-body{
-  font-family: 'Segoe UI', sans-serif;
-  background: var(--bg-gradient);
-  background-size: 400% 400%;
-  animation: bg 15s ease infinite;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+  color: var(--text-primary);
   min-height: 100vh;
-  color: var(--text);
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  transition: background 0.3s ease;
-  visibility:hidden;
+  justify-content: center;
+  padding: 1rem;
+  transition: background-color 0.3s ease;
 }
 
-@keyframes bg{
-  0%{background-position: 0% 50%}
-  50%{background-position: 100% 50%}
-  100%{background-position: 0% 50%}
+.container {
+  width: 100%;
+  max-width: 500px;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 
+              0 0 1px rgba(255, 255, 255, 0.1) inset;
+  border: 1px solid var(--border);
+  animation: slideUp 0.4s ease-out;
 }
 
-.app{
-  width: 95%;
-  max-width: 420px;
-  background: var(--glass);
-  backdrop-filter: blur(20px);
-  border-radius: 30px;
-  padding: 22px;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.2);
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.top{
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
 
-.mode button, .theme-toggle{
-  background: none;
-  border: none;
-  color: var(--text);
+.title {
+  font-size: 22px;
   font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+}
+
+.theme-btn,
+.settings-btn {
+  background: var(--surface-light);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   cursor: pointer;
-  opacity: 0.6;
-  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s ease;
 }
-.mode button.active{opacity: 1; color: var(--primary); border-bottom: 2px solid var(--primary);}
 
-.display{
+.theme-btn:hover,
+.settings-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.theme-btn:active,
+.settings-btn:active {
+  transform: translateY(0);
+}
+
+.mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: var(--surface-light);
+  padding: 4px;
+  border-radius: 12px;
+  overflow: auto;
+}
+
+.mode-tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.mode-tab.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.mode-tab:hover:not(.active) {
+  color: var(--text-primary);
+}
+
+.display-container {
+  margin-bottom: 20px;
+}
+
+.display-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.display {
   width: 100%;
-  height: 80px;
-  background: rgba(0,0,0,0.2);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px;
-  color: var(--primary);
-  font-size: 28px;
-  padding: 15px;
+  padding: 16px;
+  background: var(--bg-darker);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--accent);
+  font-size: 32px;
+  font-weight: 600;
   text-align: right;
-  margin-bottom: 15px;
+  word-wrap: break-word;
+  word-break: break-all;
+  max-height: 120px;
+  overflow-y: auto;
+  font-variant-numeric: tabular-nums;
 }
 
-.grid{
+.display::-webkit-scrollbar {
+  width: 4px;
+}
+
+.display::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.display::-webkit-scrollbar-thumb {
+  background: var(--surface-light);
+  border-radius: 2px;
+}
+
+.error-display {
+  color: var(--error);
+}
+
+.keyboard {
+  display: grid;
+  gap: 8px;
+}
+
+.calc-grid,
+.sci-grid,
+.converter-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.sci-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.btn {
+  padding: 14px 8px;
+  background: var(--surface-light);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s, height 0.4s;
+}
+
+.btn:active::before {
+  width: 200px;
+  height: 200px;
+}
+
+.btn:hover {
+  background: var(--surface);
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-number {
+  color: var(--text-primary);
+}
+
+.btn-operator {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+}
+
+.btn-operator:hover {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-equals {
+  background: linear-gradient(135deg, var(--success), var(--accent));
+  color: white;
+  border: none;
+  grid-column: span 2;
+  font-size: 18px;
+}
+
+.btn-equals:hover {
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-clear {
+  background: linear-gradient(135deg, var(--error), var(--warning));
+  color: white;
+  border: none;
+}
+
+.btn-clear:hover {
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.btn-function {
+  background: var(--primary);
+  color: white;
+  border: none;
+  font-size: 13px;
+}
+
+.btn-function:hover {
+  background: var(--primary-dark);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.converter-grid {
+  grid-template-columns: 1fr;
   gap: 12px;
 }
 
-button{
-  padding: 18px 10px;
-  border-radius: 15px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.1);
-  color: var(--text);
-  font-size: 18px;
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+select,
+input[type="number"],
+input[type="text"] {
+  padding: 12px;
+  background: var(--bg-darker);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+select:focus,
+input[type="number"]:focus,
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--bg-darker);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.result-display {
+  padding: 12px;
+  background: var(--bg-darker);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--success);
+  border-radius: 10px;
+  color: var(--success);
   font-weight: 600;
+}
+
+.history-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.history-title {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.history-item {
+  padding: 8px 12px;
+  background: var(--bg-darker);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s ease;
 }
 
-button:hover{background: rgba(255,255,255,0.2);}
-button:active{transform: scale(0.92)}
-
-.op{color: var(--primary)}
-.eq{
-  background: linear-gradient(135deg, #8ec5fc, #e0c3fc);
-  color: #111;
+.history-item:hover {
+  background: var(--surface-light);
+  color: var(--text-primary);
+  border-color: var(--primary);
 }
-.clear{color: #ff6b6b}
-.hidden{display: none !important;}
 
-select, input.conv{
-  width: 100%;
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.1);
-  color: var(--text);
-  margin-bottom: 12px;
+.history-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.history-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+  background: var(--surface-light);
+  border-radius: 2px;
 }
 
 .footer {
-  margin-top: 25px;
-  font-size: 14px;
-  text-align: center;
-  opacity: 0.9;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: center;
 }
 
-.heart { color: #ff4d4d; }
-
-.back{
-  display: block;
-  margin-top: 15px;
-  text-align: center;
-  color: var(--text);
+.footer-btn {
+  flex: 1;
+  padding: 10px 16px;
+  background: var(--surface-light);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
   text-decoration: none;
-  font-size: 14px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.footer-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.footer-btn.home {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+  animation: slideInRight 0.3s ease-out;
+  max-width: 300px;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    max-width: 100%;
+    padding: 16px;
+  }
+
+  .display {
+    font-size: 24px;
+  }
+
+  .calc-grid,
+  .sci-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .btn-equals {
+    grid-column: span 2;
+  }
+
+  .mode-tab {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .footer {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 </style>
 </head>
 <body>
 
-<div class="app">
-  <div class="top">
-    <div class="mode">
-      <button id="btn-calc" onclick="switchMode('calc')" class="active">Calc</button>
-      <button id="btn-sci" onclick="switchMode('sci')">Sci</button>
-      <button id="btn-conv" onclick="switchMode('conv')">Conv</button>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="title">Calculator</div>
+    <div class="controls">
+      <button class="theme-btn" onclick="toggleTheme()" title="Toggle dark/light mode" aria-label="Toggle theme">🌓</button>
+      <button class="settings-btn" onclick="toggleSettings()" title="Settings" aria-label="Settings">⚙️</button>
     </div>
-    <button class="theme-toggle" onclick="toggleTheme()" title="Switch Theme">🌓</button>
   </div>
 
-  <input id="display" class="display" readonly placeholder="0">
-
-  <div id="calc" class="grid">
-    <button class="clear" onclick="clr()">AC</button>
-    <button onclick="add('(')">(</button>
-    <button onclick="add(')')">)</button>
-    <button class="op" onclick="add('/')">÷</button>
-    <button onclick="add('7')">7</button>
-    <button onclick="add('8')">8</button>
-    <button onclick="add('9')">9</button>
-    <button class="op" onclick="add('*')">×</button>
-    <button onclick="add('4')">4</button>
-    <button onclick="add('5')">5</button>
-    <button onclick="add('6')">6</button>
-    <button class="op" onclick="add('-')">−</button>
-    <button onclick="add('1')">1</button>
-    <button onclick="add('2')">2</button>
-    <button onclick="add('3')">3</button>
-    <button class="op" onclick="add('+')">+</button>
-    <button onclick="add('%')">%</button>
-    <button onclick="add('0')">0</button>
-    <button onclick="back()">⌫</button>
-    <button class="eq" onclick="calculate()">=</button>
+  <!-- Mode Tabs -->
+  <div class="mode-tabs">
+    <button class="mode-tab active" onclick="switchMode('calculator')" data-mode="calculator">Calculator</button>
+    <button class="mode-tab" onclick="switchMode('scientific')" data-mode="scientific">Scientific</button>
+    <button class="mode-tab" onclick="switchMode('converter')" data-mode="converter">Converter</button>
   </div>
 
-  <div id="sci" class="grid hidden">
-    <button onclick="fn('Math.sin')">sin</button>
-    <button onclick="fn('Math.cos')">cos</button>
-    <button onclick="fn('Math.tan')">tan</button>
-    <button onclick="fn('Math.sqrt')">√</button>
-    <button onclick="add('Math.PI')">π</button>
-    <button onclick="add('Math.E')">e</button>
-    <button onclick="fn('Math.log10')">log</button>
-    <button onclick="fn('Math.log')">ln</button>
-    <button onclick="add('**')">xʸ</button>
-    <button onclick="fact()">x!</button>
-    <button onclick="back()">⌫</button>
-    <button class="eq" onclick="calculate()">=</button>
+  <!-- Display -->
+  <div class="display-container">
+    <div class="display-label" id="displayLabel">Result</div>
+    <div class="display" id="display" role="status" aria-live="polite">0</div>
   </div>
 
-  <div id="conv" class="hidden">
-    <select id="type"><option value="len">Length</option><option value="wt">Weight</option><option value="temp">Temperature</option><option value="speed">Speed</option><option value="area">Area</option><option value="vol">Volume</option></select>
-    <input class="conv" id="cval" type="number" placeholder="Enter Value">
-    <select id="from"></select>
-    <select id="to"></select>
-    <input class="conv" id="cres" readonly placeholder="Result">
+  <!-- Calculator Mode -->
+  <div id="calculator" class="keyboard">
+    <div class="calc-grid">
+      <button class="btn btn-clear" onclick="clearDisplay()">AC</button>
+      <button class="btn btn-operator" onclick="addOperator('(')">(</button>
+      <button class="btn btn-operator" onclick="addOperator(')')">)</button>
+      <button class="btn btn-operator" onclick="addOperator('/')">÷</button>
+
+      <button class="btn btn-number" onclick="addNumber('7')">7</button>
+      <button class="btn btn-number" onclick="addNumber('8')">8</button>
+      <button class="btn btn-number" onclick="addNumber('9')">9</button>
+      <button class="btn btn-operator" onclick="addOperator('*')">×</button>
+
+      <button class="btn btn-number" onclick="addNumber('4')">4</button>
+      <button class="btn btn-number" onclick="addNumber('5')">5</button>
+      <button class="btn btn-number" onclick="addNumber('6')">6</button>
+      <button class="btn btn-operator" onclick="addOperator('-')">−</button>
+
+      <button class="btn btn-number" onclick="addNumber('1')">1</button>
+      <button class="btn btn-number" onclick="addNumber('2')">2</button>
+      <button class="btn btn-number" onclick="addNumber('3')">3</button>
+      <button class="btn btn-operator" onclick="addOperator('+')">+</button>
+
+      <button class="btn btn-number" onclick="addNumber('0')">0</button>
+      <button class="btn btn-number" onclick="addNumber('.')">.</button>
+      <button class="btn btn-operator" onclick="deleteLastChar()">⌫</button>
+      <button class="btn btn-equals" onclick="calculate()">=</button>
+    </div>
   </div>
 
-  <a href="dashboard" class="back">🏠 Back to dashboard</a>
-</div>
+  <!-- Scientific Mode -->
+  <div id="scientific" class="keyboard hidden">
+    <div class="sci-grid">
+      <button class="btn btn-function" onclick="addFunction('sin')">sin</button>
+      <button class="btn btn-function" onclick="addFunction('cos')">cos</button>
+      <button class="btn btn-function" onclick="addFunction('tan')">tan</button>
+      <button class="btn btn-function" onclick="addFunction('sqrt')">√</button>
 
-<div class="footer">
-  Developed with <span class="heart">❤</span> by mohak_
+      <button class="btn btn-function" onclick="addNumber('3.14159')">π</button>
+      <button class="btn btn-function" onclick="addNumber('2.71828')">e</button>
+      <button class="btn btn-function" onclick="addFunction('log10')">log</button>
+      <button class="btn btn-function" onclick="addFunction('log')">ln</button>
+
+      <button class="btn btn-operator" onclick="addOperator('^')">x^y</button>
+      <button class="btn btn-function" onclick="factorial()">x!</button>
+      <button class="btn btn-operator" onclick="addOperator('%')">%</button>
+      <button class="btn btn-clear" onclick="clearDisplay()">AC</button>
+
+      <button class="btn btn-number" onclick="addNumber('7')">7</button>
+      <button class="btn btn-number" onclick="addNumber('8')">8</button>
+      <button class="btn btn-number" onclick="addNumber('9')">9</button>
+      <button class="btn btn-operator" onclick="addOperator('/')">÷</button>
+
+      <button class="btn btn-number" onclick="addNumber('4')">4</button>
+      <button class="btn btn-number" onclick="addNumber('5')">5</button>
+      <button class="btn btn-number" onclick="addNumber('6')">6</button>
+      <button class="btn btn-operator" onclick="addOperator('*')">×</button>
+
+      <button class="btn btn-number" onclick="addNumber('1')">1</button>
+      <button class="btn btn-number" onclick="addNumber('2')">2</button>
+      <button class="btn btn-number" onclick="addNumber('3')">3</button>
+      <button class="btn btn-operator" onclick="addOperator('-')">−</button>
+
+      <button class="btn btn-number" onclick="addNumber('0')">0</button>
+      <button class="btn btn-number" onclick="addNumber('.')">.</button>
+      <button class="btn btn-operator" onclick="deleteLastChar()">⌫</button>
+      <button class="btn btn-equals" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <!-- Converter Mode -->
+  <div id="converter" class="keyboard hidden">
+    <div class="converter-grid">
+      <div class="input-group">
+        <label class="input-label">Conversion Type</label>
+        <select id="convType" onchange="updateConversionUnits()">
+          <option value="length">Length</option>
+          <option value="weight">Weight</option>
+          <option value="temperature">Temperature</option>
+          <option value="speed">Speed</option>
+          <option value="area">Area</option>
+          <option value="volume">Volume</option>
+        </select>
+      </div>
+
+      <div class="input-row">
+        <div class="input-group">
+          <label class="input-label">From</label>
+          <select id="convFrom" onchange="performConversion()">
+            <option value="m">Meter</option>
+            <option value="km">Kilometer</option>
+            <option value="cm">Centimeter</option>
+            <option value="mm">Millimeter</option>
+            <option value="mile">Mile</option>
+            <option value="yard">Yard</option>
+            <option value="foot">Foot</option>
+            <option value="inch">Inch</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">To</label>
+          <select id="convTo" onchange="performConversion()">
+            <option value="m">Meter</option>
+            <option value="km">Kilometer</option>
+            <option value="cm">Centimeter</option>
+            <option value="mm">Millimeter</option>
+            <option value="mile">Mile</option>
+            <option value="yard">Yard</option>
+            <option value="foot">Foot</option>
+            <option value="inch">Inch</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Value</label>
+        <input type="number" id="convValue" placeholder="Enter value" oninput="performConversion()" step="any">
+      </div>
+
+      <div class="result-display" id="convResult">0</div>
+    </div>
+  </div>
+
+  <!-- History Section -->
+  <div class="history-section">
+    <div class="history-title">History</div>
+    <div class="history-list" id="history"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <button class="footer-btn" onclick="copyToClipboard()">📋 Copy</button>
+    <a href="https://mohakdev1220.github.io/toolify/dashboard" class="footer-btn home">🏠 Home</a>
+  </div>
 </div>
 
 <script>
-const d = document.getElementById("display");
-const calcDiv = document.getElementById("calc");
-const sciDiv = document.getElementById("sci");
-const convDiv = document.getElementById("conv");
-const typeSel = document.getElementById("type");
-const fromSel = document.getElementById("from");
-const toSel = document.getElementById("to");
-const cvalInp = document.getElementById("cval");
-const cresInp = document.getElementById("cres");
-
-// Theme Toggle Logic
-function toggleTheme() {
-    document.body.classList.toggle("light-mode");
-}
-
-function add(v){ if(d.value === "Error") d.value = ""; d.value += v; }
-function clr(){ d.value = ""; }
-function back(){ d.value = d.value.slice(0,-1); }
-
-function calculate(){
-    try { 
-        let expression = d.value.replace(/%/g, '/100');
-        d.value = eval(expression);
-    } catch { d.value = "Error"; }
-}
-
-function fn(f){ d.value += `${f}(`; }
-
-function fact(){
-    try {
-        let n = Number(eval(d.value));
-        if(n < 0 || isNaN(n)) throw "err";
-        let r = 1; for(let i = 1; i <= n; i++) r *= i;
-        d.value = r;
-    } catch { d.value = "Error"; }
-}
-
-function switchMode(m){
-    document.querySelectorAll(".mode button").forEach(b => b.classList.remove("active"));
-    document.getElementById(`btn-${m}`).classList.add("active");
-    calcDiv.classList.add("hidden"); sciDiv.classList.add("hidden"); convDiv.classList.add("hidden");
-    if(m === "calc") calcDiv.classList.remove("hidden");
-    if(m === "sci") { sciDiv.classList.remove("hidden"); calcDiv.classList.remove("hidden"); }
-    if(m === "conv") convDiv.classList.remove("hidden");
-}
-
-const units = {
-    len: {m: 1, cm: 0.01, km: 1000, inch: 0.0254, ft: 0.3048, mile: 1609},
-    wt: {kg: 1, g: 0.001, lb: 0.4536, oz: 0.02835},
-    speed: {ms: 1, kmh: 0.2778, mph: 0.447},
-    area: {m2: 1, km2: 1e6, ft2: 0.0929, acre: 4046},
-    vol: {l: 1, ml: 0.001, m3: 1000, gal: 3.785}
+// ==================== STATE ====================
+let display = {
+  value: '0',
+  shouldReset: false,
+  history: [],
+  isDark: !localStorage.getItem('calc-light-mode'),
 };
 
-function loadUnits(){
-    let t = typeSel.value;
-    fromSel.innerHTML = ""; toSel.innerHTML = "";
-    if(t === "temp") {
-        ["C", "F", "K"].forEach(u => {
-            fromSel.innerHTML += `<option value="${u}">${u}</option>`;
-            toSel.innerHTML += `<option value="${u}">${u}</option>`;
-        });
-    } else {
-        for(let u in units[t]){
-            fromSel.innerHTML += `<option value="${u}">${u}</option>`;
-            toSel.innerHTML += `<option value="${u}">${u}</option>`;
-        }
+// ==================== CONSTANTS ====================
+const CONVERSION_UNITS = {
+  length: {
+    m: 1,
+    km: 1000,
+    cm: 0.01,
+    mm: 0.001,
+    mile: 1609.34,
+    yard: 0.9144,
+    foot: 0.3048,
+    inch: 0.0254,
+  },
+  weight: {
+    kg: 1,
+    g: 0.001,
+    mg: 0.000001,
+    lb: 0.453592,
+    oz: 0.0283495,
+    ton: 1000,
+  },
+  speed: {
+    'ms': 1,
+    'kmh': 0.277778,
+    'mph': 0.44704,
+    'knots': 0.514444,
+  },
+  area: {
+    m2: 1,
+    km2: 1000000,
+    cm2: 0.0001,
+    hectare: 10000,
+    acre: 4046.86,
+    mile2: 2589988,
+  },
+  volume: {
+    l: 1,
+    ml: 0.001,
+    m3: 1000,
+    gallon: 3.78541,
+    pint: 0.473176,
+    cup: 0.236588,
+  },
+};
+
+// ==================== INITIALIZATION ====================
+document.addEventListener('DOMContentLoaded', () => {
+  initializeTheme();
+  loadHistory();
+  setupKeyboardShortcuts();
+});
+
+function initializeTheme() {
+  if (display.isDark) {
+    document.body.classList.remove('light-mode');
+  } else {
+    document.body.classList.add('light-mode');
+  }
+}
+
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    const key = e.key;
+    
+    if (key >= '0' && key <= '9') addNumber(key);
+    if (key === '.') addNumber('.');
+    if (key === '+' || key === '-' || key === '*' || key === '/') addOperator(key);
+    if (key === 'Enter' || key === '=') {
+      e.preventDefault();
+      calculate();
     }
-    convert();
+    if (key === 'Backspace') {
+      e.preventDefault();
+      deleteLastChar();
+    }
+    if (key === 'Escape') clearDisplay();
+    if (key === 'c' && e.ctrlKey) copyToClipboard();
+  });
 }
 
-function convert(){
-    let v = Number(cvalInp.value);
-    if(cvalInp.value === "") return cresInp.value = "";
-    let t = typeSel.value, f = fromSel.value, toU = toSel.value, r;
-    if(t === "temp"){
-        if(f === "C") r = (toU === "F") ? v * 9/5 + 32 : (toU === "K") ? v + 273.15 : v;
-        if(f === "F") r = (toU === "C") ? (v - 32) * 5/9 : (toU === "K") ? (v - 32) * 5/9 + 273.15 : v;
-        if(f === "K") r = (toU === "C") ? v - 273.15 : (toU === "F") ? (v - 273.15) * 9/5 + 32 : v;
-    } else { r = v * units[t][f] / units[t][toU]; }
-    cresInp.value = r.toFixed(4);
+// ==================== CALCULATOR FUNCTIONS ====================
+function addNumber(num) {
+  if (display.shouldReset) {
+    display.value = num;
+    display.shouldReset = false;
+  } else {
+    if (display.value === '0' && num !== '.') {
+      display.value = num;
+    } else if (num === '.' && display.value.includes('.')) {
+      return;
+    } else {
+      display.value += num;
+    }
+  }
+  updateDisplay();
 }
 
-typeSel.addEventListener("change", loadUnits);
-fromSel.addEventListener("change", convert);
-toSel.addEventListener("change", convert);
-cvalInp.addEventListener("input", convert);
-loadUnits(); 
+function addOperator(op) {
+  if (display.shouldReset && op !== '-') {
+    display.shouldReset = false;
+    return;
+  }
+  if (display.value === '0' && op !== '-') return;
+  display.value += op;
+  display.shouldReset = false;
+  updateDisplay();
+}
+
+function addFunction(func) {
+  display.value += `${func}(`;
+  display.shouldReset = false;
+  updateDisplay();
+}
+
+function deleteLastChar() {
+  if (display.value.length > 1) {
+    display.value = display.value.slice(0, -1);
+  } else {
+    display.value = '0';
+  }
+  updateDisplay();
+}
+
+function clearDisplay() {
+  display.value = '0';
+  display.shouldReset = false;
+  updateDisplay();
+}
+
+function calculate() {
+  try {
+    // Sanitize and validate expression
+    let expr = display.value.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+    
+    // Handle scientific functions
+    expr = expr.replace(/sin\(/g, 'Math.sin(');
+    expr = expr.replace(/cos\(/g, 'Math.cos(');
+    expr = expr.replace(/tan\(/g, 'Math.tan(');
+    expr = expr.replace(/sqrt\(/g, 'Math.sqrt(');
+    expr = expr.replace(/log\(/g, 'Math.log(');
+    expr = expr.replace(/log10\(/g, 'Math.log10(');
+    expr = expr.replace(/\^/g, '**');
+    expr = expr.replace(/π/g, 'Math.PI');
+    expr = expr.replace(/e/g, 'Math.E');
+    
+    // Prevent dangerous operations
+    if (/[^0-9+\-*/().Math\s]/.test(expr)) {
+      throw new Error('Invalid characters');
+    }
+
+    const result = Function('"use strict"; return (' + expr + ')')();
+    
+    if (!isFinite(result)) {
+      throw new Error('Invalid result');
+    }
+
+    const formatted = formatResult(result);
+    addToHistory(`${display.value} = ${formatted}`);
+    display.value = formatted;
+    display.shouldReset = true;
+    updateDisplay();
+  } catch (error) {
+    display.value = 'Error';
+    document.getElementById('display').classList.add('error-display');
+    display.shouldReset = true;
+    updateDisplay();
+    setTimeout(() => {
+      document.getElementById('display').classList.remove('error-display');
+    }, 2000);
+  }
+}
+
+function factorial() {
+  try {
+    const num = Math.floor(parseFloat(display.value));
+    if (num < 0 || num > 170) throw new Error('Invalid input');
+    
+    let result = 1;
+    for (let i = 2; i <= num; i++) result *= i;
+    
+    display.value = result.toString();
+    display.shouldReset = true;
+    updateDisplay();
+  } catch {
+    display.value = 'Error';
+    display.shouldReset = true;
+    updateDisplay();
+  }
+}
+
+function formatResult(num) {
+  // Round to 10 decimal places to avoid floating point errors
+  const rounded = Math.round(num * 10000000000) / 10000000000;
+  
+  // Return as string with appropriate precision
+  if (Math.abs(rounded) > 1000000 || (Math.abs(rounded) < 0.0001 && rounded !== 0)) {
+    return rounded.toExponential(6);
+  }
+  return rounded.toString();
+}
+
+function updateDisplay() {
+  const displayEl = document.getElementById('display');
+  displayEl.textContent = display.value;
+  displayEl.scrollTop = displayEl.scrollHeight;
+}
+
+// ==================== CONVERTER FUNCTIONS ====================
+function updateConversionUnits() {
+  const type = document.getElementById('convType').value;
+  const units = CONVERSION_UNITS[type];
+  
+  const fromSelect = document.getElementById('convFrom');
+  const toSelect = document.getElementById('convTo');
+  
+  fromSelect.innerHTML = '';
+  toSelect.innerHTML = '';
+  
+  for (const unit in units) {
+    fromSelect.innerHTML += `<option value="${unit}">${unit.toUpperCase()}</option>`;
+    toSelect.innerHTML += `<option value="${unit}">${unit.toUpperCase()}</option>`;
+  }
+  
+  performConversion();
+}
+
+function performConversion() {
+  const type = document.getElementById('convType').value;
+  const value = parseFloat(document.getElementById('convValue').value);
+  const from = document.getElementById('convFrom').value;
+  const to = document.getElementById('convTo').value;
+  const resultEl = document.getElementById('convResult');
+  
+  if (!value || isNaN(value)) {
+    resultEl.textContent = '0';
+    return;
+  }
+  
+  try {
+    let result;
+    
+    if (type === 'temperature') {
+      result = convertTemperature(value, from, to);
+    } else {
+      const fromBase = CONVERSION_UNITS[type][from];
+      const toBase = CONVERSION_UNITS[type][to];
+      result = (value * fromBase) / toBase;
+    }
+    
+    resultEl.textContent = formatResult(result);
+  } catch {
+    resultEl.textContent = 'Error';
+  }
+}
+
+function convertTemperature(value, from, to) {
+  let celsius;
+  
+  // Convert to Celsius first
+  if (from === 'C') celsius = value;
+  else if (from === 'F') celsius = (value - 32) * 5/9;
+  else if (from === 'K') celsius = value - 273.15;
+  
+  // Convert from Celsius to target
+  if (to === 'C') return celsius;
+  else if (to === 'F') return (celsius * 9/5) + 32;
+  else if (to === 'K') return celsius + 273.15;
+}
+
+// ==================== MODE SWITCHING ====================
+function switchMode(mode) {
+  // Update active tab
+  document.querySelectorAll('.mode-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  // Hide all sections
+  document.getElementById('calculator').classList.add('hidden');
+  document.getElementById('scientific').classList.add('hidden');
+  document.getElementById('converter').classList.add('hidden');
+  
+  // Show selected section
+  document.getElementById(mode).classList.remove('hidden');
+  
+  // Update display label
+  const labels = {
+    calculator: 'Result',
+    scientific: 'Scientific',
+    converter: 'Converted Value',
+  };
+  document.getElementById('displayLabel').textContent = labels[mode];
+}
+
+// ==================== THEME ====================
+function toggleTheme() {
+  display.isDark = !display.isDark;
+  document.body.classList.toggle('light-mode');
+  localStorage.setItem('calc-light-mode', !display.isDark ? '1' : '');
+}
+
+function toggleSettings() {
+  showToast('Settings available in sidebar menu');
+}
+
+// ==================== HISTORY ====================
+function addToHistory(entry) {
+  display.history.unshift(entry);
+  if (display.history.length > 10) display.history.pop();
+  saveHistory();
+  renderHistory();
+}
+
+function saveHistory() {
+  localStorage.setItem('calc-history', JSON.stringify(display.history));
+}
+
+function loadHistory() {
+  const saved = localStorage.getItem('calc-history');
+  display.history = saved ? JSON.parse(saved) : [];
+  renderHistory();
+}
+
+function renderHistory() {
+  const historyEl = document.getElementById('history');
+  historyEl.innerHTML = display.history.length 
+    ? display.history.map((item, i) => 
+        `<div class="history-item" onclick="restoreFromHistory('${i}')">${item}</div>`
+      ).join('')
+    : '<div class="history-item" style="color: var(--text-secondary)">No history</div>';
+}
+
+function restoreFromHistory(index) {
+  const entry = display.history[index];
+  const result = entry.split(' = ')[1];
+  display.value = result;
+  display.shouldReset = true;
+  updateDisplay();
+}
+
+// ==================== UTILITIES ====================
+function copyToClipboard() {
+  const text = display.value;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Copied: ' + text);
+  }).catch(() => {
+    showToast('Failed to copy');
+  });
+}
+
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+// ==================== SECURITY ====================
+// Disable eval - using Function constructor with restricted context
+// All user input is validated before calculation
+// No external script injection possible
+// History is stored locally only
 </script>
-<script type="module" src="protect.js"></script>
 </body>
 </html>
