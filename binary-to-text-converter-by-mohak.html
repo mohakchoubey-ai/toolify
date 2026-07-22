@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary & Text Studio | Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Menlo', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for a polished look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #52525b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #71717a; }
+    </style>
+</head>
+<body class="bg-zinc-50 dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-100 min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 transition-colors duration-300 antialiased selection:bg-zinc-300 dark:selection:bg-zinc-700">
+
+    <!-- Top Navigation -->
+    <header class="w-full max-w-3xl flex justify-between items-center mb-8 px-2 mt-2">
+        <a href="https://mohakdev1220.github.io/toolify/dashboard" class="group flex items-center gap-2 text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
+            <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Dashboard
+        </a>
+
+        <!-- Theme Toggle -->
+        <div class="flex bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-1 rounded-xl shadow-sm">
+            <button onclick="setTheme('light')" id="btnLight" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-zinc-500 hover:text-zinc-900">Light</button>
+            <button onclick="setTheme('dark')" id="btnDark" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-zinc-500 hover:text-white">Dark</button>
+        </div>
+    </header>
+
+    <!-- Main Application Card -->
+    <main class="max-w-3xl w-full bg-white dark:bg-zinc-900/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-2xl p-6 md:p-10 border border-zinc-200 dark:border-zinc-800/80 backdrop-blur-xl">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                Binary Studio
+            </h1>
+            <p class="text-zinc-500 dark:text-zinc-400 mt-2 text-sm">Professional grade text and binary encoding.</p>
+        </div>
+
+        <!-- Mode Toggle Tabs -->
+        <div class="flex bg-zinc-100 dark:bg-zinc-950 p-1.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 mb-8">
+            <button id="tabTextToBin" onclick="switchMode('textToBin')" 
+                class="flex-1 py-3 text-sm font-semibold rounded-xl transition-all shadow-sm bg-white dark:bg-zinc-100 text-zinc-900">
+                Text to Binary
+            </button>
+            <button id="tabBinToText" onclick="switchMode('binToText')" 
+                class="flex-1 py-3 text-sm font-semibold rounded-xl transition-all text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200">
+                Binary to Text
+            </button>
+        </div>
+
+        <!-- Converter Interface -->
+        <div class="space-y-6">
+            
+            <!-- Input Panel -->
+            <div class="bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 transition-colors">
+                <div class="flex justify-between items-center mb-3">
+                    <label id="inputLabel" class="text-xs font-semibold text-zinc-600 dark:text-zinc-300 uppercase tracking-widest">Input Text</label>
+                    <span id="inputCharCount" class="text-xs text-zinc-400">0 chars</span>
+                </div>
+                
+                <textarea id="mainInput" rows="4" 
+                    class="w-full bg-transparent text-zinc-900 dark:text-zinc-100 focus:outline-none resize-none placeholder-zinc-400 dark:placeholder-zinc-600 text-sm font-mono"
+                    placeholder="Enter your text here..." 
+                    oninput="processConversion()"></textarea>
+                
+                <div class="flex justify-between items-center mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800/60">
+                    <button onclick="clearInput()" class="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white font-medium transition-colors flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        Clear
+                    </button>
+                    <button onclick="pasteFromClipboard()" class="text-xs bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 transition-colors flex items-center gap-1.5 font-medium shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        Paste
+                    </button>
+                </div>
+            </div>
+
+            <!-- Visual Divider -->
+            <div class="flex justify-center -my-3 relative z-10">
+                <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 rounded-full text-zinc-400 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                </div>
+            </div>
+
+            <!-- Output Panel -->
+            <div class="bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 transition-colors relative group">
+                <div class="flex justify-between items-center mb-3">
+                    <label id="outputLabel" class="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-widest">Binary Output</label>
+                    <span id="errorMsg" class="text-xs text-red-500 font-medium hidden">Invalid Sequence</span>
+                </div>
+                
+                <textarea id="mainOutput" rows="4" readonly
+                    class="w-full bg-transparent text-zinc-900 dark:text-zinc-100 focus:outline-none resize-none placeholder-zinc-400 dark:placeholder-zinc-600 text-sm font-mono selection:bg-zinc-200 dark:selection:bg-zinc-700"
+                    placeholder="Result will appear here..."></textarea>
+                
+                <div class="flex justify-between items-center mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800/60">
+                    <span id="outputCharCount" class="text-xs text-zinc-400">0 chars</span>
+                    <button onclick="copyOutput()" id="copyBtn" class="text-xs bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-white text-white dark:text-zinc-900 font-semibold px-5 py-2 rounded-lg shadow-md transition-all flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        Copy
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Action -->
+        <div class="mt-8 flex justify-center">
+            <button onclick="loadSample()" class="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors underline underline-offset-4 decoration-zinc-300 dark:decoration-zinc-700">
+                Load sample data
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer Links -->
+    <footer class="w-full max-w-3xl mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400 px-2">
+        <div class="flex items-center gap-6">
+            <a href="https://mohakdev1220.github.io/toolify/feedback" class="hover:text-zinc-900 dark:hover:text-white transition-colors">Feedback</a>
+            <a href="https://mohakdev1220.github.io/websites_link/" class="hover:text-zinc-900 dark:hover:text-white transition-colors">other websites</a>
+        </div>
+        <span>&copy; 2026 Toolify Hub</span>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        let currentMode = 'textToBin';
+
+        // --- Initialization ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('preferred_theme') || 'dark';
+            setTheme(savedTheme);
+            processConversion(); // Init counters
+        });
+
+        // --- Theme Management ---
+        function setTheme(theme) {
+            const html = document.documentElement;
+            const btnLight = document.getElementById('btnLight');
+            const btnDark = document.getElementById('btnDark');
+
+            // Reset Button Styles
+            const inactiveClass = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white bg-transparent shadow-none";
+            btnLight.className = inactiveClass;
+            btnDark.className = inactiveClass;
+
+            if (theme === 'dark') {
+                html.classList.add('dark');
+                btnDark.className = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all bg-white text-zinc-900 shadow-sm";
+            } else {
+                html.classList.remove('dark');
+                btnLight.className = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all bg-zinc-900 text-white shadow-sm";
+            }
+            
+            localStorage.setItem('preferred_theme', theme);
+        }
+
+        // --- Mode Switching ---
+        function switchMode(mode) {
+            currentMode = mode;
+            const btnTextToBin = document.getElementById('tabTextToBin');
+            const btnBinToText = document.getElementById('tabBinToText');
+            const inputLabel = document.getElementById('inputLabel');
+            const outputLabel = document.getElementById('outputLabel');
+            const mainInput = document.getElementById('mainInput');
+            const mainOutput = document.getElementById('mainOutput');
+
+            // Clear state on switch
+            mainInput.value = '';
+            mainOutput.value = '';
+            document.getElementById('errorMsg').classList.add('hidden');
+            updateCounters();
+
+            // Active/Inactive styles for tabs
+            const activeClass = "flex-1 py-3 text-sm font-semibold rounded-xl transition-all shadow-sm bg-white dark:bg-zinc-100 text-zinc-900";
+            const inactiveClass = "flex-1 py-3 text-sm font-semibold rounded-xl transition-all text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 bg-transparent shadow-none";
+
+            if (mode === 'textToBin') {
+                btnTextToBin.className = activeClass;
+                btnBinToText.className = inactiveClass;
+                inputLabel.innerText = "Input Text";
+                outputLabel.innerText = "Binary Output";
+                mainInput.placeholder = "Enter your text here...";
+                mainOutput.placeholder = "Binary result will appear here...";
+            } else {
+                btnBinToText.className = activeClass;
+                btnTextToBin.className = inactiveClass;
+                inputLabel.innerText = "Binary Input";
+                outputLabel.innerText = "Text Output";
+                mainInput.placeholder = "Enter binary (e.g., 01001000)...";
+                mainOutput.placeholder = "Decoded text will appear here...";
+            }
+        }
+
+        // --- Core Conversion Logic ---
+        function processConversion() {
+            const val = document.getElementById('mainInput').value;
+            const outputField = document.getElementById('mainOutput');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            updateCounters();
+
+            if (!val) {
+                outputField.value = '';
+                errorMsg.classList.add('hidden');
+                return;
+            }
+
+            if (currentMode === 'textToBin') {
+                try {
+                    let binaryResult = Array.from(val, char => {
+                        return char.charCodeAt(0).toString(2).padStart(8, '0');
+                    }).join(' ');
+                    outputField.value = binaryResult;
+                    errorMsg.classList.add('hidden');
+                } catch (e) {
+                    outputField.value = '';
+                }
+            } else {
+                // Remove spaces and dashes for processing
+                let cleaned = val.replace(/[\s\-]+/g, '');
+                
+                // Validate binary format
+                if (!/^[01]*$/.test(cleaned) || cleaned.length % 8 !== 0) {
+                    errorMsg.classList.remove('hidden');
+                    outputField.value = '';
+                    return;
+                }
+
+                errorMsg.classList.add('hidden');
+
+                try {
+                    let textResult = '';
+                    for (let i = 0; i < cleaned.length; i += 8) {
+                        let byte = cleaned.substr(i, 8);
+                        textResult += String.fromCharCode(parseInt(byte, 2));
+                    }
+                    outputField.value = textResult;
+                } catch (e) {
+                    errorMsg.classList.remove('hidden');
+                    outputField.value = '';
+                }
+            }
+            updateCounters();
+        }
+
+        // --- Utility Functions ---
+        function updateCounters() {
+            const inVal = document.getElementById('mainInput').value;
+            const outVal = document.getElementById('mainOutput').value;
+            document.getElementById('inputCharCount').innerText = `${inVal.length} chars`;
+            document.getElementById('outputCharCount').innerText = `${outVal.length} chars`;
+        }
+
+        function clearInput() {
+            document.getElementById('mainInput').value = '';
+            document.getElementById('mainOutput').value = '';
+            document.getElementById('errorMsg').classList.add('hidden');
+            updateCounters();
+        }
+
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('mainInput').value = text;
+                processConversion();
+            } catch (err) {
+                console.error('Failed to read clipboard contents: ', err);
+                alert("Please allow clipboard access or use Ctrl+V / Cmd+V to paste.");
+            }
+        }
+
+        function copyOutput() {
+            const outputField = document.getElementById('mainOutput');
+            if (!outputField.value) return;
+            
+            outputField.select();
+            navigator.clipboard.writeText(outputField.value);
+            
+            const btn = document.getElementById('copyBtn');
+            const originalHTML = btn.innerHTML;
+            
+            // Show success state
+            btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied`;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+            }, 2000);
+        }
+
+        function loadSample() {
+            if (currentMode === 'textToBin') {
+                document.getElementById('mainInput').value = "Premium Toolify Hub";
+            } else {
+                document.getElementById('mainInput').value = "01010000 01110010 01100101 01101101 01101001 01110101 01101101";
+            }
+            processConversion();
+        }
+    </script>
+</body>
+</html>
