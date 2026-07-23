@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notepad Pro Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Include protect.js -->
+  <script src="protect.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8fafc;
+      --panel-bg: #ffffff;
+      --text-color: #0f172a;
+      --subtext-color: #64748b;
+      --border-color: #e2e8f0;
+      --button-bg: #f1f5f9;
+      --button-hover: #e2e8f0;
+      --accent-color: #3b82f6;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    }
+
+    body.dark-mode {
+      --bg-color: #0f172a;
+      --panel-bg: #1e293b;
+      --text-color: #f8fafc;
+      --subtext-color: #94a3b8;
+      --border-color: #334155;
+      --button-bg: #334155;
+      --button-hover: #475569;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* Header Container */
+    header {
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .group {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      border-right: 1px solid var(--border-color);
+      padding-right: 8px;
+    }
+
+    .group:last-child { border-right: none; }
+
+    button, select, input[type="color"], .btn-link {
+      background: var(--button-bg);
+      color: var(--text-color);
+      border: 1px solid transparent;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    button:hover, select:hover, .btn-link:hover { 
+      background: var(--button-hover); 
+    }
+
+    /* Highlight Back Button */
+    .btn-dashboard {
+      background-color: #2563eb;
+      color: #ffffff !important;
+    }
+    .btn-dashboard:hover {
+      background-color: #1d4ed8;
+    }
+
+    input[type="color"] {
+      padding: 2px 4px;
+      width: 32px;
+      height: 28px;
+    }
+
+    /* Workspace */
+    .workspace {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      overflow-y: auto;
+      padding: 30px 15px;
+    }
+
+    #editor {
+      width: 100%;
+      max-width: 850px;
+      min-height: 80vh;
+      background: var(--panel-bg);
+      padding: 50px 60px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+      outline: none;
+      line-height: 1.7;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    #editor:focus {
+      border-color: var(--accent-color);
+    }
+
+    /* Focus Mode */
+    body.focus-mode header, 
+    body.focus-mode .status-bar {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    
+    body.focus-mode header:hover {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      background: var(--panel-bg);
+      border-top: 1px solid var(--border-color);
+      padding: 8px 24px;
+      font-size: 12px;
+      color: var(--subtext-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge {
+      background: var(--button-bg);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+
+    @media print {
+      header, .status-bar { display: none !important; }
+      body { background: white; }
+      #editor { box-shadow: none; border: none; padding: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header>
+    <div class="toolbar">
+      <!-- Dashboard Navigation -->
+      <div class="group">
+        <a href="https://mohakdev1220.github.io/toolify/dashboard" class="btn-link btn-dashboard">
+          ⬅ Back to Dashboard
+        </a>
+      </div>
+
+      <!-- File Operations -->
+      <div class="group">
+        <button onclick="newDoc()" title="New Document">📄 New</button>
+        <button onclick="document.getElementById('fileInput').click()" title="Open File">📂 Open</button>
+        <input type="file" id="fileInput" hidden accept=".txt,.html,.md" onchange="loadFile(event)">
+        <button onclick="handleProtectedSave('txt')">💾 .txt</button>
+        <button onclick="handleProtectedSave('html')">🌐 .html</button>
+        <button onclick="handleProtectedSave('pdf')">🖨️ PDF / Print</button>
+      </div>
+
+      <!-- Formatting Commands -->
+      <div class="group">
+        <select onchange="execCmd('fontName', this.value)">
+          <option value="Inter">Sans-Serif</option>
+          <option value="Georgia">Serif</option>
+          <option value="JetBrains Mono">Monospace</option>
+        </select>
+        <select onchange="execCmd('formatBlock', this.value)">
+          <option value="P">Paragraph</option>
+          <option value="H1">Heading 1</option>
+          <option value="H2">Heading 2</option>
+          <option value="H3">Heading 3</option>
+        </select>
+      </div>
+
+      <!-- Inline Styles -->
+      <div class="group">
+        <button onclick="execCmd('bold')"><b>B</b></button>
+        <button onclick="execCmd('italic')"><i>I</i></button>
+        <button onclick="execCmd('underline')"><u>U</u></button>
+        <button onclick="execCmd('strikeThrough')"><s>S</s></button>
+      </div>
+
+      <!-- Colors -->
+      <div class="group">
+        <input type="color" title="Text Color" onchange="execCmd('foreColor', this.value)">
+        <input type="color" value="#ffffff" title="Highlight Color" onchange="execCmd('hiliteColor', this.value)">
+      </div>
+    </div>
+
+    <!-- View & Modes -->
+    <div class="toolbar">
+      <button onclick="toggleFocusMode()">🧘 Focus</button>
+      <button onclick="toggleTheme()">🌙 Theme</button>
+    </div>
+  </header>
+
+  <!-- Writing Area -->
+  <div class="workspace">
+    <div id="editor" contenteditable="true" spellcheck="true" placeholder="Start typing here..."></div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div>
+      Words: <span id="wordCount" class="badge">0</span> &nbsp;|&nbsp; 
+      Chars: <span id="charCount" class="badge">0</span> &nbsp;|&nbsp; 
+      Read Time: <span id="readTime" class="badge">0 min</span>
+    </div>
+    <div id="autoSaveState">Auto-saved</div>
+  </div>
+
+  <script>
+    const editor = document.getElementById('editor');
+
+    // Rich Formatting Handler
+    function execCmd(command, value = null) {
+      document.execCommand(command, false, value);
+      editor.focus();
+      updateStats();
+    }
+
+    // Protection Handler for File Exports
+    function handleProtectedSave(type) {
+      // Execute function inside protect.js if defined
+      if (typeof triggerProtection === 'function') {
+        const allowExport = triggerProtection(type);
+        if (allowExport === false) return; // Halt save if protect.js refuses permission
+      }
+
+      // Proceed with file action based on type
+      if (type === 'txt') {
+        saveTxt();
+      } else if (type === 'html') {
+        saveHtml();
+      } else if (type === 'pdf') {
+        window.print();
+      }
+    }
+
+    // Real-time Stats & Local Storage
+    function updateStats() {
+      const text = editor.innerText.trim();
+      const words = text ? text.split(/\s+/).filter(w => w.length > 0).length : 0;
+      
+      document.getElementById('wordCount').textContent = words;
+      document.getElementById('charCount').textContent = text.length;
+      
+      const readingTime = Math.ceil(words / 200);
+      document.getElementById('readTime').textContent = `${readingTime} min`;
+
+      localStorage.setItem('notepad_pro_content', editor.innerHTML);
+    }
+
+    editor.addEventListener('input', updateStats);
+
+    window.addEventListener('load', () => {
+      const saved = localStorage.getItem('notepad_pro_content');
+      if (saved) {
+        editor.innerHTML = saved;
+      } else {
+        editor.innerHTML = '<h2>Welcome! 🚀</h2><p>Start editing or type your notes here...</p>';
+      }
+      updateStats();
+    });
+
+    // Save Functions
+    function saveTxt() {
+      const blob = new Blob([editor.innerText], { type: "text/plain;charset=utf-8" });
+      download(blob, "document.txt");
+    }
+
+    function saveHtml() {
+      const blob = new Blob([editor.innerHTML], { type: "text/html;charset=utf-8" });
+      download(blob, "document.html");
+    }
+
+    function download(blob, name) {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      a.click();
+    }
+
+    function newDoc() {
+      if (confirm("Create a new document?")) {
+        editor.innerHTML = "";
+        updateStats();
+      }
+    }
+
+    function loadFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (file.name.endsWith('.html')) {
+          editor.innerHTML = e.target.result;
+        } else {
+          editor.innerText = e.target.result;
+        }
+        updateStats();
+      };
+      reader.readAsText(file);
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    function toggleFocusMode() {
+      document.body.classList.toggle('focus-mode');
+    }
+  </script>
+</body>
+</html>
