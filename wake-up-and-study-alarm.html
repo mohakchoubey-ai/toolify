@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyGuard AI - Drowsiness & Sleep Detector</title>
+
+  <!-- MediaPipe Face Mesh & Camera Utils -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #0a0d18;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+    }
+
+    #webcam { display: none; }
+    canvas { display: block; width: 100vw; height: 100vh; object-fit: cover; }
+
+    /* Glassmorphism Dashboard */
+    #hud {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .hud-card {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      padding: 16px 24px;
+      border-radius: 16px;
+      pointer-events: auto;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #38bdf8;
+      text-transform: uppercase;
+    }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 13px;
+      margin-top: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+      font-weight: bold;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+    .status-badge.drowsy {
+      background: rgba(239, 68, 68, 0.25);
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.5);
+      animation: pulse 0.8s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 0.6; }
+      to { opacity: 1; }
+    }
+
+    .stats-group {
+      display: flex;
+      gap: 20px;
+      text-align: right;
+    }
+
+    .stat-box { display: flex; flex-direction: column; }
+    .stat-label { font-size: 11px; text-transform: uppercase; color: #94a3b8; }
+    .stat-val { font-size: 22px; font-weight: bold; color: #f8fafc; }
+
+    /* Controls Drawer */
+    #controls-panel {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 5;
+    }
+
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    input[type="range"] {
+      accent-color: #38bdf8;
+      cursor: pointer;
+    }
+
+    .file-btn {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .file-btn:hover { background: rgba(56, 189, 248, 0.3); }
+
+    /* Fullscreen Alarm Red Flash Overlay */
+    #alarm-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(220, 38, 38, 0.45);
+      border: 16px solid #ef4444;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 8;
+      pointer-events: none;
+    }
+
+    #alarm-text {
+      font-size: 64px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 0 30px #ef4444;
+      letter-spacing: 4px;
+      animation: blink 0.4s infinite alternate;
+    }
+
+    @keyframes blink {
+      from { opacity: 0.2; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1.02); }
+    }
+
+    /* Start Overlay */
+    #start-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 13, 24, 0.96);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      z-index: 10;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 14px 40px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 45px rgba(56, 189, 248, 0.8);
+    }
+  </style>
+</head>
+<body>
+
+  <video id="webcam" playsinline></video>
+  <canvas id="mainCanvas"></canvas>
+
+  <!-- Audio Element for wakeup.mp3 -->
+  <audio id="wakeup-audio" src="wakeup.mp3" preload="auto" loop></audio>
+
+  <!-- Flash Screen when sleeping -->
+  <div id="alarm-overlay">
+    <div id="alarm-text">⚠️ WAKE UP & STUDY! ⚠️</div>
+  </div>
+
+  <!-- HUD Dashboard -->
+  <div id="hud">
+    <div class="hud-card">
+      <div class="title">STUDYGUARD AI</div>
+      <div id="status-badge" class="status-badge">AWAKE & MONITORING</div>
+    </div>
+
+    <div class="hud-card stats-group">
+      <div class="stat-box">
+        <span class="stat-label">EYES CLOSED</span>
+        <span id="timer-val" class="stat-val">0.0s</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">DROWSY ALERTS</span>
+        <span id="alerts-val" class="stat-val">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div id="controls-panel" class="hud-card">
+    <div class="control-item">
+      <label for="threshold-slider">Trigger Threshold:</label>
+      <input type="range" id="threshold-slider" min="1.0" max="5.0" step="0.5" value="2.5">
+      <span id="threshold-val">2.5s</span>
+    </div>
+
+    <div class="control-item">
+      <label class="file-btn" for="audio-picker">📁 Change Audio File</label>
+      <input type="file" id="audio-picker" accept="audio/*" style="display: none;">
+      <span id="audio-name-display" style="font-size: 11px; color: #94a3b8;">Default: wakeup.mp3</span>
+    </div>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="start-overlay">
+    <h1 style="font-size: 38px; color: #38bdf8; text-shadow: 0 0 20px rgba(56,189,248,0.4);">STUDYGUARD AI</h1>
+    <p style="color: #94a3b8; max-width: 480px; text-align: center; line-height: 1.6;">
+      Monitors your eye closure in real-time. If you fall asleep while studying, it immediately alerts you with <b>wakeup.mp3</b>.
+    </p>
+    <button id="start-btn" class="btn">START STUDY SESSION</button>
+  </div>
+
+  <script>
+    // --- 1. AUDIO & ALARM CONTROLLER ---
+    const audioElement = document.getElementById('wakeup-audio');
+    const audioPicker = document.getElementById('audio-picker');
+    const audioNameDisplay = document.getElementById('audio-name-display');
+
+    let audioContext = null;
+    let fallbackOscillator = null;
+    let isAlarmPlaying = false;
+
+    // Handle Custom MP3 Upload
+    audioPicker.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        audioElement.src = URL.createObjectURL(file);
+        audioNameDisplay.textContent = `Custom: ${file.name}`;
+      }
+    });
+
+    function initAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+    }
+
+    // Play wakeup.mp3 with Synthetic Beep Fallback
+    function triggerAlarm() {
+      if (isAlarmPlaying) return;
+      isAlarmPlaying = true;
+
+      // Attempt to play wakeup.mp3
+      audioElement.play().catch(err => {
+        console.warn("wakeup.mp3 not found or blocked, activating Web Audio synthesizer fallback:", err);
+        playFallbackSynthAlarm();
+      });
+
+      document.getElementById('alarm-overlay').style.display = 'flex';
+    }
+
+    function stopAlarm() {
+      if (!isAlarmPlaying) return;
+      isAlarmPlaying = false;
+
+      audioElement.pause();
+      audioElement.currentTime = 0;
+
+      if (fallbackOscillator) {
+        try { fallbackOscillator.stop(); } catch(e) {}
+        fallbackOscillator = null;
+      }
+
+      document.getElementById('alarm-overlay').style.display = 'none';
+    }
+
+    // Backup sound generator if wakeup.mp3 is missing
+    function playFallbackSynthAlarm() {
+      if (!audioContext) return;
+      fallbackOscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+
+      fallbackOscillator.type = 'sawtooth';
+      fallbackOscillator.frequency.setValueAtTime(880, audioContext.currentTime); // High pitch siren
+      gain.gain.setValueAtTime(0.5, audioContext.currentTime);
+
+      fallbackOscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      fallbackOscillator.start();
+    }
+
+    // --- 2. CANVAS & UI STATE ---
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    const video = document.getElementById('webcam');
+
+    const statusBadge = document.getElementById('status-badge');
+    const timerValEl = document.getElementById('timer-val');
+    const alertsValEl = document.getElementById('alerts-val');
+    const thresholdSlider = document.getElementById('threshold-slider');
+    const thresholdValEl = document.getElementById('threshold-val');
+
+    let eyesClosedStartTime = null;
+    let alarmTriggeredCount = 0;
+    let sleepThresholdSeconds = parseFloat(thresholdSlider.value);
+
+    thresholdSlider.addEventListener('input', (e) => {
+      sleepThresholdSeconds = parseFloat(e.target.value);
+      thresholdValEl.textContent = `${sleepThresholdSeconds.toFixed(1)}s`;
+    });
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // --- 3. EYE ASPECT RATIO (EAR) CALCULATION ---
+    function calculateEAR(landmarks, topIdx, bottomIdx, outerIdx, innerIdx) {
+      const top = landmarks[topIdx];
+      const bottom = landmarks[bottomIdx];
+      const outer = landmarks[outerIdx];
+      const inner = landmarks[innerIdx];
+
+      const verticalDist = Math.hypot((top.x - bottom.x) * canvas.width, (top.y - bottom.y) * canvas.height);
+      const horizontalDist = Math.hypot((outer.x - inner.x) * canvas.width, (outer.y - inner.y) * canvas.height);
+
+      return verticalDist / (horizontalDist + 1e-6);
+    }
+
+    // --- 4. RENDER LOOP & SLEEP DETECTION LOGIC ---
+    let faceLandmarks = null;
+
+    function renderLoop() {
+      // Clear & Draw Mirrored Video Feed
+      ctx.fillStyle = '#0a0d18';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (video.videoWidth > 0) {
+        ctx.save();
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+        ctx.restore();
+      }
+
+      if (faceLandmarks) {
+        // Left Eye EAR (Top: 159, Bottom: 145, Outer: 33, Inner: 133)
+        const leftEAR = calculateEAR(faceLandmarks, 159, 145, 33, 133);
+        // Right Eye EAR (Top: 386, Bottom: 374, Outer: 263, Inner: 362)
+        const rightEAR = calculateEAR(faceLandmarks, 386, 374, 263, 362);
+
+        const avgEAR = (leftEAR + rightEAR) / 2.0;
+        const EYES_CLOSED_THRESHOLD = 0.16; // EAR < 0.16 indicates closed eyes
+
+        drawEyeContours(faceLandmarks, avgEAR < EYES_CLOSED_THRESHOLD);
+
+        if (avgEAR < EYES_CLOSED_THRESHOLD) {
+          // Eyes are closed
+          if (!eyesClosedStartTime) {
+            eyesClosedStartTime = Date.now();
+          }
+
+          const elapsedSeconds = (Date.now() - eyesClosedStartTime) / 1000.0;
+          timerValEl.textContent = `${elapsedSeconds.toFixed(1)}s`;
+
+          if (elapsedSeconds >= sleepThresholdSeconds) {
+            if (!isAlarmPlaying) {
+              alarmTriggeredCount++;
+              alertsValEl.textContent = alarmTriggeredCount;
+            }
+            triggerAlarm();
+            statusBadge.textContent = '⚠️ SLEEP DETECTED!';
+            statusBadge.className = 'status-badge drowsy';
+          } else {
+            statusBadge.textContent = 'EYES CLOSING...';
+            statusBadge.className = 'status-badge';
+          }
+        } else {
+          // Eyes are open -> Reset
+          eyesClosedStartTime = null;
+          timerValEl.textContent = '0.0s';
+          stopAlarm();
+          statusBadge.textContent = 'AWAKE & MONITORING';
+          statusBadge.className = 'status-badge';
+        }
+      } else {
+        // No face detected
+        timerValEl.textContent = '0.0s';
+        stopAlarm();
+        statusBadge.textContent = 'NO FACE IN CAMERA';
+        statusBadge.className = 'status-badge drowsy';
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    // --- 5. DRAW VISUAL EYE INDICATORS ---
+    function drawEyeContours(landmarks, isClosed) {
+      const eyeColor = isClosed ? '#ef4444' : '#38bdf8';
+
+      [ [33, 159, 133, 145], [263, 386, 362, 374] ].forEach(eye => {
+        ctx.strokeStyle = eyeColor;
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = eyeColor;
+
+        ctx.beginPath();
+        eye.forEach((idx, i) => {
+          const pt = landmarks[idx];
+          const x = (1 - pt.x) * canvas.width;
+          const y = pt.y * canvas.height;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.closePath();
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      });
+    }
+
+    // --- 6. INITIALIZE MEDIAPIPE FACE MESH ---
+    const faceMesh = new FaceMesh({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+    });
+
+    faceMesh.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.6,
+      minTrackingConfidence: 0.6
+    });
+
+    faceMesh.onResults((results) => {
+      if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+        faceLandmarks = results.multiFaceLandmarks[0];
+      } else {
+        faceLandmarks = null;
+      }
+    });
+
+    // Start App & Camera
+    document.getElementById('start-btn').addEventListener('click', () => {
+      initAudioContext();
+      document.getElementById('start-overlay').style.display = 'none';
+
+      const camera = new Camera(video, {
+        onFrame: async () => {
+          await faceMesh.send({ image: video });
+        },
+        width: 640,
+        height: 480
+      });
+
+      camera.start();
+      renderLoop();
+    });
+  </script>
+</body>
+</html>
