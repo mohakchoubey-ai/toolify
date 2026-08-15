@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CheckMate — Play Chess Online</title>
+<meta name="description" content="Play chess online with friends, challenge the AI, solve puzzles, and improve your game on CheckMate — a premium chess platform."/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<style>
+/* HERO */
+.hero{min-height:calc(100vh - 60px);display:flex;align-items:center;position:relative;overflow:hidden;padding:60px 0}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 60% 40%,rgba(201,162,39,.07) 0%,transparent 70%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:1200px;margin:0 auto;padding:0 24px;width:100%}
+.hero-eyebrow{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:16px}
+.hero-title{font-size:clamp(2.4rem,5vw,4rem);font-weight:900;line-height:1.08;letter-spacing:-1.5px;margin-bottom:20px}
+.hero-title em{font-style:normal;color:var(--gold)}
+.hero-sub{font-size:1.05rem;color:var(--t-3);margin-bottom:36px;max-width:440px;line-height:1.7}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:24px;margin-top:40px;padding-top:32px;border-top:1px solid var(--border-1)}
+.hero-stat-val{font-size:1.6rem;font-weight:800;color:var(--t-1);font-family:var(--font-mono);line-height:1}
+.hero-stat-lbl{font-size:.75rem;color:var(--t-4);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* Mini chess board preview */
+.hero-board{width:100%;max-width:440px;aspect-ratio:1;display:grid;grid-template-columns:repeat(8,1fr);border-radius:8px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.8);margin:0 auto;opacity:.92}
+.hero-sq{display:flex;align-items:center;justify-content:center;font-size:clamp(1.4rem,4vw,2.4rem)}
+.hero-sq.l{background:#f0d9b5;color:#312e2b}.hero-sq.d{background:#b58863;color:#f0d9b5}
+.hero-sq.hl{background:#cdd26a!important}
+
+/* WHY section */
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.why-card{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-lg);padding:28px;transition:all var(--t-base)}
+.why-card:hover{border-color:var(--border-2);transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.why-icon{font-size:2rem;margin-bottom:14px}
+.why-card h3{margin-bottom:8px;font-size:1.05rem}
+.why-card p{font-size:.88rem;color:var(--t-3);line-height:1.7}
+
+/* PLAY MODES section */
+.modes-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.mode-card{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-xl);padding:28px 24px;display:flex;align-items:flex-start;gap:16px;cursor:pointer;text-decoration:none;transition:all var(--t-base)}
+.mode-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.mode-card-icon{font-size:2rem;flex-shrink:0;line-height:1}
+.mode-card h3{font-size:1rem;color:var(--t-1);margin-bottom:4px}
+.mode-card p{font-size:.84rem;color:var(--t-3)}
+
+/* SECTION LABELS */
+.section-label{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:12px}
+.section-title{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:800;letter-spacing:-.5px;margin-bottom:16px}
+.section-sub{color:var(--t-3);font-size:.95rem;max-width:520px;line-height:1.7}
+
+/* CTA */
+.cta-section{background:linear-gradient(135deg,var(--bg-2) 0%,var(--bg-3) 100%);border:1px solid var(--border-1);border-radius:var(--r-xl);padding:60px 48px;text-align:center;margin:40px 0}
+.cta-section h2{font-size:clamp(1.8rem,4vw,2.8rem);margin-bottom:12px}
+.cta-section p{color:var(--t-3);margin-bottom:28px}
+
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:40px;text-align:center}.hero-sub{margin:0 auto 36px}.hero-actions{justify-content:center}.hero-stats{justify-content:center}.why-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.modes-grid{grid-template-columns:1fr}.cta-section{padding:40px 20px}}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid">
+    <div class="hero-content">
+      <div class="hero-eyebrow">♟ Premium Chess Platform</div>
+      <h1 class="hero-title">Think Deeper.<br>Play <em>Bolder.</em></h1>
+      <p class="hero-sub">A serious chess platform for players who want more — smarter AI, real multiplayer, and puzzles that actually make you better.</p>
+      <div class="hero-actions">
+        <a href="play.html" class="btn btn-primary btn-lg">▶ Play Now</a>
+        <a href="online.html" class="btn btn-outline btn-lg">Play with Friend</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-val" id="stat-players">—</div>
+          <div class="hero-stat-lbl">Players Online</div>
+        </div>
+        <div>
+          <div class="hero-stat-val" id="stat-games">—</div>
+          <div class="hero-stat-lbl">Games Played</div>
+        </div>
+        <div>
+          <div class="hero-stat-val">4</div>
+          <div class="hero-stat-lbl">AI Levels</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center">
+      <div class="hero-board" id="hero-board"></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section class="section" style="background:var(--bg-0)">
+  <div class="container">
+    <div class="text-center mb-24">
+      <div class="section-label">Why CheckMate</div>
+      <h2 class="section-title">Built for Serious Players</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card"><div class="why-icon">🤖</div><h3>Challenging AI</h3><p>Four difficulty levels from Beginner to Master — powered by a real minimax engine with alpha-beta pruning and piece-square tables.</p></div>
+      <div class="why-card"><div class="why-icon">🌐</div><h3>Real Multiplayer</h3><p>Play with friends anywhere using room codes. Google sign-in keeps your account permanent across all sessions.</p></div>
+      <div class="why-card"><div class="why-icon">⚡</div><h3>Full Chess Rules</h3><p>Castling, en passant, promotion, stalemate, 50-move rule awareness — every rule is enforced properly.</p></div>
+      <div class="why-card"><div class="why-icon">🧩</div><h3>Tactical Puzzles</h3><p>Sharpen your pattern recognition with curated mate-in-1, mate-in-2, fork, pin, and skewer puzzles.</p></div>
+      <div class="why-card"><div class="why-icon">📊</div><h3>Game Analysis</h3><p>Import PGN, replay your games move by move, and understand where you went wrong with the analysis board.</p></div>
+      <div class="why-card"><div class="why-icon">🏆</div><h3>Leaderboards</h3><p>Track your progress on global leaderboards. Compete, improve, and climb the ranks.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAY MODES -->
+<section class="section">
+  <div class="container">
+    <div class="mb-24">
+      <div class="section-label">Game Modes</div>
+      <h2 class="section-title">Choose Your Battle</h2>
+    </div>
+    <div class="modes-grid">
+      <a href="online.html" class="mode-card"><div class="mode-card-icon">🌐</div><div><h3>Play with Friend Online</h3><p>Create a room, share the code, and play in real time. Requires Google sign-in.</p></div></a>
+      <a href="computer.html" class="mode-card"><div class="mode-card-icon">🤖</div><div><h3>Play vs Computer</h3><p>Test your skills against AI from Easy to Master difficulty.</p></div></a>
+      <a href="play.html#pvp" class="mode-card"><div class="mode-card-icon">🤝</div><div><h3>Pass & Play</h3><p>Two players, one device. Hand the screen back and forth.</p></div></a>
+      <a href="puzzles.html" class="mode-card"><div class="mode-card-icon">🧩</div><div><h3>Solve Puzzles</h3><p>Improve tactics with daily puzzles across multiple categories.</p></div></a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section">
+  <div class="container">
+    <div class="cta-section">
+      <h2>Ready to Play?</h2>
+      <p>Jump into a game instantly — no account needed to start.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="play.html" class="btn btn-primary btn-xl">Start Playing</a>
+        <a href="signup.html" class="btn btn-outline btn-xl">Create Account</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo" style="font-size:1.1rem">♟ Check<span>Mate</span></a>
+        <p>A premium chess platform for players who take the game seriously.</p>
+      </div>
+      <div class="footer-col"><h4>Play</h4><ul><li><a href="play.html">Play Now</a></li><li><a href="online.html">Play Online</a></li><li><a href="computer.html">vs Computer</a></li><li><a href="puzzles.html">Puzzles</a></li></ul></div>
+      <div class="footer-col"><h4>Learn</h4><ul><li><a href="analysis.html">Analysis</a></li><li><a href="games.html">Games</a></li><li><a href="leaderboard.html">Leaderboard</a></li><li><a href="players.html">Players</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a href="profile.html">Profile</a></li><li><a href="settings.html">Settings</a></li><li><a href="login.html">Sign In</a></li><li><a href="signup.html">Sign Up</a></li></ul></div>
+      <div class="footer-col"><h4>Info</h4><ul><li><a href="about.html">About</a></li><li><a href="faq.html">FAQ</a></li><li><a href="contact.html">Contact</a></li><li><a href="privacy.html">Privacy</a></li><li><a href="terms.html">Terms</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© 2025 CheckMate Chess. All rights reserved.</span><span>Made with ♟ for chess lovers</span></div>
+  </div>
+</footer>
+
+<script>
+// Hero board - show starting position
+const HERO_POS = [
+  ['r','n','b','q','k','b','n','r'],
+  ['p','p','p','','','p','p','p'],
+  ['','','','','','','',''],
+  ['','','','p','p','','',''],
+  ['','','','P','P','','',''],
+  ['','','','','','N','',''],
+  ['P','P','P','','','P','P','P'],
+  ['R','N','B','Q','K','B','','R']
+];
+const SYM={'P':'♙','R':'♖','N':'♘','B':'♗','Q':'♕','K':'♔','p':'♟','r':'♜','n':'♞','b':'♝','q':'♛','k':'♚'};
+const HLS=[[3,3],[3,4],[4,3],[4,4],[5,5]];
+const hb=document.getElementById('hero-board');
+if(hb){
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+    const sq=document.createElement('div');
+    const isL=(r+c)%2===0;
+    const isHL=HLS.some(([hr,hc])=>hr===r&&hc===c);
+    sq.className=`hero-sq ${isHL?'hl':(isL?'l':'d')}`;
+    const p=HERO_POS[r][c];
+    if(p) sq.textContent=SYM[p];
+    hb.appendChild(sq);
+  }
+}
+
+// Load stats from Firebase
+function onAuthReady(user) {}
+DB.ref('stats').on('value', snap => {
+  const d = snap.val() || {};
+  document.getElementById('stat-players').textContent = (d.onlinePlayers||0).toLocaleString();
+  document.getElementById('stat-games').textContent = (d.totalGames||0).toLocaleString();
+});
+// Increment online count
+if(AUTH) AUTH.onAuthStateChanged(user=>{
+  if(user){
+    const ref=DB.ref('stats/onlinePlayers');
+    ref.transaction(v=>(v||0)+1);
+    window.addEventListener('beforeunload',()=>ref.transaction(v=>Math.max(0,(v||1)-1)));
+  }
+});
+</script>
+</body>
+</html>
