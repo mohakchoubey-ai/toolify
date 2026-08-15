@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Players — CheckMate</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<style>
+.players-wrap{max-width:900px;margin:0 auto;padding:30px 20px}
+.search-bar{display:flex;gap:10px;margin-bottom:24px}
+.player-card2{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-md);padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:10px;transition:all var(--t-base)}
+.player-card2:hover{border-color:var(--border-2);transform:translateX(2px)}
+.p-av2{width:44px;height:44px;border-radius:50%;background:var(--bg-4);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;color:var(--gold);overflow:hidden;flex-shrink:0;border:2px solid var(--border-2)}
+.p-av2 img{width:100%;height:100%;object-fit:cover}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+
+<div class="players-wrap">
+  <div class="page-header"><h1>Players</h1><p>Browse all registered players</p></div>
+  <div class="search-bar">
+    <input id="search-input" class="form-input" placeholder="Search by name..." oninput="filterPlayers(this.value)"/>
+  </div>
+  <div id="players-list"></div>
+</div>
+
+<script>
+let allPlayers=[];
+function onAuthReady(){}
+AUTH.onAuthStateChanged(()=>{
+  DB.ref('users').orderByChild('rating').limitToLast(100).once('value').then(snap=>{
+    allPlayers=[];
+    snap.forEach(c=>{ const d=c.val(); if(d.displayName) allPlayers.push(d); });
+    allPlayers.sort((a,b)=>(b.rating||0)-(a.rating||0));
+    renderPlayers(allPlayers);
+  });
+});
+function filterPlayers(q){
+  const filtered=q?allPlayers.filter(p=>p.displayName.toLowerCase().includes(q.toLowerCase())):allPlayers;
+  renderPlayers(filtered);
+}
+function renderPlayers(players){
+  const el=document.getElementById('players-list');
+  el.innerHTML='';
+  if(!players.length){el.innerHTML='<p style="color:var(--t-4);text-align:center;padding:40px">No players found.</p>';return;}
+  players.forEach(p=>{
+    const div=document.createElement('div');
+    div.className='player-card2';
+    const wr=p.gamesPlayed>0?Math.round(((p.wins||0)/p.gamesPlayed)*100):0;
+    div.innerHTML=`
+      <div class="p-av2">${p.photoURL?`<img src="${p.photoURL}" alt="">`:(p.displayName||'?').slice(0,2).toUpperCase()}</div>
+      <div style="flex:1">
+        <div style="font-weight:700;color:var(--t-1)">${p.displayName}</div>
+        <div style="font-size:.78rem;color:var(--t-4)">Joined ${p.joinedAt?fmtDate(p.joinedAt):'—'}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:var(--font-mono);font-weight:700;color:var(--gold)">${p.rating||1200}</div>
+        <div style="font-size:.75rem;color:var(--t-4)">${p.gamesPlayed||0} games · ${wr}% wins</div>
+      </div>`;
+    el.appendChild(div);
+  });
+}
+</script>
+</body></html>

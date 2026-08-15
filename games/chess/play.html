@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Play Chess — CheckMate</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<link rel="stylesheet" href="css/chess.css"/>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/chess-engine.js"></script>
+<script src="js/chess-game.js"></script>
+
+<div class="game-layout">
+  <div class="board-wrapper">
+    <div class="player-card" id="black-player-card">
+      <div class="player-detail">
+        <div class="p-avatar">♚</div>
+        <div class="player-meta">
+          <div class="player-name" id="black-label">Black</div>
+          <div class="captured-row" id="captured-by-black"></div>
+          <div id="ai-thinking-badge" class="thinking-badge">Thinking<span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></div>
+        </div>
+      </div>
+      <div class="clock-badge" id="black-clock">05:00</div>
+    </div>
+    <div id="board" class="chessboard">
+      <div id="promo-overlay" class="board-overlay"><h3>Promote Pawn</h3><div id="promo-row" class="promo-row"></div></div>
+      <div id="gameover-overlay" class="board-overlay">
+        <h3 id="gameover-title">Game Over</h3><p id="gameover-sub"></p>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button class="btn btn-primary" onclick="newGame()">New Game</button>
+          <button class="btn btn-outline" onclick="game.undoMove()">Undo</button>
+        </div>
+      </div>
+    </div>
+    <div class="player-card" id="white-player-card">
+      <div class="player-detail">
+        <div class="p-avatar">♔</div>
+        <div class="player-meta">
+          <div class="player-name" id="white-label">White (You)</div>
+          <div class="captured-row" id="captured-by-white"></div>
+        </div>
+      </div>
+      <div class="clock-badge active" id="white-clock">05:00</div>
+    </div>
+  </div>
+
+  <div class="game-sidebar">
+    <div class="sidebar-box">
+      <h3>Game Settings</h3>
+      <div class="form-group">
+        <label class="form-label">Mode</label>
+        <select id="mode-sel" class="form-select" onchange="onModeChange()">
+          <option value="ai">vs Computer</option>
+          <option value="pvp">Pass & Play</option>
+        </select>
+      </div>
+      <div class="form-group" id="diff-group">
+        <label class="form-label">Difficulty</label>
+        <select id="diff-sel" class="form-select">
+          <option value="1">Beginner</option>
+          <option value="2" selected>Easy</option>
+          <option value="3">Medium</option>
+          <option value="4">Hard</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Time Control</label>
+        <select id="time-sel" class="form-select">
+          <option value="60">1 min</option>
+          <option value="180">3 min</option>
+          <option value="300" selected>5 min</option>
+          <option value="600">10 min</option>
+          <option value="0">No Clock</option>
+        </select>
+      </div>
+      <div class="form-group" id="color-group">
+        <label class="form-label">Play As</label>
+        <select id="color-sel" class="form-select">
+          <option value="white">White</option>
+          <option value="black">Black</option>
+          <option value="random">Random</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="newGame()">▶ New Game</button>
+      <button class="btn btn-outline btn-block" onclick="game.undoMove()">↩ Undo Move</button>
+    </div>
+    <div class="sidebar-box">
+      <div id="status-banner" class="status-banner">White to move</div>
+    </div>
+    <div class="sidebar-box">
+      <h3>Move History</h3>
+      <div class="move-list-wrap"><div id="move-list" class="move-list"></div></div>
+    </div>
+    <div class="sidebar-box">
+      <a href="online.html" class="btn btn-green btn-block">🌐 Play with Friend Online</a>
+    </div>
+  </div>
+</div>
+
+<script>
+let game;
+function getOpts() {
+  const mode = document.getElementById('mode-sel').value;
+  const diff = parseInt(document.getElementById('diff-sel').value);
+  const tc   = parseInt(document.getElementById('time-sel').value);
+  let color = document.getElementById('color-sel').value;
+  if (color==='random') color = Math.random()<.5?'white':'black';
+  return { mode, diff, tc, color };
+}
+function newGame() {
+  if (game) game.destroy();
+  const {mode,diff,tc,color} = getOpts();
+  document.getElementById('black-label').textContent = mode==='ai' ? 'Computer (Black)' : 'Black';
+  document.getElementById('white-label').textContent = mode==='ai' ? `You (${color==='white'?'White':'Black'})` : 'White';
+  game = new ChessGame({
+    boardEl: document.getElementById('board'),
+    mode, difficulty: diff, timeControl: tc, playerColor: color
+  });
+  if (mode==='ai' && color==='black') {
+    // AI plays first as white
+    game.playerColor='black';
+    setTimeout(()=>{
+      const lm=getAllLegalMoves(true,game.board,game.enPassant,game.castleRights);
+      const best=getBestMove(game.board,diff,lm);
+      if(best){game.lastMoveCoords={fr:best.from[0],fc:best.from[1],tr:best.to[0],tc:best.to[1]};game.commitMove(best.from[0],best.from[1],best.to[0],best.to[1],best.special,best.special==='promotion'?'q':null);}
+    },600);
+  }
+}
+function onModeChange() {
+  const m = document.getElementById('mode-sel').value;
+  document.getElementById('diff-group').style.display = m==='ai'?'flex':'none';
+  document.getElementById('color-group').style.display = m==='ai'?'flex':'none';
+  newGame();
+}
+function onAuthReady(){}
+window.onload = newGame;
+</script>
+</body></html>

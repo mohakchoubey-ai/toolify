@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Game History — CheckMate</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<style>
+.games-wrap{max-width:900px;margin:0 auto;padding:30px 20px}
+.game-card{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-md);padding:16px 20px;display:flex;align-items:center;gap:16px;margin-bottom:10px;transition:all var(--t-base)}
+.game-card:hover{border-color:var(--border-2);transform:translateX(3px)}
+.result-pill{width:48px;height:32px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:800;flex-shrink:0}
+.rw{background:rgba(88,161,74,.2);color:var(--green-light)}.rl{background:rgba(217,64,64,.2);color:#ef6666}.rd{background:rgba(201,162,39,.15);color:var(--gold)}
+.game-info{flex:1}.game-opp{font-weight:700;color:var(--t-1)}.game-meta{font-size:.78rem;color:var(--t-4);margin-top:3px}
+.filter-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border:1px solid var(--border-2);background:transparent;color:var(--t-3);border-radius:var(--r-pill);font-size:.82rem;cursor:pointer;transition:all var(--t-fast);font-family:var(--font-sans)}
+.filter-btn:hover{border-color:var(--border-3);color:var(--t-1)}.filter-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+
+<div class="games-wrap">
+  <div class="page-header">
+    <h1>Game History</h1>
+    <p>Your recent online games</p>
+  </div>
+  <div id="not-signed" style="display:none;text-align:center;padding:60px">
+    <div style="font-size:3rem;margin-bottom:12px">📚</div>
+    <h2>Sign in to see your games</h2>
+    <p style="color:var(--t-3);margin:10px 0 20px">Your game history is saved with your account.</p>
+    <a href="login.html" class="btn btn-primary">Sign In with Google</a>
+  </div>
+  <div id="games-content" style="display:none">
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterGames('all',this)">All</button>
+      <button class="filter-btn" onclick="filterGames('win',this)">Wins</button>
+      <button class="filter-btn" onclick="filterGames('loss',this)">Losses</button>
+      <button class="filter-btn" onclick="filterGames('draw',this)">Draws</button>
+    </div>
+    <div id="games-list"></div>
+    <div id="no-games" style="display:none;text-align:center;padding:40px;color:var(--t-4)">
+      No games found. <a href="online.html">Play online!</a>
+    </div>
+  </div>
+</div>
+
+<script>
+let allGames=[], currentFilter='all';
+function onAuthReady(user){
+  if(!user||user.isAnonymous){
+    document.getElementById('not-signed').style.display='block';
+    return;
+  }
+  document.getElementById('games-content').style.display='block';
+  DB.ref('gameHistory/'+user.uid).limitToLast(100).once('value').then(snap=>{
+    allGames=[];
+    snap.forEach(c=>allGames.push(c.val()));
+    allGames.sort((a,b)=>(b.ts||0)-(a.ts||0));
+    renderGames();
+  });
+}
+function filterGames(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderGames();
+}
+function renderGames(){
+  const filtered=allGames.filter(g=>{
+    if(currentFilter==='all') return true;
+    const myColor=g.myColor||'white';
+    const winner=g.result?.winner;
+    if(currentFilter==='win') return winner===myColor;
+    if(currentFilter==='loss') return winner&&winner!==myColor;
+    if(currentFilter==='draw') return winner===null;
+    return true;
+  });
+  const el=document.getElementById('games-list');
+  el.innerHTML='';
+  if(!filtered.length){document.getElementById('no-games').style.display='block';return;}
+  document.getElementById('no-games').style.display='none';
+  filtered.forEach(g=>{
+    const myColor=g.myColor||'white';
+    const winner=g.result?.winner;
+    const isWin=winner===myColor,isDraw=winner===null;
+    const res=isWin?'WIN':isDraw?'DRAW':'LOSS';
+    const cls=isWin?'rw':isDraw?'rd':'rl';
+    const div=document.createElement('div');
+    div.className='game-card';
+    div.innerHTML=`<div class="result-pill ${cls}">${res}</div>
+    <div class="game-info">
+      <div class="game-opp">vs ${g.opponent||'Unknown'}</div>
+      <div class="game-meta">${fmtDate(g.ts||Date.now())} · Playing ${myColor} · ${g.result?.reason||'online'}</div>
+    </div>
+    <span class="badge ${isWin?'badge-green':isDraw?'badge-gold':'badge-red'}">${res}</span>`;
+    el.appendChild(div);
+  });
+}
+</script>
+</body></html>

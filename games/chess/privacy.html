@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Privacy Policy — CheckMate Chess</title>
+<meta name="description" content="CheckMate Chess privacy policy — how we collect, use, and protect your data."/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<style>
+.legal-wrap{max-width:760px;margin:0 auto;padding:40px 20px}
+.legal-wrap h2{font-size:1.15rem;margin:32px 0 10px;color:var(--t-1)}
+.legal-wrap h2:first-of-type{margin-top:0}
+.legal-wrap p,.legal-wrap li{color:var(--t-2);line-height:1.8;font-size:.93rem;margin-bottom:10px}
+.legal-wrap ul{padding-left:20px}
+.legal-wrap li{margin-bottom:6px}
+.legal-wrap strong{color:var(--t-1)}
+.last-updated{font-size:.8rem;color:var(--t-4);margin-bottom:32px}
+.highlight-box{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-md);padding:20px;margin:20px 0}
+.highlight-box p{margin:0;font-size:.9rem}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+
+<div class="legal-wrap">
+  <h1>Privacy Policy</h1>
+  <div class="last-updated">Last updated: January 2025</div>
+
+  <div class="highlight-box">
+    <p><strong>Short version:</strong> We collect only what we need to make CheckMate work. We don't sell your data. We don't show ads. Your data is stored securely in Firebase. You can delete your data or stop using the platform at any time.</p>
+  </div>
+
+  <h2>1. Who We Are</h2>
+  <p>CheckMate ("we", "us", "our") is a chess platform operated independently. We can be reached via the <a href="contact.html">Contact</a> page.</p>
+
+  <h2>2. What Information We Collect</h2>
+  <p>We collect the following information when you use CheckMate:</p>
+  <ul>
+    <li><strong>Account data (if you sign in with Google):</strong> Your Google display name, email address, and profile photo URL. This comes directly from Google OAuth and is stored in Firebase.</li>
+    <li><strong>Game data:</strong> Game results, move history, opponent information, and time stamps for games you play online.</li>
+    <li><strong>Puzzle data:</strong> Number of puzzles solved, failed, and your best streak.</li>
+    <li><strong>Rating:</strong> Your chess rating, which changes based on online game results.</li>
+    <li><strong>Contact messages:</strong> If you submit a contact form, we store your name, email, subject, and message.</li>
+    <li><strong>Usage data:</strong> Anonymous connection events (online/offline status during a game session).</li>
+  </ul>
+  <p>We do <strong>not</strong> collect passwords (Google handles authentication), payment information, location data, or any data from users who play without signing in.</p>
+
+  <h2>3. How We Use Your Information</h2>
+  <ul>
+    <li>To identify you during online multiplayer games</li>
+    <li>To display your name and rating on the leaderboard</li>
+    <li>To save your game history and puzzle progress to your profile</li>
+    <li>To respond to contact form submissions</li>
+    <li>To show online/offline status to your opponent during a game</li>
+  </ul>
+  <p>We do <strong>not</strong> sell your data to third parties. We do not use your data for advertising.</p>
+
+  <h2>4. Firebase & Google Services</h2>
+  <p>CheckMate is built on <strong>Google Firebase</strong>, which provides authentication and real-time database services. When you sign in with Google, your authentication is handled by Google's OAuth system. Firebase stores your data on Google Cloud infrastructure. Firebase is subject to <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Google's privacy policies</a>.</p>
+  <p>The Firebase Realtime Database and Authentication services comply with GDPR and other major data protection regulations.</p>
+
+  <h2>5. Data Storage & Security</h2>
+  <p>Your data is stored in Firebase Realtime Database, protected by Firebase security rules that ensure:</p>
+  <ul>
+    <li>Only you can write to your own profile data</li>
+    <li>Only authenticated game participants can write to a game room</li>
+    <li>Contact messages can only be written, not read publicly</li>
+  </ul>
+  <p>We use HTTPS for all connections. Firebase encrypts data at rest and in transit.</p>
+
+  <h2>6. Local Storage</h2>
+  <p>CheckMate uses your browser's <code>localStorage</code> to save your settings preferences (board theme, sound settings, etc.). This data never leaves your device and is not sent to our servers. You can clear it anytime in <a href="settings.html">Settings → Privacy → Clear Local Storage</a>.</p>
+
+  <h2>7. Your Rights</h2>
+  <p>You have the right to:</p>
+  <ul>
+    <li><strong>Access:</strong> View your profile data on the <a href="profile.html">Profile</a> page</li>
+    <li><strong>Correction:</strong> Update your display name in <a href="settings.html">Settings</a></li>
+    <li><strong>Deletion:</strong> Contact us to request deletion of your account and all associated data</li>
+    <li><strong>Opt-out:</strong> Stop using CheckMate at any time — signing out removes your active presence</li>
+    <li><strong>Portability:</strong> You can export your game history via the <a href="games.html">Games</a> page</li>
+  </ul>
+
+  <h2>8. Children's Privacy</h2>
+  <p>CheckMate is not directed to children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe a child under 13 has provided us with personal information, please contact us.</p>
+
+  <h2>9. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. The "Last updated" date at the top will reflect any changes. Continued use of CheckMate after changes constitutes acceptance of the updated policy.</p>
+
+  <h2>10. Contact</h2>
+  <p>If you have questions about this Privacy Policy or your data, please <a href="contact.html">contact us</a>.</p>
+
+  <div style="margin-top:40px;padding-top:24px;border-top:1px solid var(--border-1);display:flex;gap:16px;flex-wrap:wrap">
+    <a href="terms.html" class="btn btn-outline btn-sm">Terms of Service</a>
+    <a href="contact.html" class="btn btn-outline btn-sm">Contact Us</a>
+    <a href="index.html" class="btn btn-ghost btn-sm">← Back to Home</a>
+  </div>
+</div>
+<script>function onAuthReady(){}</script>
+</body>
+</html>

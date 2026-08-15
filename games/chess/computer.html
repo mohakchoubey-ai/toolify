@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Play vs Computer — CheckMate</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<link rel="stylesheet" href="css/chess.css"/>
+<style>
+.diff-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+.diff-card{background:var(--bg-3);border:1px solid var(--border-2);border-radius:var(--r-sm);padding:12px 10px;text-align:center;cursor:pointer;transition:all var(--t-fast)}
+.diff-card:hover{border-color:var(--border-3)}.diff-card.active{border-color:var(--gold);background:var(--gold-dim)}
+.diff-card .dc-icon{font-size:1.4rem;line-height:1}.diff-card .dc-name{font-size:.82rem;font-weight:700;color:var(--t-1);margin-top:4px}
+.diff-card .dc-desc{font-size:.72rem;color:var(--t-4);margin-top:2px}
+.ai-info{background:var(--bg-3);border-radius:var(--r-sm);padding:12px;display:flex;flex-direction:column;gap:6px}
+.ai-row{display:flex;justify-content:space-between;font-size:.82rem}
+.ai-row span:first-child{color:var(--t-3)}.ai-row span:last-child{font-weight:600;font-family:var(--font-mono)}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/chess-engine.js"></script>
+<script src="js/chess-game.js"></script>
+
+<div class="game-layout">
+  <div class="board-wrapper">
+    <div class="player-card" id="black-player-card">
+      <div class="player-detail">
+        <div class="p-avatar">🤖</div>
+        <div class="player-meta">
+          <div class="player-name" id="ai-name-label">Computer (Black)</div>
+          <div class="captured-row" id="captured-by-black"></div>
+          <div id="ai-thinking-badge" class="thinking-badge">Thinking<span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></div>
+        </div>
+      </div>
+      <div class="clock-badge" id="black-clock">05:00</div>
+    </div>
+    <div id="board" class="chessboard">
+      <div id="promo-overlay" class="board-overlay"><h3>Promote Pawn</h3><div id="promo-row" class="promo-row"></div></div>
+      <div id="gameover-overlay" class="board-overlay">
+        <h3 id="gameover-title">Game Over</h3><p id="gameover-sub"></p>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button class="btn btn-primary" onclick="startGame()">Play Again</button>
+          <button class="btn btn-outline" onclick="undoLast()">Undo</button>
+        </div>
+      </div>
+    </div>
+    <div class="player-card" id="white-player-card">
+      <div class="player-detail">
+        <div class="p-avatar">👤</div>
+        <div class="player-meta">
+          <div class="player-name" id="player-name-label">You (White)</div>
+          <div class="captured-row" id="captured-by-white"></div>
+        </div>
+      </div>
+      <div class="clock-badge active" id="white-clock">05:00</div>
+    </div>
+  </div>
+
+  <div class="game-sidebar">
+    <div class="sidebar-box">
+      <h3>Difficulty</h3>
+      <div class="diff-grid">
+        <div class="diff-card" data-diff="1"><div class="dc-icon">🐣</div><div class="dc-name">Beginner</div><div class="dc-desc">Just learning</div></div>
+        <div class="diff-card active" data-diff="2"><div class="dc-icon">🙂</div><div class="dc-name">Easy</div><div class="dc-desc">Casual play</div></div>
+        <div class="diff-card" data-diff="3"><div class="dc-icon">😤</div><div class="dc-name">Medium</div><div class="dc-desc">Challenging</div></div>
+        <div class="diff-card" data-diff="4"><div class="dc-icon">🧠</div><div class="dc-name">Hard</div><div class="dc-desc">Real fight</div></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Play As</label>
+        <select id="color-sel" class="form-select">
+          <option value="white">White (go first)</option>
+          <option value="black">Black (go second)</option>
+          <option value="random">Random</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Time Control</label>
+        <select id="time-sel" class="form-select">
+          <option value="180">3 min</option>
+          <option value="300" selected>5 min</option>
+          <option value="600">10 min</option>
+          <option value="0">No Clock</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="startGame()">▶ Start Game</button>
+      <button class="btn btn-outline btn-block" onclick="undoLast()">↩ Undo Move</button>
+    </div>
+    <div class="sidebar-box">
+      <div id="status-banner" class="status-banner">Press Start Game</div>
+    </div>
+    <div class="sidebar-box">
+      <h3>AI Info</h3>
+      <div class="ai-info">
+        <div class="ai-row"><span>Engine</span><span>Minimax + α-β</span></div>
+        <div class="ai-row"><span>Depth</span><span id="ai-depth-disp">2 ply</span></div>
+        <div class="ai-row"><span>Difficulty</span><span id="ai-diff-disp">Easy</span></div>
+        <div class="ai-row"><span>Moves</span><span id="ai-moves-disp">0</span></div>
+      </div>
+    </div>
+    <div class="sidebar-box">
+      <h3>Move History</h3>
+      <div class="move-list-wrap"><div id="move-list" class="move-list"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let game, selectedDiff=2, aiMoves=0;
+const diffNames=['','Beginner','Easy','Medium','Hard'];
+const diffDepths=['','Random','2 ply','3 ply','4 ply'];
+
+document.querySelectorAll('.diff-card').forEach(el=>{
+  el.onclick=()=>{
+    document.querySelectorAll('.diff-card').forEach(x=>x.classList.remove('active'));
+    el.classList.add('active');
+    selectedDiff=parseInt(el.dataset.diff);
+    document.getElementById('ai-diff-disp').textContent=diffNames[selectedDiff];
+    document.getElementById('ai-depth-disp').textContent=diffDepths[selectedDiff];
+  };
+});
+
+function startGame(){
+  if(game) game.destroy();
+  aiMoves=0;
+  document.getElementById('ai-moves-disp').textContent='0';
+  let color=document.getElementById('color-sel').value;
+  if(color==='random') color=Math.random()<.5?'white':'black';
+  const tc=parseInt(document.getElementById('time-sel').value);
+  document.getElementById('ai-diff-disp').textContent=diffNames[selectedDiff];
+  document.getElementById('ai-depth-disp').textContent=diffDepths[selectedDiff];
+  document.getElementById('player-name-label').textContent=`You (${color==='white'?'White':'Black'})`;
+  document.getElementById('ai-name-label').textContent=`Computer (${color==='white'?'Black':'White'})`;
+
+  game=new ChessGame({
+    boardEl:document.getElementById('board'),
+    mode:'ai', difficulty:selectedDiff, timeControl:tc, playerColor:color,
+    onMove:()=>{ if(game.turn===color){ aiMoves++; document.getElementById('ai-moves-disp').textContent=aiMoves; } }
+  });
+  if(color==='black'){
+    setTimeout(()=>{
+      const lm=getAllLegalMoves(true,game.board,game.enPassant,game.castleRights);
+      const best=getBestMove(game.board,selectedDiff,lm);
+      if(best){game.lastMoveCoords={fr:best.from[0],fc:best.from[1],tr:best.to[0],tc:best.to[1]};game.commitMove(best.from[0],best.from[1],best.to[0],best.to[1],best.special,best.special==='promotion'?'q':null);aiMoves++;document.getElementById('ai-moves-disp').textContent=aiMoves;}
+    },600);
+  }
+}
+function undoLast(){ if(game) game.undoMove(); }
+function onAuthReady(){}
+window.onload=startGame;
+</script>
+</body></html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FAQ — CheckMate Chess</title>
+<meta name="description" content="Frequently asked questions about CheckMate chess platform."/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<style>
+.faq-wrap{max-width:760px;margin:0 auto;padding:40px 20px}
+.faq-section{margin-bottom:40px}
+.faq-section-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:16px}
+.faq-item{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-md);margin-bottom:8px;overflow:hidden}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer;font-weight:600;font-size:.95rem;color:var(--t-1);gap:12px;user-select:none;transition:background var(--t-fast)}
+.faq-q:hover{background:var(--bg-3)}
+.faq-q .faq-icon{font-size:1.1rem;color:var(--gold);flex-shrink:0;transition:transform .25s}
+.faq-item.open .faq-q .faq-icon{transform:rotate(45deg)}
+.faq-a{display:none;padding:0 20px 16px;font-size:.9rem;color:var(--t-2);line-height:1.8}
+.faq-a a{color:var(--gold)}.faq-a code{background:var(--bg-4);padding:2px 6px;border-radius:3px;font-family:var(--font-mono);font-size:.85em}
+.faq-item.open .faq-a{display:block}
+.faq-search{margin-bottom:28px}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+
+<div class="faq-wrap">
+  <div class="page-header">
+    <h1>❓ Frequently Asked Questions</h1>
+    <p>Everything you need to know about CheckMate</p>
+  </div>
+
+  <div class="faq-search">
+    <input class="form-input" placeholder="Search questions..." id="faq-search" oninput="searchFAQ(this.value)"/>
+  </div>
+
+  <div id="faq-all">
+    <div class="faq-section">
+      <div class="faq-section-title">Getting Started</div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Do I need an account to play? <span class="faq-icon">+</span></div><div class="faq-a">No! You can play against the AI and use Pass & Play mode without any account. An account (via Google Sign-In) is only required to play <strong>online with friends</strong>, appear on the leaderboard, and save your game history.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">How do I sign in? <span class="faq-icon">+</span></div><div class="faq-a">Click <strong>Sign In</strong> in the top navigation, then click <strong>Continue with Google</strong>. Your account is created automatically the first time you sign in. No password needed — ever.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Is my account permanent? <span class="faq-icon">+</span></div><div class="faq-a">Yes. Your Google account gives you a permanent CheckMate account. Your rating, game history, puzzle stats, and achievements are all saved and will be there whenever you come back. You can sign out anytime using the nav menu.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Is CheckMate free? <span class="faq-icon">+</span></div><div class="faq-a">Yes, CheckMate is completely free. All features — AI play, online multiplayer, puzzles, analysis, leaderboard — are available at no cost.</div></div>
+    </div>
+
+    <div class="faq-section">
+      <div class="faq-section-title">Online Play</div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">How do I play with a friend online? <span class="faq-icon">+</span></div><div class="faq-a">Go to <a href="online.html">Play Online</a>, sign in with Google, then click <strong>Create Game</strong>. A 6-character room code will appear. Share that code with your friend. They go to the same page, enter the code, and click <strong>Join Game</strong>. The game starts automatically when both players are connected.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Why does online play require Google Sign-In? <span class="faq-icon">+</span></div><div class="faq-a">Online multiplayer requires sign-in so your opponent knows who they're playing against, results can be saved to your profile, and games appear on the leaderboard. Anonymous play is allowed for local and AI games.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">What happens if my opponent disconnects? <span class="faq-icon">+</span></div><div class="faq-a">The connection status indicator in the game sidebar shows if your opponent is connected or disconnected. Their clock continues running. If they don't reconnect and run out of time, you win on time.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Can I offer a draw or resign? <span class="faq-icon">+</span></div><div class="faq-a">Yes. In the online game sidebar, you'll find an <strong>Offer Draw</strong> button and a <strong>Resign</strong> button. Your opponent will see the draw offer and can accept or decline.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">How does the room code expire? <span class="faq-icon">+</span></div><div class="faq-a">Room codes are active as long as at least one player is in the room. Once both players leave, the room data remains in the database briefly but is no longer accessible. You can always create a fresh game.</div></div>
+    </div>
+
+    <div class="faq-section">
+      <div class="faq-section-title">Chess Rules & AI</div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Are all chess rules supported? <span class="faq-icon">+</span></div><div class="faq-a">Yes. CheckMate enforces all standard chess rules including: legal move generation, check and checkmate, stalemate, castling (kingside and queenside), en passant, pawn promotion with piece selection, and material tracking. Illegal moves are blocked automatically.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">How strong is the AI? <span class="faq-icon">+</span></div><div class="faq-a">The AI uses a <strong>minimax algorithm with alpha-beta pruning</strong> and piece-square tables. Difficulty levels:<br><br><strong>Beginner:</strong> Mostly random moves with slight capture preference.<br><strong>Easy:</strong> 2-ply search — thinks 2 moves ahead.<br><strong>Medium:</strong> 3-ply search — reasonably challenging.<br><strong>Hard:</strong> 4-ply search — will punish tactical mistakes.<br><br>It won't beat a titled player, but Medium and Hard are a real challenge for casual players.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">What does the hint system show? <span class="faq-icon">+</span></div><div class="faq-a">When you click a piece, green circles appear on squares where that piece can legally move. Hollow circles appear on squares where you can capture an enemy piece. You can disable hints in <a href="settings.html">Settings → Board</a>.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Can I undo a move? <span class="faq-icon">+</span></div><div class="faq-a">Yes, when playing against the AI or in local mode. In AI mode, undo takes back two moves (your move and the AI's response). Undo is not available in online games against a real opponent.</div></div>
+    </div>
+
+    <div class="faq-section">
+      <div class="faq-section-title">Puzzles & Analysis</div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">How do puzzles work? <span class="faq-icon">+</span></div><div class="faq-a">Select a puzzle category (Mate in 1, Fork, Pin, etc.) and click a piece to see its legal moves. Click a destination to make your move. If it matches the correct solution, you advance. Your streak and best streak are tracked and saved to your profile when signed in.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Can I import my games into the analysis board? <span class="faq-icon">+</span></div><div class="faq-a">Yes. Go to <a href="analysis.html">Analysis</a>, paste a PGN (Portable Game Notation) into the import field, and click Import. You can then step through the game move by move, or load any position via FEN.</div></div>
+    </div>
+
+    <div class="faq-section">
+      <div class="faq-section-title">Technical</div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Does CheckMate work offline? <span class="faq-icon">+</span></div><div class="faq-a">The AI and local Pass & Play mode work offline once the page is loaded (except for auth and Firebase-dependent features). Online multiplayer, leaderboard, and profile saving require an internet connection.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Why isn't there any sound? <span class="faq-icon">+</span></div><div class="faq-a">CheckMate uses two audio files: <code>assets/audio/move.mp3</code> and <code>assets/audio/mate.mp3</code>. If you're running locally and don't have those files, sound won't play. Browsers also require a user interaction before playing audio — click anywhere on the page first. You can verify sound in <a href="settings.html">Settings → Sound</a>.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">What browsers are supported? <span class="faq-icon">+</span></div><div class="faq-a">CheckMate works on all modern browsers: Chrome, Firefox, Edge, Safari (desktop and mobile). Internet Explorer is not supported. For the best experience, use Chrome or Edge on desktop.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">How do I run this locally? <span class="faq-icon">+</span></div><div class="faq-a">You can't just open the HTML files directly in a browser due to module loading. Use a local server: run <code>npx serve .</code> or <code>python -m http.server 8000</code> in the project folder, then open <code>http://localhost:8000</code>.</div></div>
+    </div>
+  </div>
+
+  <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-xl);padding:28px;text-align:center;margin-top:40px">
+    <h3 style="margin-bottom:8px">Still have questions?</h3>
+    <p style="color:var(--t-3);margin-bottom:16px;font-size:.9rem">Can't find what you're looking for? We're happy to help.</p>
+    <a href="contact.html" class="btn btn-primary">Contact Us</a>
+  </div>
+</div>
+
+<script>
+function onAuthReady(){}
+function toggleFAQ(el){
+  const item=el.parentElement;
+  item.classList.toggle('open');
+}
+function searchFAQ(q){
+  const items=document.querySelectorAll('.faq-item');
+  const sections=document.querySelectorAll('.faq-section');
+  if(!q){ items.forEach(i=>i.style.display=''); sections.forEach(s=>s.style.display=''); return; }
+  const ql=q.toLowerCase();
+  items.forEach(item=>{
+    const text=item.textContent.toLowerCase();
+    item.style.display=text.includes(ql)?'':'none';
+    if(text.includes(ql)) item.classList.add('open');
+  });
+  sections.forEach(s=>{
+    const vis=[...s.querySelectorAll('.faq-item')].some(i=>i.style.display!=='none');
+    s.style.display=vis?'':'none';
+  });
+}
+</script>
+</body>
+</html>

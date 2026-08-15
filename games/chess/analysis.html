@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Analysis Board — CheckMate</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<link rel="stylesheet" href="css/chess.css"/>
+<style>
+.analysis-layout{display:flex;gap:20px;max-width:1100px;margin:20px auto;padding:0 20px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.pgn-area{background:var(--bg-3);border:1px solid var(--border-2);border-radius:var(--r-sm);padding:10px;font-family:var(--font-mono);font-size:.82rem;color:var(--t-2);width:100%;min-height:80px;resize:vertical;line-height:1.6}
+.pgn-area:focus{outline:none;border-color:var(--gold)}
+.nav-controls{display:flex;gap:6px;justify-content:center}
+.nav-ctrl-btn{width:40px;height:40px;background:var(--bg-3);border:1px solid var(--border-2);color:var(--t-2);border-radius:var(--r-sm);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--t-fast)}
+.nav-ctrl-btn:hover{background:var(--bg-4);color:var(--t-1)}.nav-ctrl-btn:disabled{opacity:.3;cursor:not-allowed}
+.fen-input{background:var(--bg-3);border:1px solid var(--border-2);color:var(--t-1);border-radius:var(--r-sm);padding:8px 12px;font-size:.8rem;font-family:var(--font-mono);width:100%}
+.fen-input:focus{outline:none;border-color:var(--gold)}
+.move-highlight{background:rgba(201,162,39,.15);border-left:2px solid var(--gold)}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/chess-engine.js"></script>
+
+<div class="analysis-layout">
+  <div style="width:100%;max-width:500px">
+    <div class="player-card" style="margin-bottom:8px">
+      <div class="player-detail"><div class="p-avatar">♚</div><div class="player-name">Black</div></div>
+      <div class="captured-row" id="captured-by-black"></div>
+    </div>
+    <div id="board" class="chessboard" style="max-width:500px"></div>
+    <div class="player-card" style="margin-top:8px">
+      <div class="player-detail"><div class="p-avatar">♔</div><div class="player-name">White</div></div>
+      <div class="captured-row" id="captured-by-white"></div>
+    </div>
+    <div class="nav-controls" style="margin-top:12px">
+      <button class="nav-ctrl-btn" onclick="goToStart()" title="Start">⏮</button>
+      <button class="nav-ctrl-btn" onclick="prevMove()" title="Previous">◀</button>
+      <button class="nav-ctrl-btn" onclick="nextMove()" title="Next">▶</button>
+      <button class="nav-ctrl-btn" onclick="goToEnd()" title="End">⏭</button>
+      <button class="nav-ctrl-btn" onclick="flipBoard()" title="Flip">⟲</button>
+    </div>
+  </div>
+
+  <div style="width:280px;display:flex;flex-direction:column;gap:12px">
+    <div class="sidebar-box">
+      <div id="status-banner" class="status-banner">Starting position</div>
+    </div>
+    <div class="sidebar-box">
+      <h3>Import PGN</h3>
+      <textarea id="pgn-input" class="pgn-area" placeholder="Paste PGN here...
+e.g. 1.e4 e5 2.Nf3 Nc6 3.Bc4"></textarea>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="importPGN()" style="flex:1">Import</button>
+        <button class="btn btn-outline btn-sm" onclick="clearBoard()">Clear</button>
+        <button class="btn btn-outline btn-sm" onclick="resetToStart()">Reset</button>
+      </div>
+    </div>
+    <div class="sidebar-box">
+      <h3>FEN</h3>
+      <input id="fen-display" class="fen-input" readonly placeholder="Current FEN..." onclick="this.select()"/>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-outline btn-sm" onclick="copyFEN()">Copy FEN</button>
+        <button class="btn btn-primary btn-sm" onclick="loadFEN()">Load FEN</button>
+      </div>
+      <input id="fen-input" class="fen-input" style="margin-top:8px" placeholder="Enter FEN to load..."/>
+    </div>
+    <div class="sidebar-box">
+      <h3>Moves <span id="move-counter" style="color:var(--t-4);font-size:.78rem;margin-left:4px">0/0</span></h3>
+      <div class="move-list-wrap"><div id="move-list" class="move-list"></div></div>
+    </div>
+    <div class="sidebar-box">
+      <h3>Export</h3>
+      <button class="btn btn-outline btn-block btn-sm" onclick="exportPGN()">📋 Copy PGN</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SYM={'P':'♙','R':'♖','N':'♘','B':'♗','Q':'♕','K':'♔','p':'♟','r':'♜','n':'♞','b':'♝','q':'♛','k':'♚'};
+let aBoard=null, aTurn='white', aHistory=[], aPositions=[], aCurrent=0, aFlipped=false;
+let aMoves=[]; // parsed move list
+let aEnPassant=null, aCastleRights={wK:true,wQ:true,bK:true,bQ:true};
+
+function startPos(){
+  return [
+    ['r','n','b','q','k','b','n','r'],['p','p','p','p','p','p','p','p'],
+    ['','','','','','','',''],['','','','','','','',''],
+    ['','','','','','','',''],['','','','','','','',''],
+    ['P','P','P','P','P','P','P','P'],['R','N','B','Q','K','B','N','R']
+  ];
+}
+
+let selected=null, validMoves2=[], editMode=false;
+
+function resetToStart(){
+  aBoard=startPos(); aTurn='white'; aHistory=[]; aPositions=[cloneBoard(aBoard)]; aCurrent=0;
+  aMoves=[]; aEnPassant=null; aCastleRights={wK:true,wQ:true,bK:true,bQ:true};
+  document.getElementById('move-list').innerHTML='';
+  document.getElementById('move-counter').textContent='0/0';
+  selected=null; validMoves2=[];
+  drawBoard(); updateFEN();
+  document.getElementById('status-banner').textContent='White to move';
+  document.getElementById('status-banner').className='status-banner';
+}
+
+function drawBoard(){
+  const el=document.getElementById('board'); el.innerHTML='';
+  const lm=aHistory.length>0?aHistory[aCurrent-1]:null;
+  const wInCheck=isInCheck(true,aBoard,aEnPassant,aCastleRights);
+  const bInCheck=isInCheck(false,aBoard,aEnPassant,aCastleRights);
+  const wKing=findKing(true,aBoard), bKing=findKing(false,aBoard);
+  for(let rr=0;rr<8;rr++) for(let cc=0;cc<8;cc++){
+    const r=aFlipped?7-rr:rr, c=aFlipped?7-cc:cc;
+    const sq=document.createElement('div');
+    const isL=(r+c)%2===0; sq.className=`square ${isL?'light':'dark'}`;
+    if(selected&&selected[0]===r&&selected[1]===c) sq.classList.add('selected');
+    if(lm&&((lm.fr===r&&lm.fc===c)||(lm.tr===r&&lm.tc===c))) sq.classList.add('last-move-to');
+    if(wInCheck&&wKing&&wKing[0]===r&&wKing[1]===c) sq.classList.add('in-check');
+    if(bInCheck&&bKing&&bKing[0]===r&&bKing[1]===c) sq.classList.add('in-check');
+    const hint=validMoves2.find(m=>m.r===r&&m.c===c);
+    if(hint){sq.classList.add('hint');if(aBoard[r][c]) sq.classList.add('capture-hint');}
+    const p=aBoard[r][c];
+    if(p) sq.textContent=SYM[p];
+    if(c===0){const s=document.createElement('span');s.className='coord rank';s.textContent=(8-r);sq.appendChild(s);}
+    if(r===7){const s=document.createElement('span');s.className='coord file';s.textContent='abcdefgh'[c];sq.appendChild(s);}
+    sq.onclick=()=>handleAnalClick(r,c);
+    el.appendChild(sq);
+  }
+}
+
+function handleAnalClick(r,c){
+  const p=aBoard[r][c];
+  if(selected){
+    const mv=validMoves2.find(m=>m.r===r&&m.c===c);
+    if(mv){
+      const snap=cloneBoard(aBoard);
+      const captured=aBoard[r][c]||(mv.special==='enpassant'?aBoard[selected[0]][c]:'');
+      applyMoveToBoard(aBoard,selected[0],selected[1],r,c,mv.special);
+      if(mv.special==='double') aEnPassant={r:(selected[0]+r)/2,c:selected[1]};
+      else aEnPassant=null;
+      if(aBoard[r][c]==='K') {aCastleRights.wK=false;aCastleRights.wQ=false;}
+      if(aBoard[r][c]==='k') {aCastleRights.bK=false;aCastleRights.bQ=false;}
+      const text=squareName(selected[0],selected[1])+(captured?'x':'-')+squareName(r,c);
+      aHistory=aHistory.slice(0,aCurrent);
+      aHistory.push({fr:selected[0],fc:selected[1],tr:r,tc:c,snap,text});
+      aPositions=aPositions.slice(0,aCurrent+1);
+      aPositions.push(cloneBoard(aBoard));
+      aCurrent++;
+      aTurn=aTurn==='white'?'black':'white';
+      addMoveToList(text,aTurn==='black');
+      document.getElementById('move-counter').textContent=aCurrent+'/'+(aMoves.length||aCurrent);
+      selected=null; validMoves2=[];
+      drawBoard(); updateFEN();
+      const sb=document.getElementById('status-banner');
+      const inChk=isInCheck(aTurn==='white',aBoard,aEnPassant,aCastleRights);
+      sb.textContent=inChk?(aTurn==='white'?'White':'Black')+' is in check!':(aTurn==='white'?'White':'Black')+' to move';
+      sb.className='status-banner'+(inChk?' check':'');
+      return;
+    }
+    selected=null; validMoves2=[];
+  }
+  if(p){
+    selected=[r,c];
+    validMoves2=getLegalMoves(r,c,aBoard,aEnPassant,aCastleRights);
+  }
+  drawBoard();
+}
+
+function addMoveToList(text,wasWhite){
+  const list=document.getElementById('move-list');
+  const num=Math.ceil(aHistory.length/2);
+  if(!wasWhite){
+    const row=document.createElement('div');
+    row.className='move-row'; row.dataset.move=aHistory.length;
+    row.innerHTML=`<span class="m-idx">${num}.</span><span class="m-w" onclick="jumpTo(${aHistory.length-1})">${text}</span><span class="m-b"></span>`;
+    list.appendChild(row);
+  } else {
+    const rows=list.querySelectorAll('.move-row');
+    const last=rows[rows.length-1];
+    if(last) { const s=last.querySelector('.m-b'); if(s){s.textContent=text;s.onclick=()=>jumpTo(aHistory.length-1);} }
+  }
+  list.scrollTop=list.scrollHeight;
+}
+
+function jumpTo(idx){
+  if(idx<0){resetToStart();return;}
+  aBoard=cloneBoard(aPositions[idx+1]);
+  aCurrent=idx+1; aTurn=aCurrent%2===0?'white':'black';
+  aEnPassant=null; selected=null; validMoves2=[];
+  drawBoard(); updateFEN();
+  document.getElementById('move-counter').textContent=aCurrent+'/'+(aMoves.length||aCurrent);
+}
+function goToStart(){jumpTo(-1);}
+function goToEnd(){jumpTo(aHistory.length-1);}
+function prevMove(){if(aCurrent>0) jumpTo(aCurrent-2);}
+function nextMove(){if(aCurrent<aHistory.length) jumpTo(aCurrent-1);}
+function flipBoard(){aFlipped=!aFlipped;drawBoard();}
+function clearBoard(){aBoard=startPos().map(r=>r.map(()=>''));drawBoard();updateFEN();}
+
+function updateFEN(){
+  let fen='';
+  for(let r=0;r<8;r++){
+    let empty=0;
+    for(let c=0;c<8;c++){
+      const p=aBoard[r][c];
+      if(p) {if(empty){fen+=empty;empty=0;} fen+=p;}
+      else empty++;
+    }
+    if(empty) fen+=empty;
+    if(r<7) fen+='/';
+  }
+  fen+=' '+(aTurn==='white'?'w':'b')+' - - 0 1';
+  document.getElementById('fen-display').value=fen;
+}
+
+function copyFEN(){
+  const v=document.getElementById('fen-display').value;
+  navigator.clipboard.writeText(v).then(()=>showToast('FEN copied!','success'));
+}
+
+function loadFEN(){
+  const fen=document.getElementById('fen-input').value.trim();
+  if(!fen) return;
+  try{
+    const parts=fen.split(' ');
+    const rows=parts[0].split('/');
+    const bd=[];
+    for(const row of rows){
+      const r=[];
+      for(const ch of row){ if(isNaN(ch)) r.push(ch); else for(let i=0;i<parseInt(ch);i++) r.push(''); }
+      bd.push(r);
+    }
+    if(bd.length!==8||bd.some(r=>r.length!==8)) throw new Error('Invalid FEN');
+    aBoard=bd; aTurn=parts[1]==='b'?'black':'white';
+    aHistory=[]; aPositions=[cloneBoard(aBoard)]; aCurrent=0;
+    aEnPassant=null; aCastleRights={wK:parts[2]?.includes('K'),wQ:parts[2]?.includes('Q'),bK:parts[2]?.includes('k'),bQ:parts[2]?.includes('q')};
+    selected=null; validMoves2=[];
+    document.getElementById('move-list').innerHTML='';
+    drawBoard(); updateFEN();
+    showToast('FEN loaded!','success');
+  } catch(e){ showToast('Invalid FEN: '+e.message,'error'); }
+}
+
+function importPGN(){
+  const pgn=document.getElementById('pgn-input').value.trim();
+  if(!pgn){showToast('Paste a PGN first','error');return;}
+  try{
+    resetToStart();
+    const clean=pgn.replace(/\{[^}]*\}/g,'').replace(/\[[^\]]*\]/g,'').replace(/\d+\./g,'').replace(/[+#!?]/g,'').trim();
+    const tokens=clean.split(/\s+/).filter(t=>t&&!['1-0','0-1','1/2-1/2','*'].includes(t));
+    for(const tok of tokens){
+      if(!tok) continue;
+      const lm=getAllLegalMoves(aTurn==='white',aBoard,aEnPassant,aCastleRights);
+      const mv=findMoveByAlgebraic(tok,lm,aBoard,aTurn==='white');
+      if(!mv){console.warn('Could not parse:',tok);break;}
+      const snap=cloneBoard(aBoard);
+      applyMoveToBoard(aBoard,mv.from[0],mv.from[1],mv.to[0],mv.to[1],mv.special||'normal');
+      if(mv.special==='double') aEnPassant={(r:(mv.from[0]+mv.to[0])/2,c:mv.from[1])};
+      else aEnPassant=null;
+      aHistory.push({fr:mv.from[0],fc:mv.from[1],tr:mv.to[0],tc:mv.to[1],snap,text:tok});
+      aPositions.push(cloneBoard(aBoard));
+      aCurrent++;
+      addMoveToList(tok,aTurn==='black');
+      aTurn=aTurn==='white'?'black':'white';
+    }
+    document.getElementById('move-counter').textContent=aCurrent+'/'+aCurrent;
+    drawBoard(); updateFEN();
+    showToast('PGN imported — '+aHistory.length+' moves','success');
+  } catch(e){ showToast('PGN parse error: '+e.message,'error'); console.error(e); }
+}
+
+function findMoveByAlgebraic(san,legalMoves,bd,white){
+  // Handle castling
+  if(san==='O-O'||san==='0-0') return legalMoves.find(m=>m.special==='castleK');
+  if(san==='O-O-O'||san==='0-0-0') return legalMoves.find(m=>m.special==='castleQ');
+  // Basic: last 2 chars are destination
+  const dest=san.replace(/[^a-h1-8]/g,'').slice(-2);
+  if(dest.length<2) return null;
+  const tc=dest.charCodeAt(0)-97, tr=8-parseInt(dest[1]);
+  const piece=san[0]===san[0].toUpperCase()&&'RNBQK'.includes(san[0])?san[0]:(white?'P':'p');
+  return legalMoves.find(m=>{
+    if(m.to[0]!==tr||m.to[1]!==tc) return false;
+    const p=bd[m.from[0]][m.from[1]];
+    return p&&p.toLowerCase()===(piece||'p').toLowerCase();
+  });
+}
+
+function exportPGN(){
+  let pgn='[Event "Analysis"]\n[Date "'+new Date().toISOString().slice(0,10)+'"]\n\n';
+  aHistory.forEach((h,i)=>{
+    if(i%2===0) pgn+=(Math.floor(i/2)+1)+'. ';
+    pgn+=h.text+' ';
+  });
+  pgn+='*';
+  navigator.clipboard.writeText(pgn.trim()).then(()=>showToast('PGN copied!','success'));
+}
+
+function onAuthReady(){}
+window.onload=resetToStart;
+</script>
+</body></html>

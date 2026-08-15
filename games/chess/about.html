@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>About — CheckMate Chess</title>
+<meta name="description" content="Learn about CheckMate — a premium online chess platform built for serious players."/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<style>
+.about-wrap{max-width:820px;margin:0 auto;padding:40px 20px}
+.hero-about{text-align:center;padding:60px 0 48px;border-bottom:1px solid var(--border-1);margin-bottom:48px}
+.hero-about .icon{font-size:4rem;margin-bottom:16px}
+.hero-about h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:900;letter-spacing:-1px;margin-bottom:12px}
+.hero-about p{font-size:1.05rem;color:var(--t-3);max-width:540px;margin:0 auto;line-height:1.8}
+.about-section{margin-bottom:48px}
+.about-section h2{font-size:1.4rem;font-weight:800;margin-bottom:12px;letter-spacing:-.3px}
+.about-section p{color:var(--t-2);line-height:1.8;margin-bottom:12px}
+.tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.tech-card{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-md);padding:16px;text-align:center}
+.tech-card .t-icon{font-size:1.6rem;margin-bottom:6px}
+.tech-card .t-name{font-size:.85rem;font-weight:700;color:var(--t-1)}
+.tech-card .t-desc{font-size:.75rem;color:var(--t-4);margin-top:2px}
+.value-list{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.value-item{display:flex;align-items:flex-start;gap:14px;background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-md);padding:16px}
+.value-icon{font-size:1.4rem;flex-shrink:0;margin-top:2px}
+.value-item h4{font-size:.95rem;margin-bottom:4px}
+.value-item p{font-size:.85rem;color:var(--t-3);line-height:1.6;margin:0}
+@media(max-width:600px){.tech-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+
+<div class="about-wrap">
+  <div class="hero-about">
+    <div class="icon">♟</div>
+    <h1>Built for Chess. Built for Players.</h1>
+    <p>CheckMate is a premium chess platform where serious players come to improve, compete, and enjoy the game at its fullest.</p>
+  </div>
+
+  <div class="about-section">
+    <h2>What is CheckMate?</h2>
+    <p>CheckMate is a fully-featured online chess platform. Whether you want to sharpen your tactical vision with daily puzzles, battle a challenging AI, or play real-time chess with a friend anywhere in the world — this is your board.</p>
+    <p>Every rule of chess is enforced precisely: castling, en passant, pawn promotion, stalemate, and check detection. The AI uses a real minimax engine with alpha-beta pruning and piece-square tables — not random moves.</p>
+  </div>
+
+  <div class="about-section">
+    <h2>Our Values</h2>
+    <div class="value-list">
+      <div class="value-item"><span class="value-icon">⚡</span><div><h4>Speed & Precision</h4><p>The board loads instantly. Moves are validated locally. No lag between you and the position.</p></div></div>
+      <div class="value-item"><span class="value-icon">🔒</span><div><h4>Permanent Accounts</h4><p>Sign in once with Google and your account, rating, and history persist forever. No passwords to forget.</p></div></div>
+      <div class="value-item"><span class="value-icon">🌐</span><div><h4>Real Multiplayer</h4><p>Online games sync in real time using Firebase. Your opponent's moves appear instantly — no polling, no refresh.</p></div></div>
+      <div class="value-item"><span class="value-icon">🧩</span><div><h4>Improvement-First</h4><p>Puzzles, analysis tools, and game history are all designed to help you become a better chess player.</p></div></div>
+    </div>
+  </div>
+
+  <div class="about-section">
+    <h2>Technology Stack</h2>
+    <p>Built with web standards — no heavy frameworks, no build steps, runs anywhere.</p>
+    <div class="tech-grid">
+      <div class="tech-card"><div class="t-icon">🔥</div><div class="t-name">Firebase</div><div class="t-desc">Auth, Realtime DB, hosting</div></div>
+      <div class="tech-card"><div class="t-icon">🌐</div><div class="t-name">Vanilla JS</div><div class="t-desc">No frameworks, pure speed</div></div>
+      <div class="tech-card"><div class="t-icon">🎨</div><div class="t-name">CSS Variables</div><div class="t-desc">Dynamic theming system</div></div>
+      <div class="tech-card"><div class="t-icon">🧠</div><div class="t-name">Minimax AI</div><div class="t-desc">Alpha-beta pruning + PST</div></div>
+      <div class="tech-card"><div class="t-icon">♟</div><div class="t-name">Chess Engine</div><div class="t-desc">Full legal move generation</div></div>
+      <div class="tech-card"><div class="t-icon">📱</div><div class="t-name">Responsive</div><div class="t-desc">Works on all screen sizes</div></div>
+    </div>
+  </div>
+
+  <div class="about-section">
+    <h2>The Developer</h2>
+    <p>CheckMate was built as a passion project by a developer who loves chess and clean code. The goal: a chess platform that feels premium, runs fast, and actually works — rules, AI, multiplayer and all.</p>
+    <p>If you find a bug, want to suggest a feature, or just want to say hi — <a href="contact.html">reach out</a>.</p>
+  </div>
+
+  <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-xl);padding:32px;text-align:center;margin-top:40px">
+    <h2 style="margin-bottom:10px">Ready to play?</h2>
+    <p style="margin-bottom:20px;color:var(--t-3)">Jump in — no account required to start.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="play.html" class="btn btn-primary btn-lg">Play Now</a>
+      <a href="online.html" class="btn btn-outline btn-lg">Play Online</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><a href="index.html" class="nav-logo" style="font-size:1.1rem">♟ Check<span>Mate</span></a><p>A premium chess platform for players who take the game seriously.</p></div>
+      <div class="footer-col"><h4>Play</h4><ul><li><a href="play.html">Play Now</a></li><li><a href="online.html">Play Online</a></li><li><a href="computer.html">vs Computer</a></li><li><a href="puzzles.html">Puzzles</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a href="profile.html">Profile</a></li><li><a href="settings.html">Settings</a></li><li><a href="login.html">Sign In</a></li><li><a href="signup.html">Sign Up</a></li></ul></div>
+      <div class="footer-col"><h4>Info</h4><ul><li><a href="about.html">About</a></li><li><a href="faq.html">FAQ</a></li><li><a href="contact.html">Contact</a></li><li><a href="privacy.html">Privacy</a></li><li><a href="terms.html">Terms</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© 2025 CheckMate Chess.</span><span>Made with ♟ for chess lovers</span></div>
+  </div>
+</footer>
+<script>function onAuthReady(){}</script>
+</body>
+</html>

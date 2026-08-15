@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Settings — CheckMate</title>
+<meta name="description" content="Manage your CheckMate account, board, sound and appearance settings."/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<style>
+.settings-wrap{max-width:860px;margin:0 auto;padding:30px 20px}
+.settings-layout{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start}
+.settings-nav{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-lg);overflow:hidden;position:sticky;top:80px}
+.settings-nav-item{display:flex;align-items:center;gap:10px;padding:13px 18px;font-size:.88rem;font-weight:500;color:var(--t-2);cursor:pointer;transition:all var(--t-fast);border-left:3px solid transparent}
+.settings-nav-item:hover{background:var(--bg-3);color:var(--t-1)}
+.settings-nav-item.active{color:var(--gold);background:var(--gold-dim);border-left-color:var(--gold)}
+.settings-nav-item .s-icon{font-size:1rem;width:18px;text-align:center}
+.section-panel{display:none}.section-panel.active{display:block}
+.settings-card{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-lg);padding:24px;margin-bottom:16px}
+.settings-card h3{font-size:1rem;margin-bottom:4px}
+.settings-card .card-desc{font-size:.82rem;color:var(--t-3);margin-bottom:20px}
+.setting-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border-1)}
+.setting-row:last-child{border-bottom:none;padding-bottom:0}
+.setting-label{font-size:.9rem;font-weight:500;color:var(--t-1)}
+.setting-sub{font-size:.78rem;color:var(--t-4);margin-top:2px}
+
+/* Toggle switch */
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--bg-5);border-radius:12px;cursor:pointer;transition:.25s}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.25s}
+.toggle input:checked + .toggle-slider{background:var(--gold)}
+.toggle input:checked + .toggle-slider::before{transform:translateX(20px)}
+
+/* Board theme preview */
+.board-themes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.board-theme{cursor:pointer;border-radius:var(--r-sm);overflow:hidden;border:2px solid transparent;transition:all var(--t-fast)}
+.board-theme.active{border-color:var(--gold)}
+.board-theme-preview{display:grid;grid-template-columns:repeat(4,1fr);aspect-ratio:1}
+.bt-sq{width:100%;aspect-ratio:1}
+.board-theme-name{font-size:.72rem;text-align:center;padding:4px;color:var(--t-3);background:var(--bg-3)}
+
+/* Volume slider */
+.vol-slider{width:100%;accent-color:var(--gold);height:4px;cursor:pointer}
+.avatar-preview{width:64px;height:64px;border-radius:50%;background:var(--bg-4);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:var(--gold);overflow:hidden}
+.avatar-preview img{width:100%;height:100%;object-fit:cover}
+
+.danger-zone{border-color:rgba(217,64,64,.3)!important}
+.danger-zone h3{color:#ef6666}
+
+@media(max-width:700px){.settings-layout{grid-template-columns:1fr}.settings-nav{position:static;display:flex;overflow-x:auto}.settings-nav-item{white-space:nowrap;border-left:none;border-bottom:3px solid transparent}.settings-nav-item.active{border-bottom-color:var(--gold);border-left-color:transparent}}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+
+<div class="settings-wrap">
+  <div class="page-header"><h1>⚙ Settings</h1><p>Manage your account, board, and preferences</p></div>
+
+  <div class="settings-layout">
+    <!-- SIDEBAR NAV -->
+    <div class="settings-nav">
+      <div class="settings-nav-item active" onclick="showSection('account',this)"><span class="s-icon">👤</span>Account</div>
+      <div class="settings-nav-item" onclick="showSection('board',this)"><span class="s-icon">♟</span>Board</div>
+      <div class="settings-nav-item" onclick="showSection('game',this)"><span class="s-icon">🎮</span>Game</div>
+      <div class="settings-nav-item" onclick="showSection('sound',this)"><span class="s-icon">🔊</span>Sound</div>
+      <div class="settings-nav-item" onclick="showSection('appearance',this)"><span class="s-icon">🎨</span>Appearance</div>
+      <div class="settings-nav-item" onclick="showSection('privacy-s',this)"><span class="s-icon">🔒</span>Privacy</div>
+    </div>
+
+    <!-- PANELS -->
+    <div>
+      <!-- ACCOUNT -->
+      <div id="section-account" class="section-panel active">
+        <div class="settings-card" id="account-guest-card">
+          <h3>Account</h3>
+          <p class="card-desc">Sign in with Google to save your settings, track stats, and play online.</p>
+          <button class="btn btn-google btn-lg" onclick="doSignIn()">
+            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Sign in with Google
+          </button>
+        </div>
+
+        <div class="settings-card" id="account-user-card" style="display:none">
+          <h3>Your Account</h3>
+          <p class="card-desc">Signed in with Google. Your account is permanent — sign out anytime.</p>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+            <div class="avatar-preview" id="set-avatar">?</div>
+            <div>
+              <div id="set-name" style="font-size:1.1rem;font-weight:700;color:var(--t-1)">Loading...</div>
+              <div id="set-email" style="font-size:.82rem;color:var(--t-3);margin-top:2px"></div>
+              <div id="set-joined" style="font-size:.75rem;color:var(--t-4);margin-top:2px"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a href="profile.html" class="btn btn-outline btn-sm">View Profile</a>
+            <button class="btn btn-ghost btn-sm" onclick="signOut().then(()=>location.href='index.html')">Sign Out</button>
+          </div>
+        </div>
+
+        <div class="settings-card" id="account-user-card2" style="display:none">
+          <h3>Display Name</h3>
+          <p class="card-desc">This is shown to opponents and on leaderboards.</p>
+          <div style="display:flex;gap:10px">
+            <input id="display-name-input" class="form-input" placeholder="Your display name" style="max-width:280px"/>
+            <button class="btn btn-primary btn-sm" onclick="saveDisplayName()">Save</button>
+          </div>
+        </div>
+
+        <div class="settings-card danger-zone" id="account-danger" style="display:none">
+          <h3>Danger Zone</h3>
+          <p class="card-desc">These actions cannot be undone.</p>
+          <div class="setting-row">
+            <div><div class="setting-label">Sign Out</div><div class="setting-sub">Sign out from all devices</div></div>
+            <button class="btn btn-danger btn-sm" onclick="signOut().then(()=>location.href='index.html')">Sign Out</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOARD -->
+      <div id="section-board" class="section-panel">
+        <div class="settings-card">
+          <h3>Board Theme</h3>
+          <p class="card-desc">Choose the color scheme for the chess board.</p>
+          <div class="board-themes">
+            <div class="board-theme active" onclick="setBoardTheme('classic',this)" data-theme="classic">
+              <div class="board-theme-preview" id="prev-classic"></div>
+              <div class="board-theme-name">Classic</div>
+            </div>
+            <div class="board-theme" onclick="setBoardTheme('ocean',this)" data-theme="ocean">
+              <div class="board-theme-preview" id="prev-ocean"></div>
+              <div class="board-theme-name">Ocean</div>
+            </div>
+            <div class="board-theme" onclick="setBoardTheme('midnight',this)" data-theme="midnight">
+              <div class="board-theme-preview" id="prev-midnight"></div>
+              <div class="board-theme-name">Midnight</div>
+            </div>
+            <div class="board-theme" onclick="setBoardTheme('forest',this)" data-theme="forest">
+              <div class="board-theme-preview" id="prev-forest"></div>
+              <div class="board-theme-name">Forest</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3>Board Options</h3>
+          <p class="card-desc">Customize how the board looks and behaves.</p>
+          <div class="setting-row">
+            <div><div class="setting-label">Show Coordinates</div><div class="setting-sub">Display rank and file labels (a-h, 1-8)</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-coords" checked onchange="saveSetting('coords',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Show Legal Move Hints</div><div class="setting-sub">Highlight squares where selected piece can move</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-hints" checked onchange="saveSetting('hints',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Highlight Last Move</div><div class="setting-sub">Show which squares the last move involved</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-lastmove" checked onchange="saveSetting('lastmove',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Highlight Check</div><div class="setting-sub">Flash king in red when in check</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-check" checked onchange="saveSetting('checkhl',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- GAME -->
+      <div id="section-game" class="section-panel">
+        <div class="settings-card">
+          <h3>Game Preferences</h3>
+          <p class="card-desc">Control how the game behaves during play.</p>
+          <div class="setting-row">
+            <div><div class="setting-label">Auto-Queen Promotion</div><div class="setting-sub">Automatically promote pawns to Queen without asking</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-autoqueen" onchange="saveSetting('autoqueen',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Confirm Moves</div><div class="setting-sub">Show a confirmation before committing a move</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-confirm" onchange="saveSetting('confirmMove',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Show Captured Pieces</div><div class="setting-sub">Display captured pieces next to the player cards</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-captured" checked onchange="saveSetting('showCaptured',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Show Material Advantage</div><div class="setting-sub">Show +N material advantage next to captured pieces</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-material" checked onchange="saveSetting('showMaterial',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3>Default Time Control</h3>
+          <p class="card-desc">Pre-select your preferred time control when starting a game.</p>
+          <div class="form-group">
+            <label class="form-label">Default Time</label>
+            <select id="default-time" class="form-select" onchange="saveSetting('defaultTime',this.value)" style="max-width:200px">
+              <option value="60">1 minute</option>
+              <option value="180">3 minutes</option>
+              <option value="300" selected>5 minutes</option>
+              <option value="600">10 minutes</option>
+              <option value="900">15 minutes</option>
+              <option value="0">No clock</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOUND -->
+      <div id="section-sound" class="section-panel">
+        <div class="settings-card">
+          <h3>Sound Effects</h3>
+          <p class="card-desc">Control in-game audio feedback. Requires <code>move.mp3</code> and <code>mate.mp3</code> in <code>assets/audio/</code>.</p>
+          <div class="setting-row">
+            <div><div class="setting-label">Enable Sound Effects</div><div class="setting-sub">Piece move, capture, check, and game-end sounds</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-sfx" checked onchange="saveSetting('sfxEnabled',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Move Sound</div><div class="setting-sub">Play a sound when a piece moves</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-movesnd" checked onchange="saveSetting('moveSound',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Capture Sound</div><div class="setting-sub">Different sound when a piece is captured</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-capsnd" checked onchange="saveSetting('captureSound',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Volume</div></div>
+            <input type="range" class="vol-slider" id="sfx-vol" min="0" max="100" value="70" style="width:140px" onchange="saveSetting('sfxVolume',this.value)"/>
+          </div>
+          <div style="margin-top:16px">
+            <button class="btn btn-outline btn-sm" onclick="testSound()">🔊 Test Sound</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPEARANCE -->
+      <div id="section-appearance" class="section-panel">
+        <div class="settings-card">
+          <h3>Interface</h3>
+          <p class="card-desc">Adjust the look and feel of the platform.</p>
+          <div class="setting-row">
+            <div><div class="setting-label">Smooth Animations</div><div class="setting-sub">Animate piece moves and UI transitions</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-anim" checked onchange="saveSetting('animations',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Compact Mode</div><div class="setting-sub">Reduce padding and spacing for smaller screens</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-compact" onchange="toggleCompact(this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3>Accent Color</h3>
+          <p class="card-desc">Choose a highlight color for the interface.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap" id="accent-colors">
+            <div class="accent-swatch active" data-color="#c9a227" style="width:32px;height:32px;border-radius:50%;background:#c9a227;cursor:pointer;border:3px solid #fff;transition:.15s"></div>
+            <div class="accent-swatch" data-color="#4a7cbf" style="width:32px;height:32px;border-radius:50%;background:#4a7cbf;cursor:pointer;border:3px solid transparent;transition:.15s"></div>
+            <div class="accent-swatch" data-color="#58a14a" style="width:32px;height:32px;border-radius:50%;background:#58a14a;cursor:pointer;border:3px solid transparent;transition:.15s"></div>
+            <div class="accent-swatch" data-color="#a855f7" style="width:32px;height:32px;border-radius:50%;background:#a855f7;cursor:pointer;border:3px solid transparent;transition:.15s"></div>
+            <div class="accent-swatch" data-color="#ef4444" style="width:32px;height:32px;border-radius:50%;background:#ef4444;cursor:pointer;border:3px solid transparent;transition:.15s"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRIVACY -->
+      <div id="section-privacy-s" class="section-panel">
+        <div class="settings-card">
+          <h3>Privacy Settings</h3>
+          <p class="card-desc">Control how your data is used and displayed.</p>
+          <div class="setting-row">
+            <div><div class="setting-label">Show on Leaderboard</div><div class="setting-sub">Allow your name and rating to appear publicly</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-leaderboard" checked onchange="saveSetting('showOnLeaderboard',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Show Game History</div><div class="setting-sub">Allow others to view your recent games</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-history" checked onchange="saveSetting('showHistory',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Show Online Status</div><div class="setting-sub">Show when you are currently online</div></div>
+            <label class="toggle"><input type="checkbox" id="tog-online-status" checked onchange="saveSetting('showOnline',this.checked)"/><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>Data</h3>
+          <p class="card-desc">Manage your stored data.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" onclick="clearLocalData()">Clear Local Storage</button>
+            <a href="privacy.html" class="btn btn-ghost btn-sm">Privacy Policy →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BOARD_THEMES = {
+  classic:  { light:'#f0d9b5', dark:'#b58863' },
+  ocean:    { light:'#9dbdd8', dark:'#4a7ea5' },
+  midnight: { light:'#8899bb', dark:'#334466' },
+  forest:   { light:'#d4e8c2', dark:'#4a7c59' }
+};
+
+// Build theme previews
+Object.entries(BOARD_THEMES).forEach(([name,cols])=>{
+  const el=document.getElementById('prev-'+name);
+  if(!el) return;
+  for(let i=0;i<16;i++){
+    const sq=document.createElement('div');
+    sq.className='bt-sq';
+    sq.style.background=((Math.floor(i/4)+i)%2===0)?cols.light:cols.dark;
+    el.appendChild(sq);
+  }
+});
+
+function showSection(id, el){
+  document.querySelectorAll('.section-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.settings-nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('section-'+id)?.classList.add('active');
+  if(el) el.classList.add('active');
+}
+
+function saveSetting(key, value){
+  const settings = JSON.parse(localStorage.getItem('cmSettings')||'{}');
+  settings[key] = value;
+  localStorage.setItem('cmSettings', JSON.stringify(settings));
+  showToast('Setting saved','success',1500);
+}
+
+function loadSettings(){
+  const s = JSON.parse(localStorage.getItem('cmSettings')||'{}');
+  const map = {
+    'tog-coords':'coords','tog-hints':'hints','tog-lastmove':'lastmove',
+    'tog-check':'checkhl','tog-autoqueen':'autoqueen','tog-confirm':'confirmMove',
+    'tog-captured':'showCaptured','tog-material':'showMaterial',
+    'tog-sfx':'sfxEnabled','tog-movesnd':'moveSound','tog-capsnd':'captureSound',
+    'tog-anim':'animations','tog-compact':'compact',
+    'tog-leaderboard':'showOnLeaderboard','tog-history':'showHistory','tog-online-status':'showOnline'
+  };
+  Object.entries(map).forEach(([id,key])=>{
+    const el=document.getElementById(id);
+    if(el && s[key]!==undefined) el.checked=s[key];
+  });
+  if(s.sfxVolume!==undefined) document.getElementById('sfx-vol').value=s.sfxVolume;
+  if(s.defaultTime) document.getElementById('default-time').value=s.defaultTime;
+  if(s.boardTheme) {
+    document.querySelectorAll('.board-theme').forEach(t=>t.classList.toggle('active',t.dataset.theme===s.boardTheme));
+  }
+  if(s.accentColor) applyAccent(s.accentColor,false);
+}
+
+function setBoardTheme(name, el){
+  document.querySelectorAll('.board-theme').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  saveSetting('boardTheme', name);
+  const theme = BOARD_THEMES[name];
+  document.documentElement.style.setProperty('--board-light', theme.light);
+  document.documentElement.style.setProperty('--board-dark', theme.dark);
+}
+
+function applyAccent(color, save=true){
+  document.documentElement.style.setProperty('--gold', color);
+  document.querySelectorAll('.accent-swatch').forEach(s=>{
+    s.style.border = s.dataset.color===color ? '3px solid #fff' : '3px solid transparent';
+    s.classList.toggle('active', s.dataset.color===color);
+  });
+  if(save) saveSetting('accentColor', color);
+}
+
+document.querySelectorAll('.accent-swatch').forEach(s=>{
+  s.onclick=()=>applyAccent(s.dataset.color);
+});
+
+function toggleCompact(val){
+  document.body.classList.toggle('compact-mode', val);
+  saveSetting('compact', val);
+}
+
+function testSound(){
+  try{ new Audio('assets/audio/move.mp3').play().catch(()=>showToast('Sound file not found. Add move.mp3 to assets/audio/','error')); }
+  catch(e){ showToast('Sound not available','error'); }
+}
+
+function saveDisplayName(){
+  const name = document.getElementById('display-name-input').value.trim();
+  if(!name){ showToast('Enter a display name','error'); return; }
+  if(currentUser && !currentUser.isAnonymous){
+    currentUser.updateProfile({ displayName: name }).then(()=>{
+      DB.ref('users/'+currentUser.uid).update({ displayName: name });
+      showToast('Display name saved!','success');
+    }).catch(e=>showToast(e.message,'error'));
+  }
+}
+
+function clearLocalData(){
+  if(!confirm('Clear all local settings? This cannot be undone.')) return;
+  localStorage.removeItem('cmSettings');
+  showToast('Local data cleared','success');
+  setTimeout(()=>location.reload(),800);
+}
+
+function doSignIn(){
+  signInWithGoogle().then(r=>{
+    showToast('Signed in as '+getDisplayName(r.user),'success');
+    onAuthReady(r.user);
+  }).catch(e=>showToast(e.message,'error'));
+}
+
+function onAuthReady(user){
+  const guestCard = document.getElementById('account-guest-card');
+  const userCard  = document.getElementById('account-user-card');
+  const userCard2 = document.getElementById('account-user-card2');
+  const dangerCard= document.getElementById('account-danger');
+  if(user && !user.isAnonymous){
+    if(guestCard) guestCard.style.display='none';
+    if(userCard)  userCard.style.display='block';
+    if(userCard2) userCard2.style.display='block';
+    if(dangerCard)dangerCard.style.display='block';
+    const av=document.getElementById('set-avatar');
+    if(av){
+      if(user.photoURL) av.innerHTML=`<img src="${user.photoURL}" alt="">`;
+      else av.textContent=(user.displayName||'?').slice(0,2).toUpperCase();
+    }
+    const ni=document.getElementById('display-name-input');
+    if(ni) ni.value=user.displayName||'';
+    const n=document.getElementById('set-name'); if(n) n.textContent=user.displayName||'Player';
+    const e=document.getElementById('set-email'); if(e) e.textContent=user.email||'';
+    DB.ref('users/'+user.uid).once('value').then(snap=>{
+      const d=snap.val()||{};
+      const j=document.getElementById('set-joined');
+      if(j) j.textContent='Joined '+( d.joinedAt?fmtDate(d.joinedAt):'—');
+    });
+  } else {
+    if(guestCard) guestCard.style.display='block';
+    if(userCard)  userCard.style.display='none';
+    if(userCard2) userCard2.style.display='none';
+    if(dangerCard)dangerCard.style.display='none';
+  }
+}
+
+loadSettings();
+</script>
+</body>
+</html>

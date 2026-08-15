@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Contact — CheckMate Chess</title>
+<meta name="description" content="Get in touch with the CheckMate chess team."/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<style>
+.contact-wrap{max-width:800px;margin:0 auto;padding:40px 20px}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px}
+.contact-form-card{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-xl);padding:32px}
+.contact-info-card{display:flex;flex-direction:column;gap:16px}
+.info-card{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-lg);padding:20px;display:flex;align-items:flex-start;gap:14px}
+.info-icon{font-size:1.5rem;flex-shrink:0}
+.info-title{font-weight:700;font-size:.95rem;margin-bottom:4px}
+.info-desc{font-size:.85rem;color:var(--t-3);line-height:1.6}
+.char-count{font-size:.75rem;color:var(--t-4);text-align:right;margin-top:4px}
+.success-msg{background:rgba(88,161,74,.1);border:1px solid rgba(88,161,74,.3);border-radius:var(--r-md);padding:20px;text-align:center;display:none}
+.success-msg.visible{display:block}
+@media(max-width:700px){.contact-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+
+<div class="contact-wrap">
+  <div class="page-header">
+    <h1>📬 Contact Us</h1>
+    <p>Have a question, bug report, or feedback? We'd love to hear from you.</p>
+  </div>
+
+  <div class="contact-grid">
+    <div class="contact-form-card">
+      <h2 style="margin-bottom:6px;font-size:1.2rem">Send a Message</h2>
+      <p style="color:var(--t-3);font-size:.88rem;margin-bottom:24px">Messages are stored securely and we'll respond as soon as possible.</p>
+
+      <div id="success-msg" class="success-msg">
+        <div style="font-size:2rem;margin-bottom:8px">✅</div>
+        <h3>Message Sent!</h3>
+        <p style="color:var(--t-3);font-size:.88rem;margin-top:6px">Thanks for reaching out. We'll get back to you soon.</p>
+      </div>
+
+      <div id="contact-form" style="display:flex;flex-direction:column;gap:16px">
+        <div class="form-group">
+          <label class="form-label">Your Name</label>
+          <input id="c-name" class="form-input" placeholder="What should we call you?" maxlength="60"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input id="c-email" class="form-input" type="email" placeholder="your@email.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <select id="c-subject" class="form-select">
+            <option value="">Select a topic...</option>
+            <option value="bug">Bug Report</option>
+            <option value="feature">Feature Request</option>
+            <option value="account">Account Issue</option>
+            <option value="game">Game Question</option>
+            <option value="feedback">General Feedback</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message</label>
+          <textarea id="c-message" class="form-input" rows="5" placeholder="Describe your question or issue in detail..." maxlength="1000" style="resize:vertical" oninput="updateCount(this)"></textarea>
+          <div class="char-count" id="char-count">0 / 1000</div>
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="submitContact()">Send Message →</button>
+      </div>
+    </div>
+
+    <div class="contact-info-card">
+      <div class="info-card">
+        <span class="info-icon">🐛</span>
+        <div>
+          <div class="info-title">Bug Reports</div>
+          <div class="info-desc">Found something broken? Please describe what happened, what you expected, and which browser you're using. Screenshots help a lot.</div>
+        </div>
+      </div>
+      <div class="info-card">
+        <span class="info-icon">💡</span>
+        <div>
+          <div class="info-title">Feature Requests</div>
+          <div class="info-desc">Have an idea to improve CheckMate? Tell us what you'd like to see and why it would be useful for chess players.</div>
+        </div>
+      </div>
+      <div class="info-card">
+        <span class="info-icon">🔑</span>
+        <div>
+          <div class="info-title">Account Issues</div>
+          <div class="info-desc">Problems signing in, missing data, or rating issues? Include your Google account email so we can look into it.</div>
+        </div>
+      </div>
+      <div class="info-card">
+        <span class="info-icon">⚡</span>
+        <div>
+          <div class="info-title">Response Time</div>
+          <div class="info-desc">We aim to respond within 24–48 hours. For urgent issues check the <a href="faq.html">FAQ</a> first — most common questions are answered there.</div>
+        </div>
+      </div>
+      <div class="info-card">
+        <span class="info-icon">🔒</span>
+        <div>
+          <div class="info-title">Privacy</div>
+          <div class="info-desc">Your contact messages are stored securely in Firebase and used only to respond to your inquiry. See our <a href="privacy.html">Privacy Policy</a>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function onAuthReady(user){
+  if(user && !user.isAnonymous){
+    const nameEl=document.getElementById('c-name');
+    const emailEl=document.getElementById('c-email');
+    if(nameEl && !nameEl.value) nameEl.value=user.displayName||'';
+    if(emailEl && !emailEl.value) emailEl.value=user.email||'';
+  }
+}
+function updateCount(el){
+  document.getElementById('char-count').textContent=el.value.length+' / 1000';
+}
+function submitContact(){
+  const name=document.getElementById('c-name').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const subject=document.getElementById('c-subject').value;
+  const msg=document.getElementById('c-message').value.trim();
+  if(!name){showToast('Please enter your name','error');return;}
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showToast('Please enter a valid email','error');return;}
+  if(!subject){showToast('Please select a subject','error');return;}
+  if(msg.length<10){showToast('Please write a message (at least 10 characters)','error');return;}
+
+  const btn=document.querySelector('#contact-form button');
+  btn.disabled=true; btn.textContent='Sending...';
+
+  DB.ref('contactMessages').push({
+    name: name.substring(0,60),
+    email: email.substring(0,100),
+    subject,
+    message: msg.substring(0,1000),
+    uid: currentUser?.uid||'anonymous',
+    ts: firebase.database.ServerValue.TIMESTAMP
+  }).then(()=>{
+    document.getElementById('contact-form').style.display='none';
+    document.getElementById('success-msg').classList.add('visible');
+  }).catch(e=>{
+    btn.disabled=false; btn.textContent='Send Message →';
+    showToast('Failed to send. Please try again.','error');
+  });
+}
+</script>
+</body>
+</html>
