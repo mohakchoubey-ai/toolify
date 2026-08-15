@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Leaderboard — CheckMate</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<style>
+.lb-wrap{max-width:900px;margin:0 auto;padding:30px 20px}
+.lb-table{width:100%;border-collapse:collapse}
+.lb-table th{background:var(--bg-2);border-bottom:1px solid var(--border-1);padding:12px 16px;text-align:left;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;color:var(--t-3);font-weight:600}
+.lb-table td{padding:14px 16px;border-bottom:1px solid var(--border-1);font-size:.9rem}
+.lb-table tr:hover td{background:rgba(255,255,255,.02)}
+.rank-badge{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem}
+.rank-1{background:var(--gold);color:var(--bg-0)}.rank-2{background:#c0c0c0;color:var(--bg-0)}.rank-3{background:#cd7f32;color:#fff}
+.rank-n{background:var(--bg-4);color:var(--t-3)}
+.player-row{display:flex;align-items:center;gap:10px}
+.lb-avatar{width:32px;height:32px;border-radius:50%;background:var(--bg-4);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--gold);overflow:hidden;flex-shrink:0}
+.lb-avatar img{width:100%;height:100%;object-fit:cover}
+.win-bar{height:4px;border-radius:2px;background:var(--bg-4);overflow:hidden;min-width:60px}
+.win-bar-fill{height:100%;background:var(--green);border-radius:2px}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+
+<div class="lb-wrap">
+  <div class="page-header">
+    <h1>🏆 Leaderboard</h1>
+    <p>Top players ranked by rating and performance</p>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="loadTab('rating',this)">By Rating</button>
+    <button class="tab-btn" onclick="loadTab('wins',this)">Most Wins</button>
+    <button class="tab-btn" onclick="loadTab('games',this)">Most Games</button>
+  </div>
+  <div id="lb-content" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-lg);overflow:hidden">
+    <div id="lb-loading" style="padding:40px;text-align:center;color:var(--t-3)">
+      <div class="spinner" style="margin:0 auto 12px"></div>Loading players...
+    </div>
+    <table class="lb-table" id="lb-table" style="display:none">
+      <thead>
+        <tr><th>Rank</th><th>Player</th><th>Rating</th><th>W</th><th>L</th><th>D</th><th>Games</th><th>Win%</th></tr>
+      </thead>
+      <tbody id="lb-body"></tbody>
+    </table>
+  </div>
+  <p style="margin-top:16px;font-size:.82rem;color:var(--t-4);text-align:center">Ratings update after each online game. Sign in with Google to appear on the leaderboard.</p>
+</div>
+
+<script>
+let currentSort='rating';
+function onAuthReady(){}
+
+function loadTab(sort, btn){
+  currentSort=sort;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  loadLeaderboard(sort);
+}
+
+function loadLeaderboard(sort='rating'){
+  document.getElementById('lb-loading').style.display='block';
+  document.getElementById('lb-table').style.display='none';
+  DB.ref('users').orderByChild(sort).limitToLast(50).once('value').then(snap=>{
+    const users=[];
+    snap.forEach(child=>{ const d=child.val(); if(d.displayName) users.push(d); });
+    users.sort((a,b)=>(b[sort]||0)-(a[sort]||0));
+    renderLeaderboard(users);
+  }).catch(()=>{
+    document.getElementById('lb-loading').textContent='Could not load leaderboard.';
+  });
+}
+
+function renderLeaderboard(users){
+  document.getElementById('lb-loading').style.display='none';
+  document.getElementById('lb-table').style.display='table';
+  const body=document.getElementById('lb-body');
+  body.innerHTML='';
+  if(!users.length){
+    body.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--t-4)">No players yet. Be the first to sign in!</td></tr>';
+    return;
+  }
+  users.forEach((u,i)=>{
+    const rank=i+1;
+    const games=u.gamesPlayed||0;
+    const wins=u.wins||0;
+    const pct=games>0?Math.round((wins/games)*100):0;
+    const rankBadge=rank<=3?`rank-${rank}`:'rank-n';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="rank-badge ${rankBadge}">${rank<=3?['🥇','🥈','🥉'][rank-1]:rank}</span></td>
+      <td><div class="player-row">
+        <div class="lb-avatar">${u.photoURL?`<img src="${u.photoURL}" alt="">`:(u.displayName||'?').slice(0,2).toUpperCase()}</div>
+        <div>
+          <div style="font-weight:600;color:var(--t-1)">${u.displayName||'Anonymous'}</div>
+          <div style="font-size:.75rem;color:var(--t-4)">${u.email?u.email.split('@')[0]:''}</div>
+        </div>
+      </div></td>
+      <td><span style="font-family:var(--font-mono);font-weight:700;color:var(--gold)">${u.rating||1200}</span></td>
+      <td style="color:var(--green-light);font-weight:600">${u.wins||0}</td>
+      <td style="color:#ef6666">${u.losses||0}</td>
+      <td style="color:var(--t-3)">${u.draws||0}</td>
+      <td>${games}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="win-bar"><div class="win-bar-fill" style="width:${pct}%"></div></div>
+          <span style="font-size:.8rem;color:var(--t-3);font-family:var(--font-mono)">${pct}%</span>
+        </div>
+      </td>`;
+    body.appendChild(tr);
+  });
+}
+
+AUTH.onAuthStateChanged(()=>loadLeaderboard('rating'));
+</script>
+</body></html>

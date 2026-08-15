@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Profile — CheckMate</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
+<link rel="stylesheet" href="css/global.css"/>
+<style>
+.profile-wrap{max-width:900px;margin:0 auto;padding:30px 20px}
+.profile-header{background:linear-gradient(135deg,var(--bg-2),var(--bg-3));border:1px solid var(--border-1);border-radius:var(--r-xl);padding:32px;display:flex;align-items:center;gap:24px;margin-bottom:24px;flex-wrap:wrap}
+.profile-avatar{width:90px;height:90px;border-radius:50%;background:var(--bg-4);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;color:var(--gold);overflow:hidden;flex-shrink:0}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-name{font-size:1.8rem;font-weight:800;letter-spacing:-.5px}
+.profile-meta{font-size:.85rem;color:var(--t-3);margin-top:4px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.recent-game{display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid var(--border-1)}
+.recent-game:last-child{border-bottom:none}
+.result-pill{width:44px;height:28px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;flex-shrink:0}
+.result-w{background:rgba(88,161,74,.2);color:var(--green-light)}.result-l{background:rgba(217,64,64,.2);color:#ef6666}.result-d{background:rgba(201,162,39,.15);color:var(--gold)}
+.achiev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.achiev-card{background:var(--bg-3);border:1px solid var(--border-2);border-radius:var(--r-md);padding:16px;text-align:center;opacity:.4;transition:all var(--t-base)}
+.achiev-card.unlocked{opacity:1;border-color:rgba(201,162,39,.3)}
+.achiev-icon{font-size:1.8rem;margin-bottom:6px}
+.achiev-name{font-size:.8rem;font-weight:700;color:var(--t-1)}.achiev-desc{font-size:.72rem;color:var(--t-4);margin-top:2px}
+.not-signed{text-align:center;padding:80px 20px}
+</style>
+</head>
+<body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/nav.js"></script>
+
+<div class="profile-wrap">
+  <div id="not-signed" class="not-signed" style="display:none">
+    <div style="font-size:4rem;margin-bottom:16px">👤</div>
+    <h2>Sign in to view your profile</h2>
+    <p style="color:var(--t-3);margin:10px 0 24px">Track your games, rating, and achievements.</p>
+    <button class="btn btn-google btn-lg" onclick="signInWithGoogle().then(()=>location.reload())">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Sign in with Google
+    </button>
+  </div>
+
+  <div id="profile-content" style="display:none">
+    <div class="profile-header">
+      <div class="profile-avatar" id="p-avatar">?</div>
+      <div style="flex:1">
+        <div class="profile-name" id="p-name">Loading...</div>
+        <div class="profile-meta" id="p-email"></div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <span class="badge badge-gold" id="p-rating">Rating: —</span>
+          <span class="badge badge-dim" id="p-joined">Joined: —</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <a href="settings.html" class="btn btn-outline btn-sm">⚙ Settings</a>
+        <button class="btn btn-ghost btn-sm" onclick="signOut().then(()=>location.href='index.html')">Sign Out</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value" id="s-games">0</div><div class="stat-label">Games Played</div></div>
+      <div class="stat-card"><div class="stat-value text-green" id="s-wins">0</div><div class="stat-label">Wins</div></div>
+      <div class="stat-card"><div class="stat-value text-red" id="s-losses">0</div><div class="stat-label">Losses</div></div>
+      <div class="stat-card"><div class="stat-value text-gold" id="s-draws">0</div><div class="stat-label">Draws</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+      <div class="card">
+        <h3 style="margin-bottom:16px">Recent Games</h3>
+        <div id="recent-games"><p style="color:var(--t-4);font-size:.85rem">No games yet. <a href="online.html">Play online!</a></p></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:16px">Performance</h3>
+        <div style="display:flex;flex-direction:column;gap:10px" id="perf-stats">
+          <div style="display:flex;justify-content:space-between;font-size:.88rem"><span style="color:var(--t-3)">Win Rate</span><span id="perf-wr" style="font-weight:700;color:var(--green-light)">—</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.88rem"><span style="color:var(--t-3)">Rating</span><span id="perf-rating" style="font-weight:700;font-family:var(--font-mono)">—</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.88rem"><span style="color:var(--t-3)">Puzzles Solved</span><span id="perf-puzzles" style="font-weight:700">—</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.88rem"><span style="color:var(--t-3)">Best Puzzle Streak</span><span id="perf-streak" style="font-weight:700;color:var(--gold)">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:16px">Achievements</h3>
+      <div class="achiev-grid" id="achievements"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ACHIEVEMENTS=[
+  {id:'first_game',icon:'♟',name:'First Move',desc:'Play your first game',check:u=>u.gamesPlayed>=1},
+  {id:'win_first',icon:'🏆',name:'First Victory',desc:'Win your first game',check:u=>u.wins>=1},
+  {id:'games_10',icon:'🎯',name:'10 Games',desc:'Play 10 games',check:u=>u.gamesPlayed>=10},
+  {id:'games_50',icon:'⚔️',name:'50 Games',desc:'Play 50 games',check:u=>u.gamesPlayed>=50},
+  {id:'wins_10',icon:'👑',name:'10 Wins',desc:'Win 10 games',check:u=>u.wins>=10},
+  {id:'rating_1300',icon:'📈',name:'Rising Star',desc:'Reach 1300 rating',check:u=>u.rating>=1300},
+  {id:'rating_1500',icon:'🌟',name:'Expert',desc:'Reach 1500 rating',check:u=>u.rating>=1500},
+  {id:'puzzle_10',icon:'🧩',name:'Puzzle Fan',desc:'Solve 10 puzzles',check:(u,p)=>p.solved>=10},
+  {id:'streak_5',icon:'🔥',name:'On Fire',desc:'5 puzzle streak',check:(u,p)=>p.bestStreak>=5},
+];
+
+function onAuthReady(user){
+  if(!user||user.isAnonymous){
+    document.getElementById('not-signed').style.display='block';
+    document.getElementById('profile-content').style.display='none';
+    return;
+  }
+  document.getElementById('not-signed').style.display='none';
+  document.getElementById('profile-content').style.display='block';
+  loadProfile(user);
+}
+
+function loadProfile(user){
+  const el=id=>document.getElementById(id);
+  if(user.photoURL) el('p-avatar').innerHTML=`<img src="${user.photoURL}" alt="">`;
+  else el('p-avatar').textContent=(user.displayName||'?').slice(0,2).toUpperCase();
+  el('p-name').textContent=user.displayName||'Player';
+  el('p-email').textContent=user.email||'';
+
+  DB.ref('users/'+user.uid).on('value',snap=>{
+    const d=snap.val()||{};
+    el('p-rating').textContent='Rating: '+(d.rating||1200);
+    el('p-joined').textContent='Joined: '+(d.joinedAt?fmtDate(d.joinedAt):'—');
+    el('s-games').textContent=d.gamesPlayed||0;
+    el('s-wins').textContent=d.wins||0;
+    el('s-losses').textContent=d.losses||0;
+    el('s-draws').textContent=d.draws||0;
+    const wr=d.gamesPlayed>0?Math.round(((d.wins||0)/d.gamesPlayed)*100):0;
+    el('perf-wr').textContent=wr+'%';
+    el('perf-rating').textContent=d.rating||1200;
+
+    DB.ref('puzzleStats/'+user.uid).once('value').then(ps=>{
+      const pd=ps.val()||{};
+      el('perf-puzzles').textContent=pd.solved||0;
+      el('perf-streak').textContent=pd.bestStreak||0;
+      renderAchievements(d,pd);
+    });
+  });
+
+  DB.ref('gameHistory/'+user.uid).limitToLast(10).once('value').then(snap=>{
+    const games=[];
+    snap.forEach(c=>games.push(c.val()));
+    games.reverse();
+    renderRecentGames(games);
+  });
+}
+
+function renderRecentGames(games){
+  const el=document.getElementById('recent-games');
+  if(!games.length){el.innerHTML='<p style="color:var(--t-4);font-size:.85rem">No games yet. <a href="online.html">Play online!</a></p>';return;}
+  el.innerHTML='';
+  games.forEach(g=>{
+    const myColor=g.myColor||'white';
+    const winner=g.result?.winner;
+    const res=winner===myColor?'W':winner===null?'D':'L';
+    const cls=res==='W'?'result-w':res==='D'?'result-d':'result-l';
+    const div=document.createElement('div');
+    div.className='recent-game';
+    div.innerHTML=`<div class="result-pill ${cls}">${res}</div><div style="flex:1"><div style="font-size:.88rem;font-weight:600;color:var(--t-1)">vs ${g.opponent||'Opponent'}</div><div style="font-size:.75rem;color:var(--t-4)">${fmtDate(g.ts||Date.now())} · ${myColor}</div></div><div style="font-size:.75rem;color:var(--t-3)">${g.result?.reason||''}</div>`;
+    el.appendChild(div);
+  });
+}
+
+function renderAchievements(userData,puzzleData){
+  const el=document.getElementById('achievements');
+  el.innerHTML='';
+  ACHIEVEMENTS.forEach(a=>{
+    const unlocked=a.check(userData,puzzleData);
+    const div=document.createElement('div');
+    div.className='achiev-card'+(unlocked?' unlocked':'');
+    div.innerHTML=`<div class="achiev-icon">${a.icon}</div><div class="achiev-name">${a.name}</div><div class="achiev-desc">${a.desc}</div>${unlocked?'<div style="margin-top:6px"><span class="badge badge-gold" style="font-size:.7rem">Unlocked</span></div>':''}`;
+    el.appendChild(div);
+  });
+}
+</script>
+</body></html>
