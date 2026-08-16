@@ -1,0 +1,3994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PAGER — P2P Device Messaging</title>
+
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #f5f7fb;
+    --panel: #ffffff;
+    --panel2: #f1f3f7;
+    --border: #e1e5eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --danger: #dc2626;
+    --success: #16a34a;
+    --bubble-me: #2563eb;
+    --bubble-peer: #e9edf2;
+    --bubble-peer-text: #111827;
+}
+
+[data-theme="dark"] {
+    --bg: #080b10;
+    --panel: #11151c;
+    --panel2: #191e27;
+    --border: #29303b;
+    --text: #f5f7fa;
+    --muted: #9ca3af;
+    --accent: #3b82f6;
+    --accent-hover: #60a5fa;
+    --danger: #f87171;
+    --success: #4ade80;
+    --bubble-me: #2563eb;
+    --bubble-peer: #252b35;
+    --bubble-peer-text: #f3f4f6;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background: var(--bg);
+    color: var(--text);
+}
+
+button,
+input,
+textarea {
+    font-family: inherit;
+}
+
+/* =========================================================
+   APP
+========================================================= */
+
+.app {
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+    width: 320px;
+    min-width: 320px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+
+    display: flex;
+    flex-direction: column;
+}
+
+.brand {
+    padding: 22px;
+    border-bottom: 1px solid var(--border);
+}
+
+.brand-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand h1 {
+    font-size: 22px;
+    font-weight: 850;
+    letter-spacing: -0.8px;
+}
+
+.brand p {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.icon-btn {
+    width: 38px;
+    height: 38px;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    background: var(--panel2);
+    color: var(--text);
+
+    cursor: pointer;
+    font-size: 16px;
+
+    transition: .2s;
+}
+
+.icon-btn:hover {
+    border-color: var(--accent);
+}
+
+/* =========================================================
+   MY DEVICE
+========================================================= */
+
+.my-device {
+    margin: 15px;
+    padding: 15px;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    background: var(--panel2);
+}
+
+.device-label {
+    color: var(--muted);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    text-transform: uppercase;
+    letter-spacing: .8px;
+}
+
+.my-name {
+    margin-top: 5px;
+
+    font-size: 16px;
+    font-weight: 750;
+}
+
+.my-id {
+    display: flex;
+    gap: 7px;
+    margin-top: 9px;
+}
+
+.my-id code {
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 9px;
+
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    color: var(--accent);
+
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 2px;
+
+    text-align: center;
+}
+
+.copy-btn {
+    border: 0;
+    border-radius: 8px;
+
+    padding: 8px 10px;
+
+    background: var(--accent);
+    color: white;
+
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.copy-btn:hover {
+    background: var(--accent-hover);
+}
+
+/* =========================================================
+   PAIR
+========================================================= */
+
+.pair-section {
+    padding: 0 15px 15px;
+}
+
+.primary-btn {
+    width: 100%;
+
+    border: 0;
+    border-radius: 10px;
+
+    padding: 12px;
+
+    background: var(--accent);
+    color: white;
+
+    cursor: pointer;
+
+    font-weight: 750;
+
+    transition: .2s;
+}
+
+.primary-btn:hover {
+    background: var(--accent-hover);
+}
+
+/* =========================================================
+   DEVICE LIST
+========================================================= */
+
+.section-title {
+    padding: 0 15px 8px;
+
+    color: var(--muted);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    text-transform: uppercase;
+    letter-spacing: .8px;
+}
+
+.devices {
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 0 10px 15px;
+}
+
+.device-item {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 11px;
+
+    background: transparent;
+
+    border: 1px solid transparent;
+    border-radius: 12px;
+
+    color: var(--text);
+
+    cursor: pointer;
+
+    text-align: left;
+
+    transition: .15s;
+}
+
+.device-item:hover {
+    background: var(--panel2);
+}
+
+.device-item.active {
+    background: var(--panel2);
+    border-color: var(--border);
+}
+
+.device-icon {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 12px;
+
+    background: var(--panel2);
+    border: 1px solid var(--border);
+
+    font-size: 19px;
+}
+
+.device-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.device-name {
+    font-size: 14px;
+    font-weight: 750;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.device-status {
+    margin-top: 3px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.online-dot,
+.offline-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    flex-shrink: 0;
+}
+
+.online-dot {
+    background: var(--success);
+}
+
+.offline-dot {
+    background: var(--muted);
+}
+
+.empty-devices {
+    padding: 30px 15px;
+
+    color: var(--muted);
+
+    text-align: center;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
+    flex: 1;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================================
+   CHAT HEADER
+========================================================= */
+
+.chat-header {
+    height: 72px;
+    min-height: 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 22px;
+
+    background: var(--panel);
+
+    border-bottom: 1px solid var(--border);
+}
+
+.chat-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chat-device-icon {
+    width: 40px;
+    height: 40px;
+
+    display: grid;
+    place-items: center;
+
+    background: var(--panel2);
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.chat-name {
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.chat-status {
+    margin-top: 2px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 7px;
+}
+
+/* =========================================================
+   MESSAGES
+========================================================= */
+
+.messages {
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 22px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.welcome {
+    max-width: 420px;
+
+    margin: auto;
+
+    color: var(--muted);
+
+    text-align: center;
+}
+
+.welcome-icon {
+    margin-bottom: 12px;
+
+    font-size: 45px;
+}
+
+.welcome h2 {
+    color: var(--text);
+
+    font-size: 21px;
+}
+
+.welcome p {
+    margin-top: 8px;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+.message {
+    max-width: 75%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.message.me {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.message.peer {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.bubble {
+    padding: 10px 13px;
+
+    border-radius: 15px;
+
+    font-size: 14px;
+
+    line-height: 1.45;
+
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.message.me .bubble {
+    background: var(--bubble-me);
+    color: white;
+
+    border-bottom-right-radius: 4px;
+}
+
+.message.peer .bubble {
+    background: var(--bubble-peer);
+    color: var(--bubble-peer-text);
+
+    border-bottom-left-radius: 4px;
+}
+
+.message-meta {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    margin-top: 4px;
+    padding: 0 3px;
+
+    color: var(--muted);
+
+    font-size: 10px;
+}
+
+.tick {
+    color: var(--accent);
+}
+
+/* =========================================================
+   COMPOSER
+========================================================= */
+
+.composer {
+    padding: 12px 18px 18px;
+
+    background: var(--panel);
+
+    border-top: 1px solid var(--border);
+}
+
+.composer-box {
+    display: flex;
+    align-items: flex-end;
+
+    gap: 8px;
+
+    padding: 7px;
+
+    background: var(--panel2);
+
+    border: 1px solid var(--border);
+    border-radius: 15px;
+}
+
+#messageInput {
+    flex: 1;
+
+    min-height: 40px;
+    max-height: 130px;
+
+    resize: none;
+
+    padding: 10px;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+    color: var(--text);
+
+    font-size: 14px;
+}
+
+#messageInput::placeholder {
+    color: var(--muted);
+}
+
+.send-btn {
+    width: 42px;
+    height: 42px;
+
+    border: 0;
+    border-radius: 11px;
+
+    background: var(--accent);
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 17px;
+}
+
+.send-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+.composer-hint {
+    margin-top: 6px;
+
+    color: var(--muted);
+
+    text-align: center;
+
+    font-size: 10px;
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    z-index: 100;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(0,0,0,.55);
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal {
+    width: 100%;
+    max-width: 430px;
+
+    padding: 22px;
+
+    background: var(--panel);
+
+    border: 1px solid var(--border);
+    border-radius: 18px;
+}
+
+.modal h2 {
+    font-size: 19px;
+}
+
+.modal p {
+    margin-top: 7px;
+
+    color: var(--muted);
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+.input-label {
+    display: block;
+
+    margin-top: 18px;
+    margin-bottom: 7px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+    font-weight: 800;
+
+    text-transform: uppercase;
+}
+
+.text-input {
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    outline: none;
+
+    background: var(--panel2);
+    color: var(--text);
+
+    font-size: 14px;
+}
+
+.text-input:focus {
+    border-color: var(--accent);
+}
+
+.modal-actions {
+    display: flex;
+
+    gap: 8px;
+
+    margin-top: 18px;
+}
+
+.secondary-btn {
+    flex: 1;
+
+    padding: 11px;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    background: var(--panel2);
+    color: var(--text);
+
+    cursor: pointer;
+
+    font-weight: 700;
+}
+
+.modal-actions .primary-btn {
+    flex: 1;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast {
+    position: fixed;
+
+    left: 50%;
+    bottom: 25px;
+
+    z-index: 200;
+
+    padding: 10px 15px;
+
+    border-radius: 10px;
+
+    background: var(--text);
+    color: var(--bg);
+
+    font-size: 12px;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transform:
+        translateX(-50%)
+        translateY(20px);
+
+    transition: .25s;
+}
+
+.toast.show {
+    opacity: 1;
+
+    transform:
+        translateX(-50%)
+        translateY(0);
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 720px) {
+
+    .sidebar {
+        width: 82px;
+        min-width: 82px;
+    }
+
+    .brand {
+        padding: 15px 8px;
+        text-align: center;
+    }
+
+    .brand-row {
+        justify-content: center;
+    }
+
+    .brand h1 {
+        font-size: 15px;
+    }
+
+    .brand p,
+    .my-device,
+    .pair-section,
+    .section-title,
+    .device-info {
+        display: none;
+    }
+
+    .devices {
+        padding: 10px 7px;
+    }
+
+    .device-item {
+        justify-content: center;
+        padding: 8px;
+    }
+
+    .header-actions {
+        display: none;
+    }
+
+    .messages {
+        padding: 15px;
+    }
+
+    .message {
+        max-width: 88%;
+    }
+}
+
+@media (max-width: 460px) {
+
+    .sidebar {
+        width: 64px;
+        min-width: 64px;
+    }
+
+    .device-icon {
+        width: 39px;
+        height: 39px;
+    }
+
+    .chat-header {
+        padding: 0 12px;
+    }
+
+    .composer {
+        padding: 9px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-row">
+
+                <h1>PAGER</h1>
+
+                <button
+                    class="icon-btn"
+                    id="themeBtn"
+                    title="Toggle theme"
+                >
+                    ◐
+                </button>
+
+            </div>
+
+            <p>
+                Private device-to-device messaging
+            </p>
+
+        </div>
+
+
+        <!-- MY DEVICE -->
+
+        <div class="my-device">
+
+            <div class="device-label">
+                This device
+            </div>
+
+            <div
+                class="my-name"
+                id="myName"
+            >
+                My Device
+            </div>
+
+            <div class="my-id">
+
+                <code id="myId">
+                    000000
+                </code>
+
+                <button
+                    class="copy-btn"
+                    id="copyIdBtn"
+                >
+                    Copy
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- PAIR -->
+
+        <div class="pair-section">
+
+            <button
+                class="primary-btn"
+                id="pairBtn"
+            >
+                + Pair Device
+            </button>
+
+        </div>
+
+
+        <div class="section-title">
+            Paired Devices
+        </div>
+
+
+        <div
+            class="devices"
+            id="devicesList"
+        >
+
+            <div class="empty-devices">
+                No paired devices yet.
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN CHAT
+    ====================================================== -->
+
+    <main class="main">
+
+        <header class="chat-header">
+
+            <div class="chat-title">
+
+                <div
+                    class="chat-device-icon"
+                    id="chatDeviceIcon"
+                >
+                    ◉
+                </div>
+
+                <div>
+
+                    <div
+                        class="chat-name"
+                        id="chatName"
+                    >
+                        Select a device
+                    </div>
+
+                    <div
+                        class="chat-status"
+                        id="chatStatus"
+                    >
+                        Pair a device to begin
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="header-actions">
+
+                <button
+                    class="icon-btn"
+                    id="renameBtn"
+                    title="Rename device"
+                    disabled
+                >
+                    ✎
+                </button>
+
+                <button
+                    class="icon-btn"
+                    id="clearBtn"
+                    title="Clear chat"
+                    disabled
+                >
+                    ×
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- MESSAGES -->
+
+        <section
+            class="messages"
+            id="messages"
+        >
+
+            <div class="welcome">
+
+                <div class="welcome-icon">
+                    ◇
+                </div>
+
+                <h2>
+                    P2P Pager
+                </h2>
+
+                <p>
+                    Pair your laptop, phone, TV or
+                    another device. Messages travel
+                    through WebRTC when both devices
+                    are online.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- COMPOSER -->
+
+        <footer class="composer">
+
+            <div class="composer-box">
+
+                <textarea
+                    id="messageInput"
+                    placeholder="Select a device first..."
+                    rows="1"
+                    disabled
+                ></textarea>
+
+                <button
+                    class="send-btn"
+                    id="sendBtn"
+                    disabled
+                >
+                    ➤
+                </button>
+
+            </div>
+
+            <div class="composer-hint">
+                Enter to send · Shift + Enter for new line
+            </div>
+
+        </footer>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     PAIR MODAL
+========================================================= -->
+
+<div
+    class="modal-overlay"
+    id="pairModal"
+>
+
+    <div class="modal">
+
+        <h2>
+            Pair a Device
+        </h2>
+
+        <p>
+            Enter the 6-digit Device ID shown
+            on the other device.
+        </p>
+
+
+        <label class="input-label">
+            Device Name
+        </label>
+
+        <input
+            class="text-input"
+            id="deviceNameInput"
+            placeholder="e.g. My Phone"
+            maxlength="40"
+        >
+
+
+        <label class="input-label">
+            Device ID
+        </label>
+
+        <input
+            class="text-input"
+            id="peerIdInput"
+            placeholder="e.g. 482913"
+            maxlength="6"
+            inputmode="numeric"
+            autocomplete="off"
+        >
+
+
+        <div class="modal-actions">
+
+            <button
+                class="secondary-btn"
+                id="cancelPairBtn"
+            >
+                Cancel
+            </button>
+
+            <button
+                class="primary-btn"
+                id="confirmPairBtn"
+            >
+                Pair
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     RENAME MODAL
+========================================================= -->
+
+<div
+    class="modal-overlay"
+    id="renameModal"
+>
+
+    <div class="modal">
+
+        <h2>
+            Rename Device
+        </h2>
+
+        <p>
+            Give this paired device a recognizable name.
+        </p>
+
+
+        <label class="input-label">
+            Device Name
+        </label>
+
+        <input
+            class="text-input"
+            id="renameInput"
+            maxlength="40"
+            placeholder="Device name"
+        >
+
+
+        <div class="modal-actions">
+
+            <button
+                class="secondary-btn"
+                id="cancelRenameBtn"
+            >
+                Cancel
+            </button>
+
+            <button
+                class="primary-btn"
+                id="saveRenameBtn"
+            >
+                Save
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    class="toast"
+    id="toast"
+></div>
+
+
+<script>
+/* ============================================================
+   P2P PAGER
+   ============================================================
+
+   Transport:
+       PeerJS → WebRTC
+
+   Local storage:
+       localStorage → device identity/settings
+       IndexedDB   → messages
+
+   No:
+       Firebase
+       Supabase
+       Custom backend
+       Database server
+
+============================================================ */
+
+
+/* ============================================================
+   GLOBAL STATE
+============================================================ */
+
+let peer = null;
+
+let selectedPeerId = null;
+
+let activeConnections = {};
+
+let pairedDevices = [];
+
+let messageDatabase = null;
+
+let reconnectTimers = {};
+
+let renameTarget = null;
+
+
+/* ============================================================
+   STORAGE KEYS
+============================================================ */
+
+const STORAGE_KEYS = {
+
+    DEVICE_ID:
+        "pager_device_id",
+
+    DEVICE_NAME:
+        "pager_device_name",
+
+    PAIRED_DEVICES:
+        "pager_paired_devices",
+
+    THEME:
+        "pager_theme"
+
+};
+
+
+/* ============================================================
+   DOM
+============================================================ */
+
+const myIdElement =
+    document.getElementById("myId");
+
+const myNameElement =
+    document.getElementById("myName");
+
+const devicesList =
+    document.getElementById("devicesList");
+
+const messagesElement =
+    document.getElementById("messages");
+
+const messageInput =
+    document.getElementById("messageInput");
+
+const sendBtn =
+    document.getElementById("sendBtn");
+
+const chatName =
+    document.getElementById("chatName");
+
+const chatStatus =
+    document.getElementById("chatStatus");
+
+const renameBtn =
+    document.getElementById("renameBtn");
+
+const clearBtn =
+    document.getElementById("clearBtn");
+
+const pairModal =
+    document.getElementById("pairModal");
+
+const renameModal =
+    document.getElementById("renameModal");
+
+const peerIdInput =
+    document.getElementById("peerIdInput");
+
+const deviceNameInput =
+    document.getElementById("deviceNameInput");
+
+const renameInput =
+    document.getElementById("renameInput");
+
+const toastElement =
+    document.getElementById("toast");
+
+
+/* ============================================================
+   6-DIGIT DEVICE ID
+============================================================ */
+
+function generateDeviceId() {
+
+    /*
+       Generate a random 6-digit numeric ID.
+
+       Example:
+           482913
+           731604
+           105827
+
+       crypto.getRandomValues() is used instead of
+       Math.random() for better randomness.
+    */
+
+    const array =
+        new Uint32Array(1);
+
+    crypto.getRandomValues(array);
+
+    return String(
+        100000 +
+        (array[0] % 900000)
+    );
+}
+
+
+function getDeviceId() {
+
+    let id =
+        localStorage.getItem(
+            STORAGE_KEYS.DEVICE_ID
+        );
+
+    /*
+       If there is no existing ID,
+       create one and permanently save it.
+    */
+
+    if (!id) {
+
+        id =
+            generateDeviceId();
+
+        localStorage.setItem(
+            STORAGE_KEYS.DEVICE_ID,
+            id
+        );
+    }
+
+    /*
+       Safety check:
+       If an old version stored a non-6-digit
+       UUID, generate a fresh 6-digit ID.
+    */
+
+    if (
+        !/^\d{6}$/.test(id)
+    ) {
+
+        id =
+            generateDeviceId();
+
+        localStorage.setItem(
+            STORAGE_KEYS.DEVICE_ID,
+            id
+        );
+    }
+
+    return id;
+}
+
+
+/* ============================================================
+   DEVICE NAME
+============================================================ */
+
+function getDeviceName() {
+
+    let name =
+        localStorage.getItem(
+            STORAGE_KEYS.DEVICE_NAME
+        );
+
+    if (!name) {
+
+        name =
+            "My Device";
+
+        localStorage.setItem(
+            STORAGE_KEYS.DEVICE_NAME,
+            name
+        );
+    }
+
+    return name;
+}
+
+
+/* ============================================================
+   IDENTITY
+============================================================ */
+
+const MY_DEVICE_ID =
+    getDeviceId();
+
+let MY_DEVICE_NAME =
+    getDeviceName();
+
+myIdElement.textContent =
+    MY_DEVICE_ID;
+
+myNameElement.textContent =
+    MY_DEVICE_NAME;
+
+
+/* ============================================================
+   UTILITY
+============================================================ */
+
+function showToast(text) {
+
+    toastElement.textContent =
+        text;
+
+    toastElement.classList.add(
+        "show"
+    );
+
+    setTimeout(
+        () => {
+
+            toastElement.classList.remove(
+                "show"
+            );
+
+        },
+        2200
+    );
+}
+
+
+function escapeHTML(text) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent =
+        text;
+
+    return div.innerHTML;
+}
+
+
+function formatTime(timestamp) {
+
+    return new Date(
+        timestamp
+    ).toLocaleTimeString(
+        [],
+        {
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+}
+
+
+function generateMessageId() {
+
+    if (
+        crypto &&
+        crypto.randomUUID
+    ) {
+
+        return crypto.randomUUID();
+
+    }
+
+    return (
+        Date.now() +
+        "-" +
+        Math.random()
+            .toString(36)
+            .slice(2)
+    );
+}
+
+
+/* ============================================================
+   PAIRED DEVICES
+============================================================ */
+
+function loadPairedDevices() {
+
+    try {
+
+        const saved =
+            localStorage.getItem(
+                STORAGE_KEYS.PAIRED_DEVICES
+            );
+
+        pairedDevices =
+            saved
+                ? JSON.parse(saved)
+                : [];
+
+        if (
+            !Array.isArray(
+                pairedDevices
+            )
+        ) {
+
+            pairedDevices = [];
+
+        }
+
+    } catch {
+
+        pairedDevices = [];
+
+    }
+}
+
+
+function savePairedDevices() {
+
+    localStorage.setItem(
+        STORAGE_KEYS.PAIRED_DEVICES,
+
+        JSON.stringify(
+            pairedDevices
+        )
+    );
+}
+
+
+function findPairedDevice(
+    peerId
+) {
+
+    return pairedDevices.find(
+        device =>
+            device.id === peerId
+    );
+}
+
+
+function addPairedDevice(
+    peerId,
+    name
+) {
+
+    peerId =
+        peerId.trim();
+
+    /*
+       Only accept exactly 6 digits.
+    */
+
+    if (
+        !/^\d{6}$/.test(peerId)
+    ) {
+
+        showToast(
+            "Device ID must be exactly 6 digits."
+        );
+
+        return false;
+    }
+
+
+    if (
+        peerId ===
+        MY_DEVICE_ID
+    ) {
+
+        showToast(
+            "You cannot pair this device with itself."
+        );
+
+        return false;
+    }
+
+
+    const existing =
+        findPairedDevice(
+            peerId
+        );
+
+
+    if (existing) {
+
+        if (name) {
+
+            existing.name =
+                name;
+
+        }
+
+    } else {
+
+        pairedDevices.push({
+
+            id:
+                peerId,
+
+            name:
+                name ||
+                "Unknown Device",
+
+            addedAt:
+                Date.now(),
+
+            online:
+                false,
+
+            lastSeen:
+                null
+
+        });
+
+    }
+
+
+    savePairedDevices();
+
+    renderDevices();
+
+    return true;
+}
+
+
+/* ============================================================
+   DEVICE ICON
+============================================================ */
+
+function getDeviceEmoji(
+    name
+) {
+
+    const lower =
+        name.toLowerCase();
+
+    if (
+        lower.includes("phone") ||
+        lower.includes("mobile")
+    ) {
+        return "▣";
+    }
+
+    if (
+        lower.includes("tv")
+    ) {
+        return "▤";
+    }
+
+    if (
+        lower.includes("tablet")
+    ) {
+        return "▥";
+    }
+
+    if (
+        lower.includes("laptop") ||
+        lower.includes("pc") ||
+        lower.includes("computer")
+    ) {
+        return "▦";
+    }
+
+    return "◇";
+}
+
+
+/* ============================================================
+   RENDER DEVICES
+============================================================ */
+
+function renderDevices() {
+
+    devicesList.innerHTML =
+        "";
+
+    if (
+        pairedDevices.length === 0
+    ) {
+
+        devicesList.innerHTML = `
+
+            <div class="empty-devices">
+                No paired devices yet.<br>
+                Pair your phone, laptop or TV.
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    pairedDevices.forEach(
+        device => {
+
+            const isOnline =
+                !!activeConnections[
+                    device.id
+                ];
+
+
+            const item =
+                document.createElement(
+                    "button"
+                );
+
+
+            item.className =
+                "device-item" +
+                (
+                    selectedPeerId ===
+                    device.id
+                        ? " active"
+                        : ""
+                );
+
+
+            item.innerHTML = `
+
+                <div class="device-icon">
+                    ${getDeviceEmoji(
+                        device.name
+                    )}
+                </div>
+
+                <div class="device-info">
+
+                    <div class="device-name">
+                        ${escapeHTML(
+                            device.name
+                        )}
+                    </div>
+
+                    <div class="device-status">
+                        ${
+                            isOnline
+                                ? "Online"
+                                : "Offline"
+                        }
+                    </div>
+
+                </div>
+
+                <div class="${
+                    isOnline
+                        ? "online-dot"
+                        : "offline-dot"
+                }"></div>
+
+            `;
+
+
+            item.onclick =
+                () => {
+
+                    selectDevice(
+                        device.id
+                    );
+
+                };
+
+
+            devicesList.appendChild(
+                item
+            );
+
+        }
+    );
+}
+
+
+/* ============================================================
+   INDEXEDDB
+============================================================ */
+
+function openDatabase() {
+
+    return new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            const request =
+                indexedDB.open(
+                    "P2PPagerDatabase",
+                    1
+                );
+
+
+            request.onupgradeneeded =
+                event => {
+
+                    const db =
+                        event.target.result;
+
+
+                    if (
+                        !db.objectStoreNames.contains(
+                            "messages"
+                        )
+                    ) {
+
+                        const store =
+                            db.createObjectStore(
+                                "messages",
+                                {
+                                    keyPath: "id"
+                                }
+                            );
+
+
+                        store.createIndex(
+                            "peerId",
+                            "peerId",
+                            {
+                                unique: false
+                            }
+                        );
+
+
+                        store.createIndex(
+                            "timestamp",
+                            "timestamp",
+                            {
+                                unique: false
+                            }
+                        );
+
+                    }
+
+                };
+
+
+            request.onsuccess =
+                event => {
+
+                    messageDatabase =
+                        event.target.result;
+
+                    resolve(
+                        messageDatabase
+                    );
+
+                };
+
+
+            request.onerror =
+                () => {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+        }
+    );
+}
+
+
+/* ============================================================
+   SAVE MESSAGE
+============================================================ */
+
+function saveMessage(
+    message
+) {
+
+    return new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            if (
+                !messageDatabase
+            ) {
+
+                resolve();
+                return;
+
+            }
+
+
+            const transaction =
+                messageDatabase.transaction(
+                    "messages",
+                    "readwrite"
+                );
+
+
+            const store =
+                transaction.objectStore(
+                    "messages"
+                );
+
+
+            store.put(
+                message
+            );
+
+
+            transaction.oncomplete =
+                () => resolve();
+
+
+            transaction.onerror =
+                () =>
+                    reject(
+                        transaction.error
+                    );
+
+        }
+    );
+}
+
+
+/* ============================================================
+   GET MESSAGES
+============================================================ */
+
+function getMessages(
+    peerId
+) {
+
+    return new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            if (
+                !messageDatabase
+            ) {
+
+                resolve([]);
+                return;
+
+            }
+
+
+            const transaction =
+                messageDatabase.transaction(
+                    "messages",
+                    "readonly"
+                );
+
+
+            const store =
+                transaction.objectStore(
+                    "messages"
+                );
+
+
+            const index =
+                store.index(
+                    "peerId"
+                );
+
+
+            const request =
+                index.getAll(
+                    peerId
+                );
+
+
+            request.onsuccess =
+                () => {
+
+                    const result =
+                        request.result ||
+                        [];
+
+                    result.sort(
+                        (
+                            a,
+                            b
+                        ) =>
+                            a.timestamp -
+                            b.timestamp
+                    );
+
+                    resolve(
+                        result
+                    );
+
+                };
+
+
+            request.onerror =
+                () =>
+                    reject(
+                        request.error
+                    );
+
+        }
+    );
+}
+
+
+/* ============================================================
+   CLEAR MESSAGES
+============================================================ */
+
+function clearMessages(
+    peerId
+) {
+
+    return new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            if (
+                !messageDatabase
+            ) {
+
+                resolve();
+                return;
+
+            }
+
+
+            const transaction =
+                messageDatabase.transaction(
+                    "messages",
+                    "readwrite"
+                );
+
+
+            const store =
+                transaction.objectStore(
+                    "messages"
+                );
+
+
+            const index =
+                store.index(
+                    "peerId"
+                );
+
+
+            const request =
+                index.openCursor(
+                    IDBKeyRange.only(
+                        peerId
+                    )
+                );
+
+
+            request.onsuccess =
+                event => {
+
+                    const cursor =
+                        event.target.result;
+
+
+                    if (cursor) {
+
+                        cursor.delete();
+
+                        cursor.continue();
+
+                    } else {
+
+                        resolve();
+
+                    }
+
+                };
+
+
+            request.onerror =
+                () =>
+                    reject(
+                        request.error
+                    );
+
+        }
+    );
+}
+
+
+/* ============================================================
+   MARK DELIVERED
+============================================================ */
+
+function markMessageDelivered(
+    messageId
+) {
+
+    return new Promise(
+        resolve => {
+
+            if (
+                !messageDatabase
+            ) {
+
+                resolve();
+                return;
+
+            }
+
+
+            const transaction =
+                messageDatabase.transaction(
+                    "messages",
+                    "readwrite"
+                );
+
+
+            const store =
+                transaction.objectStore(
+                    "messages"
+                );
+
+
+            const request =
+                store.get(
+                    messageId
+                );
+
+
+            request.onsuccess =
+                () => {
+
+                    const message =
+                        request.result;
+
+
+                    if (message) {
+
+                        message.status =
+                            "delivered";
+
+                        store.put(
+                            message
+                        );
+
+                    }
+
+
+                    resolve();
+
+                };
+
+
+            request.onerror =
+                () =>
+                    resolve();
+
+        }
+    );
+}
+
+
+/* ============================================================
+   RENDER MESSAGE
+============================================================ */
+
+function renderMessage(
+    message
+) {
+
+    const wrapper =
+        document.createElement(
+            "div"
+        );
+
+
+    wrapper.className =
+        "message " +
+        (
+            message.sender ===
+            MY_DEVICE_ID
+                ? "me"
+                : "peer"
+        );
+
+
+    const bubble =
+        document.createElement(
+            "div"
+        );
+
+
+    bubble.className =
+        "bubble";
+
+
+    bubble.textContent =
+        message.text;
+
+
+    const meta =
+        document.createElement(
+            "div"
+        );
+
+
+    meta.className =
+        "message-meta";
+
+
+    let status =
+        "";
+
+
+    if (
+        message.sender ===
+        MY_DEVICE_ID
+    ) {
+
+        status = `
+
+            <span class="tick">
+
+                ${
+                    message.status ===
+                    "delivered"
+                        ? "✓✓"
+                        : "✓"
+                }
+
+            </span>
+
+        `;
+
+    }
+
+
+    meta.innerHTML =
+        `
+            ${formatTime(
+                message.timestamp
+            )}
+            ${status}
+        `;
+
+
+    wrapper.appendChild(
+        bubble
+    );
+
+
+    wrapper.appendChild(
+        meta
+    );
+
+
+    messagesElement.appendChild(
+        wrapper
+    );
+}
+
+
+/* ============================================================
+   LOAD CHAT
+============================================================ */
+
+async function loadChat(
+    peerId
+) {
+
+    messagesElement.innerHTML =
+        "";
+
+
+    const messages =
+        await getMessages(
+            peerId
+        );
+
+
+    if (
+        messages.length === 0
+    ) {
+
+        messagesElement.innerHTML = `
+
+            <div class="welcome">
+
+                <div class="welcome-icon">
+                    ◇
+                </div>
+
+                <h2>
+                    New conversation
+                </h2>
+
+                <p>
+                    Messages are stored locally
+                    on this device.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    messages.forEach(
+        message =>
+            renderMessage(
+                message
+            )
+    );
+
+
+    scrollMessages();
+}
+
+
+/* ============================================================
+   SCROLL
+============================================================ */
+
+function scrollMessages() {
+
+    messagesElement.scrollTop =
+        messagesElement.scrollHeight;
+}
+
+
+/* ============================================================
+   SELECT DEVICE
+============================================================ */
+
+async function selectDevice(
+    peerId
+) {
+
+    const device =
+        findPairedDevice(
+            peerId
+        );
+
+
+    if (!device) {
+        return;
+    }
+
+
+    selectedPeerId =
+        peerId;
+
+
+    chatName.textContent =
+        device.name;
+
+
+    chatDeviceIcon.textContent =
+        getDeviceEmoji(
+            device.name
+        );
+
+
+    renameBtn.disabled =
+        false;
+
+    clearBtn.disabled =
+        false;
+
+
+    messageInput.disabled =
+        false;
+
+
+    messageInput.placeholder =
+        `Message ${device.name}...`;
+
+
+    renderDevices();
+
+
+    updateSelectedStatus();
+
+
+    await loadChat(
+        peerId
+    );
+
+
+    connectToDevice(
+        peerId
+    );
+
+
+    messageInput.focus();
+}
+
+
+/* ============================================================
+   SELECTED STATUS
+============================================================ */
+
+function updateSelectedStatus() {
+
+    if (
+        !selectedPeerId
+    ) {
+
+        return;
+    }
+
+
+    const connection =
+        activeConnections[
+            selectedPeerId
+        ];
+
+
+    if (
+        connection &&
+        connection.open
+    ) {
+
+        chatStatus.textContent =
+            "Online · P2P connected";
+
+        sendBtn.disabled =
+            false;
+
+    } else {
+
+        chatStatus.textContent =
+            "Offline · Waiting for device";
+
+        sendBtn.disabled =
+            true;
+
+    }
+}
+
+
+/* ============================================================
+   PEER INITIALIZATION
+============================================================ */
+
+function initializePeer() {
+
+    console.log(
+        "[PAGER] Starting PeerJS..."
+    );
+
+
+    /*
+       IMPORTANT:
+
+       PeerJS accepts our persistent 6-digit ID.
+
+       Example:
+           482913
+    */
+
+    peer =
+        new Peer(
+            MY_DEVICE_ID
+        );
+
+
+    peer.on(
+        "open",
+        id => {
+
+            console.log(
+                "[PAGER] Peer opened:",
+                id
+            );
+
+
+            myIdElement.textContent =
+                id;
+
+
+            updateGlobalStatus(
+                "Ready"
+            );
+
+
+            /*
+               Reconnect to saved devices.
+            */
+
+            pairedDevices.forEach(
+                device => {
+
+                    setTimeout(
+                        () => {
+
+                            connectToDevice(
+                                device.id
+                            );
+
+                        },
+                        500
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    /*
+       Incoming connection
+    */
+
+    peer.on(
+        "connection",
+        connection => {
+
+            console.log(
+                "[PAGER] Incoming connection:",
+                connection.peer
+            );
+
+
+            handleConnection(
+                connection
+            );
+
+        }
+    );
+
+
+    peer.on(
+        "error",
+        error => {
+
+            console.error(
+                "[PAGER] Peer error:",
+                error
+            );
+
+
+            handlePeerError(
+                error
+            );
+
+        }
+    );
+
+
+    peer.on(
+        "disconnected",
+        () => {
+
+            console.log(
+                "[PAGER] Signaling disconnected."
+            );
+
+
+            updateGlobalStatus(
+                "Signaling disconnected"
+            );
+
+
+            try {
+
+                peer.reconnect();
+
+            } catch {}
+
+        }
+    );
+
+
+    peer.on(
+        "close",
+        () => {
+
+            updateGlobalStatus(
+                "Peer closed"
+            );
+
+        }
+    );
+}
+
+
+/* ============================================================
+   CONNECT TO DEVICE
+============================================================ */
+
+function connectToDevice(
+    peerId
+) {
+
+    if (!peer) {
+        return;
+    }
+
+
+    if (
+        peer.destroyed
+    ) {
+        return;
+    }
+
+
+    const existing =
+        activeConnections[
+            peerId
+        ];
+
+
+    if (
+        existing &&
+        existing.open
+    ) {
+
+        updateSelectedStatus();
+
+        return;
+    }
+
+
+    try {
+
+        const connection =
+            peer.connect(
+                peerId,
+                {
+                    reliable:
+                        true
+                }
+            );
+
+
+        handleConnection(
+            connection
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "[PAGER] Connect error:",
+            error
+        );
+
+    }
+}
+
+
+/* ============================================================
+   CONNECTION HANDLER
+============================================================ */
+
+function handleConnection(
+    connection
+) {
+
+    if (!connection) {
+        return;
+    }
+
+
+    const peerId =
+        connection.peer;
+
+
+    activeConnections[
+        peerId
+    ] =
+        connection;
+
+
+    connection.on(
+        "open",
+        () => {
+
+            console.log(
+                "[PAGER] Connected:",
+                peerId
+            );
+
+
+            activeConnections[
+                peerId
+            ] =
+                connection;
+
+
+            updateDeviceOnline(
+                peerId,
+                true
+            );
+
+
+            renderDevices();
+
+
+            if (
+                selectedPeerId ===
+                peerId
+            ) {
+
+                updateSelectedStatus();
+
+            }
+
+
+            /*
+               Handshake
+            */
+
+            try {
+
+                connection.send({
+
+                    type:
+                        "system",
+
+                    action:
+                        "hello",
+
+                    deviceId:
+                        MY_DEVICE_ID,
+
+                    deviceName:
+                        MY_DEVICE_NAME
+
+                });
+
+            } catch {}
+
+
+            showToast(
+                "Device connected"
+            );
+
+        }
+    );
+
+
+    connection.on(
+        "data",
+        data => {
+
+            handleIncomingData(
+                peerId,
+                data
+            );
+
+        }
+    );
+
+
+    connection.on(
+        "close",
+        () => {
+
+            console.log(
+                "[PAGER] Connection closed:",
+                peerId
+            );
+
+
+            delete activeConnections[
+                peerId
+            ];
+
+
+            updateDeviceOnline(
+                peerId,
+                false
+            );
+
+
+            renderDevices();
+
+
+            if (
+                selectedPeerId ===
+                peerId
+            ) {
+
+                updateSelectedStatus();
+
+            }
+
+
+            scheduleReconnect(
+                peerId
+            );
+
+        }
+    );
+
+
+    connection.on(
+        "error",
+        error => {
+
+            console.error(
+                "[PAGER] Data connection error:",
+                error
+            );
+
+
+            delete activeConnections[
+                peerId
+            ];
+
+
+            updateDeviceOnline(
+                peerId,
+                false
+            );
+
+
+            renderDevices();
+
+
+            if (
+                selectedPeerId ===
+                peerId
+            ) {
+
+                updateSelectedStatus();
+
+            }
+
+        }
+    );
+}
+
+
+/* ============================================================
+   INCOMING DATA
+============================================================ */
+
+async function handleIncomingData(
+    peerId,
+    data
+) {
+
+    if (
+        !data ||
+        typeof data !==
+        "object"
+    ) {
+
+        return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       HANDSHAKE
+    -------------------------------------------------------- */
+
+    if (
+        data.type ===
+            "system" &&
+        data.action ===
+            "hello"
+    ) {
+
+        const device =
+            findPairedDevice(
+                peerId
+            );
+
+
+        if (!device) {
+
+            addPairedDevice(
+                peerId,
+                data.deviceName ||
+                    "Unknown Device"
+            );
+
+        }
+
+
+        return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       MESSAGE
+    -------------------------------------------------------- */
+
+    if (
+        data.type ===
+        "message"
+    ) {
+
+        const message = {
+
+            id:
+                data.id ||
+                generateMessageId(),
+
+            peerId:
+                peerId,
+
+            sender:
+                peerId,
+
+            receiver:
+                MY_DEVICE_ID,
+
+            text:
+                String(
+                    data.text ||
+                    ""
+                ),
+
+            timestamp:
+                Number(
+                    data.timestamp
+                ) ||
+                Date.now(),
+
+            status:
+                "delivered"
+
+        };
+
+
+        /*
+           Save locally.
+        */
+
+        await saveMessage(
+            message
+        );
+
+
+        /*
+           Show in current chat.
+        */
+
+        if (
+            selectedPeerId ===
+            peerId
+        ) {
+
+            const welcome =
+                messagesElement.querySelector(
+                    ".welcome"
+                );
+
+
+            if (welcome) {
+                welcome.remove();
+            }
+
+
+            renderMessage(
+                message
+            );
+
+
+            scrollMessages();
+
+        }
+
+
+        /*
+           Delivery acknowledgement.
+        */
+
+        const connection =
+            activeConnections[
+                peerId
+            ];
+
+
+        if (
+            connection &&
+            connection.open
+        ) {
+
+            try {
+
+                connection.send({
+
+                    type:
+                        "ack",
+
+                    messageId:
+                        message.id
+
+                });
+
+            } catch {}
+
+        }
+
+
+        notifyNewMessage(
+            peerId,
+            message.text
+        );
+
+        return;
+    }
+
+
+    /* --------------------------------------------------------
+       ACKNOWLEDGEMENT
+    -------------------------------------------------------- */
+
+    if (
+        data.type ===
+        "ack"
+    ) {
+
+        await markMessageDelivered(
+            data.messageId
+        );
+
+
+        if (
+            selectedPeerId ===
+            peerId
+        ) {
+
+            await loadChat(
+                peerId
+            );
+
+        }
+
+    }
+}
+
+
+/* ============================================================
+   SEND MESSAGE
+============================================================ */
+
+async function sendMessage() {
+
+    const text =
+        messageInput.value.trim();
+
+
+    if (!text) {
+        return;
+    }
+
+
+    if (!selectedPeerId) {
+
+        showToast(
+            "Select a device first."
+        );
+
+        return;
+    }
+
+
+    const connection =
+        activeConnections[
+            selectedPeerId
+        ];
+
+
+    if (
+        !connection ||
+        !connection.open
+    ) {
+
+        showToast(
+            "Device is offline."
+        );
+
+        return;
+    }
+
+
+    const message = {
+
+        id:
+            generateMessageId(),
+
+        peerId:
+            selectedPeerId,
+
+        sender:
+            MY_DEVICE_ID,
+
+        receiver:
+            selectedPeerId,
+
+        text:
+            text,
+
+        timestamp:
+            Date.now(),
+
+        status:
+            "sent"
+
+    };
+
+
+    try {
+
+        /*
+           Send over WebRTC.
+        */
+
+        connection.send({
+
+            type:
+                "message",
+
+            id:
+                message.id,
+
+            text:
+                message.text,
+
+            timestamp:
+                message.timestamp
+
+        });
+
+
+        /*
+           Save locally.
+        */
+
+        await saveMessage(
+            message
+        );
+
+
+        const welcome =
+            messagesElement.querySelector(
+                ".welcome"
+            );
+
+
+        if (welcome) {
+            welcome.remove();
+        }
+
+
+        renderMessage(
+            message
+        );
+
+
+        scrollMessages();
+
+
+        messageInput.value =
+            "";
+
+
+        autoResizeTextarea();
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        showToast(
+            "Message could not be sent."
+        );
+
+    }
+}
+
+
+/* ============================================================
+   ONLINE STATE
+============================================================ */
+
+function updateDeviceOnline(
+    peerId,
+    online
+) {
+
+    const device =
+        findPairedDevice(
+            peerId
+        );
+
+
+    if (!device) {
+        return;
+    }
+
+
+    device.online =
+        online;
+
+
+    if (online) {
+
+        device.lastSeen =
+            Date.now();
+
+    }
+
+
+    savePairedDevices();
+
+
+    if (
+        selectedPeerId ===
+        peerId
+    ) {
+
+        updateSelectedStatus();
+
+    }
+}
+
+
+/* ============================================================
+   AUTO RECONNECT
+============================================================ */
+
+function scheduleReconnect(
+    peerId
+) {
+
+    if (
+        reconnectTimers[
+            peerId
+        ]
+    ) {
+
+        return;
+
+    }
+
+
+    reconnectTimers[
+        peerId
+    ] =
+        setTimeout(
+            () => {
+
+                delete reconnectTimers[
+                    peerId
+                ];
+
+
+                connectToDevice(
+                    peerId
+                );
+
+            },
+            4000
+        );
+}
+
+
+/* ============================================================
+   PEER ERROR
+============================================================ */
+
+function handlePeerError(
+    error
+) {
+
+    if (!error) {
+        return;
+    }
+
+
+    switch (
+        error.type
+    ) {
+
+        case "unavailable-id":
+
+            showToast(
+                "This Device ID is already active."
+            );
+
+            break;
+
+
+        case "peer-unavailable":
+
+            showToast(
+                "The other device is offline."
+            );
+
+            break;
+
+
+        case "network":
+
+            showToast(
+                "Network connection problem."
+            );
+
+            break;
+
+
+        case "server-error":
+
+            showToast(
+                "PeerJS signaling server error."
+            );
+
+            break;
+
+
+        default:
+
+            console.error(
+                error
+            );
+
+    }
+}
+
+
+/* ============================================================
+   GLOBAL STATUS
+============================================================ */
+
+function updateGlobalStatus(
+    text
+) {
+
+    console.log(
+        "[PAGER]",
+        text
+    );
+}
+
+
+/* ============================================================
+   PAIR MODAL
+============================================================ */
+
+document
+    .getElementById(
+        "pairBtn"
+    )
+    .onclick =
+    () => {
+
+        deviceNameInput.value =
+            "";
+
+        peerIdInput.value =
+            "";
+
+        pairModal.classList.add(
+            "show"
+        );
+
+        deviceNameInput.focus();
+
+    };
+
+
+document
+    .getElementById(
+        "cancelPairBtn"
+    )
+    .onclick =
+    () => {
+
+        pairModal.classList.remove(
+            "show"
+        );
+
+    };
+
+
+/*
+   Only allow numbers in Device ID field.
+*/
+
+peerIdInput.addEventListener(
+    "input",
+    () => {
+
+        peerIdInput.value =
+            peerIdInput.value
+                .replace(
+                    /\D/g,
+                    ""
+                )
+                .slice(
+                    0,
+                    6
+                );
+
+    }
+);
+
+
+document
+    .getElementById(
+        "confirmPairBtn"
+    )
+    .onclick =
+    () => {
+
+        const name =
+            deviceNameInput
+                .value
+                .trim();
+
+
+        const peerId =
+            peerIdInput
+                .value
+                .trim();
+
+
+        if (
+            !/^\d{6}$/.test(
+                peerId
+            )
+        ) {
+
+            showToast(
+                "Enter a valid 6-digit Device ID."
+            );
+
+            return;
+        }
+
+
+        const success =
+            addPairedDevice(
+                peerId,
+                name ||
+                    "Device"
+            );
+
+
+        if (!success) {
+            return;
+        }
+
+
+        pairModal.classList.remove(
+            "show"
+        );
+
+
+        showToast(
+            "Device paired."
+        );
+
+
+        selectDevice(
+            peerId
+        );
+
+    };
+
+
+/* ============================================================
+   RENAME DEVICE
+============================================================ */
+
+renameBtn.onclick =
+    () => {
+
+        if (
+            !selectedPeerId
+        ) {
+            return;
+        }
+
+
+        const device =
+            findPairedDevice(
+                selectedPeerId
+            );
+
+
+        if (!device) {
+            return;
+        }
+
+
+        renameTarget =
+            selectedPeerId;
+
+
+        renameInput.value =
+            device.name;
+
+
+        renameModal.classList.add(
+            "show"
+        );
+
+
+        renameInput.focus();
+
+    };
+
+
+document
+    .getElementById(
+        "cancelRenameBtn"
+    )
+    .onclick =
+    () => {
+
+        renameModal.classList.remove(
+            "show"
+        );
+
+        renameTarget =
+            null;
+
+    };
+
+
+document
+    .getElementById(
+        "saveRenameBtn"
+    )
+    .onclick =
+    () => {
+
+        if (
+            !renameTarget
+        ) {
+            return;
+        }
+
+
+        const device =
+            findPairedDevice(
+                renameTarget
+            );
+
+
+        if (!device) {
+            return;
+        }
+
+
+        const newName =
+            renameInput.value.trim();
+
+
+        if (!newName) {
+            return;
+        }
+
+
+        device.name =
+            newName;
+
+
+        savePairedDevices();
+
+
+        if (
+            selectedPeerId ===
+            renameTarget
+        ) {
+
+            chatName.textContent =
+                newName;
+
+
+            chatDeviceIcon.textContent =
+                getDeviceEmoji(
+                    newName
+                );
+
+        }
+
+
+        renderDevices();
+
+
+        renameModal.classList.remove(
+            "show"
+        );
+
+
+        renameTarget =
+            null;
+
+
+        showToast(
+            "Device renamed."
+        );
+
+    };
+
+
+/* ============================================================
+   CLEAR CHAT
+============================================================ */
+
+clearBtn.onclick =
+    async () => {
+
+        if (
+            !selectedPeerId
+        ) {
+            return;
+        }
+
+
+        const device =
+            findPairedDevice(
+                selectedPeerId
+            );
+
+
+        if (!device) {
+            return;
+        }
+
+
+        const confirmed =
+            confirm(
+                `Clear all messages with ${device.name}?`
+            );
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        await clearMessages(
+            selectedPeerId
+        );
+
+
+        await loadChat(
+            selectedPeerId
+        );
+
+
+        showToast(
+            "Chat cleared."
+        );
+
+    };
+
+
+/* ============================================================
+   COPY ID
+============================================================ */
+
+document
+    .getElementById(
+        "copyIdBtn"
+    )
+    .onclick =
+    async () => {
+
+        try {
+
+            await navigator
+                .clipboard
+                .writeText(
+                    MY_DEVICE_ID
+                );
+
+
+            showToast(
+                "6-digit Device ID copied."
+            );
+
+
+        } catch {
+
+            showToast(
+                "Could not copy Device ID."
+            );
+
+        }
+
+    };
+
+
+/* ============================================================
+   THEME
+============================================================ */
+
+function loadTheme() {
+
+    const theme =
+        localStorage.getItem(
+            STORAGE_KEYS.THEME
+        );
+
+
+    if (theme) {
+
+        document.documentElement
+            .setAttribute(
+                "data-theme",
+                theme
+            );
+
+    }
+}
+
+
+document
+    .getElementById(
+        "themeBtn"
+    )
+    .onclick =
+    () => {
+
+        const current =
+            document.documentElement
+                .getAttribute(
+                    "data-theme"
+                );
+
+
+        const next =
+            current === "dark"
+                ? "light"
+                : "dark";
+
+
+        document.documentElement
+            .setAttribute(
+                "data-theme",
+                next
+            );
+
+
+        localStorage.setItem(
+            STORAGE_KEYS.THEME,
+            next
+        );
+
+    };
+
+
+/* ============================================================
+   TEXTAREA
+============================================================ */
+
+function autoResizeTextarea() {
+
+    messageInput.style.height =
+        "auto";
+
+
+    messageInput.style.height =
+        Math.min(
+            messageInput.scrollHeight,
+            130
+        ) +
+        "px";
+}
+
+
+messageInput.addEventListener(
+    "input",
+    autoResizeTextarea
+);
+
+
+messageInput.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key ===
+                "Enter" &&
+            !event.shiftKey
+        ) {
+
+            event.preventDefault();
+
+            sendMessage();
+
+        }
+
+    }
+);
+
+
+sendBtn.onclick =
+    sendMessage;
+
+
+/* ============================================================
+   NETWORK RECOVERY
+============================================================ */
+
+window.addEventListener(
+    "online",
+    () => {
+
+        showToast(
+            "Network restored. Reconnecting..."
+        );
+
+
+        pairedDevices.forEach(
+            device => {
+
+                connectToDevice(
+                    device.id
+                );
+
+            }
+        );
+
+    }
+);
+
+
+window.addEventListener(
+    "offline",
+    () => {
+
+        showToast(
+            "Network offline."
+        );
+
+    }
+);
+
+
+/* ============================================================
+   TAB VISIBILITY
+============================================================ */
+
+document.addEventListener(
+    "visibilitychange",
+    () => {
+
+        if (
+            document.visibilityState ===
+            "visible"
+        ) {
+
+            pairedDevices.forEach(
+                device => {
+
+                    connectToDevice(
+                        device.id
+                    );
+
+                }
+            );
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   MODAL OUTSIDE CLICK
+============================================================ */
+
+pairModal.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target ===
+            pairModal
+        ) {
+
+            pairModal.classList.remove(
+                "show"
+            );
+
+        }
+
+    }
+);
+
+
+renameModal.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target ===
+            renameModal
+        ) {
+
+            renameModal.classList.remove(
+                "show"
+            );
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   INITIALIZE
+============================================================ */
+
+async function initialize() {
+
+    loadTheme();
+
+    loadPairedDevices();
+
+    renderDevices();
+
+
+    try {
+
+        await openDatabase();
+
+    } catch (error) {
+
+        console.error(
+            "[PAGER] IndexedDB error:",
+            error
+        );
+
+        showToast(
+            "Local message storage unavailable."
+        );
+
+    }
+
+
+    initializePeer();
+
+}
+
+
+initialize();
+
+</script>
+
+</body>
+</html>
