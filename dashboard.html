@@ -496,7 +496,19 @@ body {
     object-fit: cover;
     display: block;
 }
-  
+.install-app-btn {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+}
+
+.install-app-btn:hover {
+    background: var(--nav-hover, rgba(0, 0, 0, 0.06));
+}  
 </style>
 </head>
 <body>
@@ -515,27 +527,38 @@ body {
 
   <div class="nav-links">
     <div class="nav-label">Workspace</div>
+
     <a href="#" class="nav-item active" data-section="all">
-      <span class="nav-icon">🏠</span> Home
+        <span class="nav-icon">🏠</span> Home
     </a>
+
     <a href="#recently-used" class="nav-item" data-section="recent">
-      <span class="nav-icon">🕐</span> Recently Used
+        <span class="nav-icon">🕐</span> Recently Used
     </a>
 
     <div class="nav-label">Sections</div>
+
     <a href="#essentials" class="nav-item" data-section="essentials">
-      <span class="nav-icon">⚡</span> Essentials
+        <span class="nav-icon">⚡</span> Essentials
     </a>
+
     <a href="#productivity" class="nav-item" data-section="productivity">
-      <span class="nav-icon">📈</span> Productivity
+        <span class="nav-icon">📈</span> Productivity
     </a>
+
     <a href="#utilities" class="nav-item" data-section="utilities">
-      <span class="nav-icon">🔧</span> Utilities
+        <span class="nav-icon">🔧</span> Utilities
     </a>
+
     <a href="#time" class="nav-item" data-section="time">
-      <span class="nav-icon">⏱️</span> Time & Clock
+        <span class="nav-icon">⏱️</span> Time & Clock
     </a>
-  </div>
+
+    <!-- PWA INSTALL -->
+    <button id="installAppBtn" class="nav-item install-app-btn" type="button">
+        <span class="nav-icon">📲</span> Install App
+    </button>
+</div>
 
   <div class="nav-bottom">
     <div class="nav-user">
@@ -954,7 +977,50 @@ staggerCards();
 
 // Update greeting every minute
 setInterval(setGreeting, 60000);
+
+// ============================================================
+// PWA INSTALL
+// ============================================================
+
+let deferredInstallPrompt = null;
+const installAppBtn = document.getElementById('installAppBtn');
+
+// Chrome / Edge fires this when the site is eligible for PWA install.
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  console.log('PWA install prompt is available');
+});
+
+// Install App button
+if (installAppBtn) {
+  installAppBtn.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) {
+      showToast('Install is unavailable right now. Use your browser menu → Install App / Add to Home Screen.');
+      return;
+    }
+
+    deferredInstallPrompt.prompt();
+
+    try {
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      console.log('PWA install result:', outcome);
+    } catch (error) {
+      console.error('PWA install prompt error:', error);
+    } finally {
+      deferredInstallPrompt = null;
+    }
+  });
+}
+
+// App successfully installed
+window.addEventListener('appinstalled', () => {
+  console.log('Toolify was installed successfully');
+  deferredInstallPrompt = null;
+  showToast('Toolify installed successfully.');
+});
+
 </script>
-    <script type="module" src="/toolify/protect.js"></script>
+
 </body>
 </html>
