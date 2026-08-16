@@ -728,8 +728,14 @@ function makeCard(t, delay = 0, showRecent = false) {
   a.style.animationDelay = delay + 'ms';
   a.title = t.name;
   a.innerHTML = `
-    <div class="tc-icon">
-    <img src="${t.icon}" alt="${t.name}" class="tc-icon-img">
+   <div class="tc-icon">
+    ${
+        t.icon.startsWith('http') ||
+        t.icon.includes('/') ||
+        t.icon.match(/\.(webp|png|jpg|jpeg|gif|svg)$/i)
+            ? `<img src="${t.icon}" alt="${t.name}" class="tc-icon-img">`
+            : t.icon
+    }
 </div>
     <div class="tc-name">${t.name}</div>
     ${t.badge === 'new' ? '<span class="badge-new">NEW</span>' : ''}
