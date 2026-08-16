@@ -2,53 +2,53 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Chess Puzzles — CheckMate</title>
+<title>Puzzles — CheckMate</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟</text></svg>"/>
 <link rel="stylesheet" href="css/global.css"/>
 <link rel="stylesheet" href="css/chess.css"/>
 <style>
-.puzzle-layout{display:flex;gap:24px;max-width:1000px;margin:20px auto;padding:0 20px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
-.puzzle-board-wrap{width:100%;max-width:480px}
-.puzzle-cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
-.cat-btn{background:var(--bg-3);border:1px solid var(--border-2);border-radius:var(--r-sm);padding:10px 8px;text-align:center;cursor:pointer;transition:all var(--t-fast);font-size:.82rem;font-weight:600;color:var(--t-2)}
+.puzzle-layout{display:flex;gap:20px;max-width:1000px;margin:16px auto;padding:0 16px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.puzzle-board-wrap{flex-shrink:0;width:min(480px,calc(100vw - 32px))}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cat-btn{background:var(--bg-3);border:1px solid var(--border-2);border-radius:var(--r-sm);padding:8px 6px;text-align:center;cursor:pointer;transition:all var(--t-fast);font-size:.8rem;font-weight:600;color:var(--t-2)}
 .cat-btn:hover{border-color:var(--border-3);color:var(--t-1)}.cat-btn.active{border-color:var(--gold);background:var(--gold-dim);color:var(--gold)}
-.puzzle-info{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-lg);padding:20px;margin-bottom:12px}
-.puzzle-tag{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-.streak-bar{display:flex;gap:4px;margin-top:8px}
+.streak-bar{display:flex;gap:3px;margin-top:8px;flex-wrap:wrap}
 .streak-dot{width:10px;height:10px;border-radius:50%;background:var(--bg-4);transition:background .3s}
 .streak-dot.filled{background:var(--gold)}
-.hint-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
-.hint-item{background:var(--bg-3);border-radius:var(--r-sm);padding:8px 12px;font-size:.83rem;color:var(--t-2)}
-.puzzle-result{padding:20px;text-align:center;display:none}
-.puzzle-result.visible{display:block}
-.result-icon{font-size:3rem;margin-bottom:8px}
+.result-box{text-align:center;padding:8px 0}
+.result-icon{font-size:2.4rem;margin-bottom:6px}
 </style>
 </head>
 <body>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/chess-engine.js"></script>
 
 <div class="puzzle-layout">
+  <!-- Board -->
   <div class="puzzle-board-wrap">
     <div class="player-card" style="margin-bottom:8px">
-      <div class="player-detail"><div class="p-avatar" id="puzzle-opp-icon">♚</div><div class="player-name" id="puzzle-opp-label">Black</div></div>
-      <span class="badge badge-gold" id="puzzle-cat-badge">Mate in 1</span>
+      <div class="player-detail"><div class="p-avatar" id="pz-opp-av">♚</div><div class="player-name" id="pz-opp-label">Black</div></div>
+      <span class="badge badge-gold" id="pz-cat-badge">Mate in 1</span>
     </div>
-    <div id="board" class="chessboard" style="max-width:480px"></div>
+    <div class="chessboard-container">
+      <div id="board" class="chessboard"></div>
+    </div>
     <div class="player-card" style="margin-top:8px">
-      <div class="player-detail"><div class="p-avatar" id="puzzle-player-icon">♔</div><div class="player-name" id="puzzle-player-label">White to move</div></div>
-      <span id="puzzle-num" style="font-family:var(--font-mono);font-size:.82rem;color:var(--t-4)">#1</span>
+      <div class="player-detail"><div class="p-avatar" id="pz-player-av">♔</div><div class="player-name" id="pz-player-label">White to move</div></div>
+      <span id="pz-num" style="font-family:var(--font-mono);font-size:.8rem;color:var(--t-4)">#1</span>
     </div>
   </div>
 
-  <div style="width:280px;display:flex;flex-direction:column;gap:12px">
+  <!-- Sidebar -->
+  <div style="width:272px;display:flex;flex-direction:column;gap:10px">
     <div class="sidebar-box">
       <h3>Category</h3>
-      <div class="puzzle-cat-grid" id="cat-grid">
+      <div class="cat-grid" id="cat-grid">
         <div class="cat-btn active" data-cat="mate1">Mate in 1</div>
         <div class="cat-btn" data-cat="mate2">Mate in 2</div>
         <div class="cat-btn" data-cat="fork">Fork</div>
@@ -59,236 +59,220 @@
       <button class="btn btn-primary btn-block" onclick="loadPuzzle()">Next Puzzle →</button>
     </div>
 
-    <div class="puzzle-info">
-      <h4 id="puzzle-title">Puzzle #1</h4>
-      <div class="puzzle-tag">
-        <span class="badge badge-gold" id="badge-diff">Beginner</span>
-        <span class="badge badge-dim" id="badge-type">Mate in 1</span>
-      </div>
-      <p id="puzzle-desc" style="font-size:.85rem;color:var(--t-3);margin-top:8px">Find the winning move for White.</p>
-      <div style="margin-top:10px">
-        <span style="font-size:.78rem;color:var(--t-4);text-transform:uppercase;letter-spacing:.5px">Streak</span>
-        <div class="streak-bar" id="streak-bar"></div>
-        <span id="streak-count" style="font-size:.82rem;color:var(--gold);font-weight:700;margin-top:4px;display:block">0 streak</span>
-      </div>
-    </div>
-
-    <div class="sidebar-box" id="result-box" style="text-align:center;display:none">
-      <div class="result-icon" id="result-icon">✅</div>
-      <h3 id="result-title">Correct!</h3>
-      <p id="result-desc" style="font-size:.85rem;color:var(--t-3);margin-top:4px"></p>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn btn-primary btn-block" onclick="loadPuzzle()">Next →</button>
-      </div>
-    </div>
-
     <div class="sidebar-box">
-      <h3>Stats</h3>
-      <div class="ai-info" style="background:var(--bg-3);border-radius:var(--r-sm);padding:12px;display:flex;flex-direction:column;gap:6px">
-        <div style="display:flex;justify-content:space-between;font-size:.82rem"><span style="color:var(--t-3)">Solved</span><span style="font-weight:700;font-family:var(--font-mono)" id="stat-solved">0</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:.82rem"><span style="color:var(--t-3)">Failed</span><span style="font-weight:700;font-family:var(--font-mono);color:#ef6666" id="stat-failed">0</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:.82rem"><span style="color:var(--t-3)">Best Streak</span><span style="font-weight:700;font-family:var(--font-mono);color:var(--gold)" id="stat-best">0</span></div>
+      <h3 id="pz-title">Puzzle #1</h3>
+      <div style="display:flex;gap:6px;margin:6px 0;flex-wrap:wrap">
+        <span class="badge badge-gold" id="pz-diff">Beginner</span>
+        <span class="badge badge-dim" id="pz-type">Mate in 1</span>
       </div>
+      <p id="pz-desc" style="font-size:.84rem;color:var(--t-3);margin-top:6px;line-height:1.6">Find the winning move for White.</p>
+      <div style="margin-top:10px">
+        <div style="font-size:.76rem;color:var(--t-4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Streak</div>
+        <div class="streak-bar" id="streak-bar"></div>
+        <div id="streak-count" style="font-size:.82rem;color:var(--gold);font-weight:700;margin-top:5px">0 streak</div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="sidebar-box" id="result-box" style="display:none">
+      <div class="result-box">
+        <div class="result-icon" id="result-icon">✅</div>
+        <h3 id="result-title">Correct!</h3>
+        <p id="result-desc" style="font-size:.84rem;color:var(--t-3);margin-top:4px"></p>
+        <button class="btn btn-primary btn-block mt-12" onclick="loadPuzzle()">Next Puzzle →</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="sidebar-box">
+      <h3>Your Stats</h3>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;justify-content:space-between;font-size:.84rem"><span style="color:var(--t-3)">Solved</span><span style="font-weight:700;font-family:var(--font-mono);color:var(--green-light)" id="stat-solved">0</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.84rem"><span style="color:var(--t-3)">Failed</span><span style="font-weight:700;font-family:var(--font-mono);color:#ef6666" id="stat-failed">0</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.84rem"><span style="color:var(--t-3)">Best Streak</span><span style="font-weight:700;font-family:var(--font-mono);color:var(--gold)" id="stat-best">0</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.84rem"><span style="color:var(--t-3)">Accuracy</span><span style="font-weight:700;font-family:var(--font-mono)" id="stat-acc">—</span></div>
+      </div>
+      <p style="font-size:.74rem;color:var(--t-4);margin-top:8px" id="save-status">Sign in to save to Firebase</p>
     </div>
   </div>
 </div>
 
 <script>
-// ---- PUZZLE DATABASE ----
-const PUZZLES = {
-  mate1: [
-    { fen:'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R', moves:['d1h5'], side:'white', desc:'Queen delivers checkmate in one move.', diff:'Beginner', title:'Scholar Check' },
-    { fen:'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R', moves:['f3e5'], side:'white', desc:'Win the pawn with a fork.', diff:'Beginner', title:'Central Fork' },
-    { fen:'6k1/5ppp/8/8/8/8/8/4R2K', moves:['e1e8'], side:'white', desc:'Rook checkmate on the back rank.', diff:'Beginner', title:'Back Rank Mate' },
-    { fen:'rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR', moves:['h4f2'], side:'black', desc:'Black delivers checkmate in one.', diff:'Beginner', title:'Fool\'s Mate' },
-    { fen:'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R', moves:['f3e5'], side:'white', desc:'Win material with a fork.', diff:'Easy', title:'Knight Fork' },
+const PUZZLES={
+  mate1:[
+    {fen:'6k1/5ppp/8/8/8/8/8/4R2K w - - 0 1',moves:['e1e8'],side:'white',desc:'Rook delivers checkmate on the back rank.',diff:'Beginner',title:'Back Rank Mate'},
+    {fen:'rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 0 1',moves:['d1f3'],side:'white',desc:'Block the queen threat and deliver mate.',diff:'Beginner',title:'Queen Defense'},
+    {fen:'r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 1',moves:['e8d8'],side:'black',desc:'Only move — find where the king must go.',diff:'Beginner',title:'King Flight'},
+    {fen:'4k3/4r3/8/8/8/8/8/R3K3 w - - 0 1',moves:['a1a8'],side:'white',desc:'Rook skewer forces a win.',diff:'Easy',title:'Rook Skewer'},
+    {fen:'r3k2r/ppp2ppp/2n5/3B4/8/8/PPP2PPP/R3K2R w KQkq - 0 1',moves:['d5f7'],side:'white',desc:'Discovered attack wins material.',diff:'Easy',title:'Bishop Fork'},
   ],
-  mate2: [
-    { fen:'r1bqkb1r/pppp1ppp/2n5/4p3/2BNP3/8/PPP2PPP/RNBQK2R', moves:['d4f5','f5d6'], side:'white', desc:'Two-move combination leads to checkmate.', diff:'Easy', title:'Two-Move Combo' },
-    { fen:'4k3/4r3/8/8/8/8/4R3/4K3', moves:['e2a2','a2a8'], side:'white', desc:'Force the king to be mated.', diff:'Easy', title:'Rook Ladder' },
-    { fen:'r3k2r/ppp2ppp/2n5/3pp1N1/2B1P1b1/8/PPP2PPP/R1BQK2R', moves:['g5f7','f7d8'], side:'white', desc:'Knight fork leads to mate.', diff:'Medium', title:'Royal Fork' },
+  mate2:[
+    {fen:'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 1',moves:['f3g5','g5f7'],side:'white',desc:'Two-move combination — knight leads the way.',diff:'Easy',title:'Knight Attack'},
+    {fen:'r4rk1/ppp2ppp/2n5/3pp3/1b2P1Q1/2N2N2/PPP2PPP/R1B2RK1 b - - 0 1',moves:['d5e4','e4c3'],side:'black',desc:'Capture and give check to set up mate.',diff:'Medium',title:'Pawn Break'},
+    {fen:'5rk1/pp4pp/2p5/2b1P3/4Pp2/1PBr1q2/P1Q2P1P/R4RK1 b - - 0 1',moves:['f3g2','g2h2'],side:'black',desc:'Queen sacrifice leads to forced mate.',diff:'Hard',title:'Queen Sac'},
   ],
-  fork: [
-    { fen:'r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R', moves:['f3e5'], side:'white', desc:'Fork the king and rook!', diff:'Easy', title:'Classic Fork' },
-    { fen:'rnbqkbnr/ppp2ppp/8/3pp3/4P3/5N2/PPPP1PPP/RNBQKB1R', moves:['f3d4'], side:'white', desc:'Knight forks two pawns.', diff:'Beginner', title:'Pawn Fork' },
+  fork:[
+    {fen:'r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 0 1',moves:['f3e5'],side:'white',desc:'Fork the king and rook with the knight!',diff:'Easy',title:'Classic Fork'},
+    {fen:'rnbqkbnr/ppp2ppp/8/3pp3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 1',moves:['f3d4'],side:'white',desc:'Central knight fork attacks two pawns.',diff:'Beginner',title:'Central Fork'},
+    {fen:'r1b1kb1r/pppp1ppp/2n2n2/4p3/2B1P1q1/3P1N2/PPP2PPP/RNBQK2R w KQkq - 0 1',moves:['f3g5'],side:'white',desc:'Knight threatens queen and weak f7.',diff:'Medium',title:'Double Attack'},
   ],
-  pin: [
-    { fen:'rnbqk2r/ppp2ppp/3bpn2/3p4/2PP4/2N1PN2/PP3PPP/R1BQKB1R', moves:['f1b5'], side:'white', desc:'Pin the knight to the king!', diff:'Easy', title:'Bishop Pin' },
-    { fen:'r1bqk2r/ppp2ppp/2np1n2/2b1p3/2B1P3/2NP1N2/PPP2PPP/R1BQ1RK1', moves:['d1d6'], side:'white', desc:'Pin the piece against the king.', diff:'Medium', title:'Queen Pin' },
+  pin:[
+    {fen:'rnbqk2r/ppp2ppp/3bpn2/3p4/2PP4/2N1PN2/PP3PPP/R1BQKB1R w KQkq - 0 1',moves:['f1b5'],side:'white',desc:'Pin the knight to the king!',diff:'Easy',title:'Bishop Pin'},
+    {fen:'r1b1k2r/pppp1ppp/2n2q2/2b1p3/4P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 0 1',moves:['f1b5'],side:'white',desc:'Pin the knight and win material.',diff:'Easy',title:'Absolute Pin'},
+    {fen:'r1bqkb1r/pp2pppp/2np1n2/8/3NP3/2N5/PPP1BPPP/R1BQK2R b KQkq - 0 1',moves:['c6d4'],side:'black',desc:'Break the pin by capturing.',diff:'Medium',title:'Break the Pin'},
   ],
-  skewer: [
-    { fen:'4k3/8/8/8/8/8/8/R3K3', moves:['a1a8'], side:'white', desc:'Skewer the king to win the rook.', diff:'Easy', title:'Rook Skewer' },
-    { fen:'4k3/8/4r3/8/8/8/8/4RK2', moves:['e1e6'], side:'white', desc:'Win material with a rook skewer.', diff:'Medium', title:'File Skewer' },
+  skewer:[
+    {fen:'4k3/8/8/8/8/8/8/R3K3 w - - 0 1',moves:['a1a8'],side:'white',desc:'Skewer the king — rook takes the pawn.',diff:'Easy',title:'King Skewer'},
+    {fen:'4k3/8/4r3/8/8/8/8/4RK2 w - - 0 1',moves:['e1e6'],side:'white',desc:'Win the rook with a file skewer.',diff:'Medium',title:'File Skewer'},
   ],
-  tactics: [
-    { fen:'r1bqkb1r/pp2pppp/2np1n2/3p4/2PP4/2N1P3/PP3PPP/R1BQKBNR', moves:['c4d5'], side:'white', desc:'Open the center with a pawn push.', diff:'Medium', title:'Central Break' },
-    { fen:'rnbqkb1r/pp3ppp/2p1pn2/3p4/2PP4/2N2N2/PP2PPPP/R1BQKB1R', moves:['c4d5'], side:'white', desc:'Exchange pawn to open lines.', diff:'Medium', title:'Exchange Sac' },
+  tactics:[
+    {fen:'r1bqkb1r/pp2pppp/2np1n2/3p4/2PP4/2N2N2/PP2PPPP/R1BQKB1R w KQkq - 0 1',moves:['c4d5'],side:'white',desc:'Open the center — capture and gain space.',diff:'Medium',title:'Center Break'},
+    {fen:'rnbqkb1r/pppp1ppp/5n2/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 1',moves:['f3e5'],side:'white',desc:'Win a pawn with a tactical strike.',diff:'Easy',title:'Pawn Win'},
+    {fen:'r2qk2r/ppp1bppp/2np1n2/4p3/2B1P3/2NP1N2/PPP2PPP/R1BQK2R w KQkq - 0 1',moves:['c4f7'],side:'white',desc:'Bishop sacrifice on f7 — classic attack.',diff:'Hard',title:'Greek Gift'},
   ]
 };
 
-let currentPuzzle=null, puzzleIdx=0, solved=0, failed=0, streak=0, bestStreak=0;
-let currentCat='mate1', pendingMoves=[], moveIdx=0;
-let puzzleSolved=false;
-
 const SYM={'P':'♙','R':'♖','N':'♘','B':'♗','Q':'♕','K':'♔','p':'♟','r':'♜','n':'♞','b':'♝','q':'♛','k':'♚'};
+let curPuzzle=null, pIdx=0, streak=0, bestStreak=0, solved=0, failed=0;
+let curCat='mate1', moveIdx=0, pBoard=null, pSel=null, pMoves=[], pSolved=false;
+let statsLoaded=false;
 
-function onAuthReady(user){
-  if(user&&!user.isAnonymous){
-    const ref=DB.ref('puzzleStats/'+user.uid);
-    ref.once('value').then(snap=>{
-      const d=snap.val()||{};
-      solved=d.solved||0;failed=d.failed||0;bestStreak=d.bestStreak||0;
-      updateStats();
-    });
-  }
+// Load stats on auth
+async function onAuthReady(user){
+  const stats=await getPuzzleStats();
+  solved=stats.solved||0; failed=stats.failed||0;
+  bestStreak=stats.bestStreak||0; streak=stats.streak||0;
+  updateStatsUI();
+  const saveEl=document.getElementById('save-status');
+  if(saveEl) saveEl.textContent=user&&!user.isAnonymous?'✓ Synced to your account':'Sign in to save to Firebase';
+  statsLoaded=true;
 }
 
 document.querySelectorAll('.cat-btn').forEach(el=>{
-  el.onclick=()=>{
-    document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('active'));
-    el.classList.add('active'); currentCat=el.dataset.cat; loadPuzzle();
-  };
+  el.onclick=()=>{document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('active'));el.classList.add('active');curCat=el.dataset.cat;loadPuzzle();};
 });
 
 function loadPuzzle(){
-  const pool=PUZZLES[currentCat]||PUZZLES.mate1;
-  puzzleIdx=(puzzleIdx+1)%pool.length;
-  currentPuzzle=pool[puzzleIdx];
-  pendingMoves=currentPuzzle.moves.slice();
-  moveIdx=0; puzzleSolved=false;
-
+  const pool=PUZZLES[curCat]||PUZZLES.mate1;
+  pIdx=(pIdx+1)%pool.length;
+  curPuzzle=pool[pIdx];
+  moveIdx=0; pSolved=false; pSel=null; pMoves=[];
   document.getElementById('result-box').style.display='none';
-  document.getElementById('puzzle-title').textContent=currentPuzzle.title||'Puzzle #'+(puzzleIdx+1);
-  document.getElementById('puzzle-desc').textContent=currentPuzzle.desc||'Find the best move.';
-  document.getElementById('badge-diff').textContent=currentPuzzle.diff||'Easy';
-  document.getElementById('badge-type').textContent=currentCat.replace(/(\d)/,' in $1').replace(/([A-Z])/,' $1').trim();
-  document.getElementById('puzzle-cat-badge').textContent=currentCat.replace(/(\d)/,' in $1');
-  document.getElementById('puzzle-num').textContent='#'+(puzzleIdx+1);
-
-  const side=currentPuzzle.side||'white';
-  document.getElementById('puzzle-player-label').textContent=(side==='white'?'White':'Black')+' to move';
-  document.getElementById('puzzle-player-icon').textContent=side==='white'?'♔':'♚';
-  document.getElementById('puzzle-opp-icon').textContent=side==='white'?'♚':'♔';
-  document.getElementById('puzzle-opp-label').textContent=side==='white'?'Black':'White';
-
-  renderPuzzleBoard();
+  document.getElementById('pz-title').textContent=curPuzzle.title||'Puzzle #'+(pIdx+1);
+  document.getElementById('pz-desc').textContent=curPuzzle.desc||'Find the best move.';
+  document.getElementById('pz-diff').textContent=curPuzzle.diff||'Easy';
+  document.getElementById('pz-type').textContent=curCat.replace('mate1','Mate in 1').replace('mate2','Mate in 2');
+  document.getElementById('pz-cat-badge').textContent=curCat.replace('mate1','Mate in 1').replace('mate2','Mate in 2');
+  document.getElementById('pz-num').textContent='#'+(pIdx+1);
+  const side=curPuzzle.side||'white';
+  document.getElementById('pz-player-label').textContent=(side==='white'?'White':'Black')+' to move';
+  document.getElementById('pz-player-av').textContent=side==='white'?'♔':'♚';
+  document.getElementById('pz-opp-av').textContent=side==='white'?'♚':'♔';
+  document.getElementById('pz-opp-label').textContent=side==='white'?'Black':'White';
+  pBoard=parseFen(curPuzzle.fen);
+  drawPuzzleBoard();
 }
 
 function parseFen(fen){
-  const parts=fen.split(' ');
-  const rows=parts[0].split('/');
-  const board=[];
-  for(const row of rows){
-    const r=[];
-    for(const ch of row){
-      if(isNaN(ch)) r.push(ch);
-      else for(let i=0;i<parseInt(ch);i++) r.push('');
-    }
-    board.push(r);
-  }
-  return board;
+  const rows=fen.split(' ')[0].split('/');
+  return rows.map(row=>{const r=[];for(const ch of row){if(isNaN(ch))r.push(ch);else for(let i=0;i<parseInt(ch);i++)r.push('');}return r;});
 }
 
-let pBoard=null, pSelected=null, pValidMoves=[];
-function renderPuzzleBoard(){
-  pBoard=parseFen(currentPuzzle.fen);
-  pSelected=null; pValidMoves=[];
-  drawPuzzleBoard();
-}
 function drawPuzzleBoard(){
   const el=document.getElementById('board'); el.innerHTML='';
-  const side=currentPuzzle.side||'white';
+  const frag=document.createDocumentFragment();
   for(let r=0;r<8;r++) for(let c=0;c<8;c++){
     const sq=document.createElement('div');
-    const isL=(r+c)%2===0;
-    sq.className=`square ${isL?'light':'dark'}`;
-    if(pSelected&&pSelected[0]===r&&pSelected[1]===c) sq.classList.add('selected');
-    const hint=pValidMoves.find(m=>m.r===r&&m.c===c);
-    if(hint){sq.classList.add('hint');if(pBoard[r][c]) sq.classList.add('capture-hint');}
+    const isL=(r+c)%2===0; sq.className=`square ${isL?'light':'dark'}`;
+    if(pSel&&pSel[0]===r&&pSel[1]===c) sq.classList.add('selected');
+    const hint=pMoves.find(m=>m.r===r&&m.c===c);
+    if(hint){sq.classList.add('hint');if(pBoard[r][c])sq.classList.add('capture-hint');}
     const p=pBoard[r][c];
-    if(p) sq.textContent=SYM[p];
+    if(p){const pw=document.createElement('span');pw.className='piece';pw.textContent=SYM[p];sq.appendChild(pw);}
     if(c===0){const s=document.createElement('span');s.className='coord rank';s.textContent=(8-r);sq.appendChild(s);}
     if(r===7){const s=document.createElement('span');s.className='coord file';s.textContent='abcdefgh'[c];sq.appendChild(s);}
     sq.onclick=()=>puzzleClick(r,c);
-    el.appendChild(sq);
+    frag.appendChild(sq);
   }
+  el.appendChild(frag);
 }
+
 function puzzleClick(r,c){
-  if(puzzleSolved) return;
-  const side=currentPuzzle.side||'white';
+  if(pSolved) return;
+  const side=curPuzzle.side||'white';
   const p=pBoard[r][c];
-  if(pSelected){
-    const mv=pValidMoves.find(m=>m.r===r&&m.c===c);
+  if(pSel){
+    const mv=pMoves.find(m=>m.r===r&&m.c===c);
     if(mv){
-      const from=pSelected;
-      const expected=pendingMoves[moveIdx];
+      const from=pSel; pSel=null; pMoves=[];
+      // Check against expected move
+      const expected=curPuzzle.moves[moveIdx];
       const moveMade='abcdefgh'[from[1]]+(8-from[0])+'abcdefgh'[c]+(8-r);
       if(expected&&moveMade===expected){
-        applyPuzzleMove(from[0],from[1],r,c);
+        // Animate the piece
+        sfx('move');
+        applyMoveToBoard(pBoard,from[0],from[1],r,c,'normal');
         moveIdx++;
-        if(moveIdx>=pendingMoves.length){ puzzleCorrect(); }
-        else { setTimeout(()=>puzzleOpponentMove(),600); }
-      } else { puzzleWrong(); }
-      pSelected=null; pValidMoves=[]; drawPuzzleBoard(); return;
+        drawPuzzleBoard();
+        if(moveIdx>=curPuzzle.moves.length){ setTimeout(()=>puzzleCorrect(),300); }
+        else { setTimeout(()=>puzzleOpponentMove(),700); }
+      } else {
+        sfx('illegal');
+        puzzleWrong();
+      }
+      return;
     }
-    pSelected=null; pValidMoves=[];
+    pSel=null; pMoves=[];
   }
-  const isSide=(side==='white'&&p&&p===p.toUpperCase())||(side==='black'&&p&&p===p.toLowerCase());
-  if(isSide){
-    pSelected=[r,c];
-    pValidMoves=getLegalMoves(r,c,pBoard,null,{wK:false,wQ:false,bK:false,bQ:false});
+  const isMyPiece=(side==='white'&&p&&p===p.toUpperCase())||(side==='black'&&p&&p===p.toLowerCase());
+  if(isMyPiece){
+    pSel=[r,c];
+    pMoves=getLegalMoves(r,c,pBoard,null,{wK:false,wQ:false,bK:false,bQ:false});
   }
   drawPuzzleBoard();
 }
-function applyPuzzleMove(fr,fc,tr,tc){
-  applyMoveToBoard(pBoard,fr,fc,tr,tc,'normal');
-  drawPuzzleBoard();
-}
+
 function puzzleOpponentMove(){
-  const mv=pendingMoves[moveIdx];
-  if(!mv) return;
+  const mv=curPuzzle.moves[moveIdx]; if(!mv) return;
   const fc=mv.charCodeAt(0)-97, fr=8-parseInt(mv[1]);
   const tc=mv.charCodeAt(2)-97, tr=8-parseInt(mv[3]);
-  applyPuzzleMove(fr,fc,tr,tc);
-  moveIdx++;
+  sfx('move');
+  applyMoveToBoard(pBoard,fr,fc,tr,tc,'normal');
+  moveIdx++; drawPuzzleBoard();
 }
+
 function puzzleCorrect(){
-  puzzleSolved=true; solved++; streak++;
+  pSolved=true; streak++; solved++;
   if(streak>bestStreak) bestStreak=streak;
-  updateStats(); updateStreak();
-  document.getElementById('result-box').style.display='block';
-  document.getElementById('result-icon').textContent='✅';
-  document.getElementById('result-title').textContent='Brilliant!';
-  document.getElementById('result-desc').textContent='You found the winning move. Streak: '+streak;
-  savePuzzleStats();
+  updateStatsUI(); updateStreakBar();
+  showResult('✅','Brilliant!','You found the winning move! Streak: '+streak);
+  savePuzzleStat(true, streak);
+  sfx('game-end');
 }
 function puzzleWrong(){
-  failed++; streak=0; updateStats(); updateStreak();
-  document.getElementById('result-box').style.display='block';
-  document.getElementById('result-icon').textContent='❌';
-  document.getElementById('result-title').textContent='Not quite...';
-  document.getElementById('result-desc').textContent='That wasn\'t the best move. Try the next puzzle!';
-  pSelected=null; pValidMoves=[]; savePuzzleStats();
+  failed++; streak=0; updateStatsUI(); updateStreakBar();
+  showResult('❌','Not quite...','That wasn\'t the best move. Try the next puzzle!');
+  savePuzzleStat(false, 0);
 }
-function updateStats(){
+function showResult(icon,title,desc){
+  document.getElementById('result-box').style.display='block';
+  document.getElementById('result-icon').textContent=icon;
+  document.getElementById('result-title').textContent=title;
+  document.getElementById('result-desc').textContent=desc;
+}
+function updateStatsUI(){
   document.getElementById('stat-solved').textContent=solved;
   document.getElementById('stat-failed').textContent=failed;
   document.getElementById('stat-best').textContent=bestStreak;
+  const total=solved+failed;
+  document.getElementById('stat-acc').textContent=total>0?Math.round((solved/total)*100)+'%':'—';
 }
-function updateStreak(){
+function updateStreakBar(){
   const bar=document.getElementById('streak-bar'); bar.innerHTML='';
-  for(let i=0;i<10;i++){
-    const d=document.createElement('div');
-    d.className='streak-dot'+(i<streak?' filled':'');
-    bar.appendChild(d);
-  }
+  for(let i=0;i<10;i++){const d=document.createElement('div');d.className='streak-dot'+(i<streak?' filled':'');bar.appendChild(d);}
   document.getElementById('streak-count').textContent=streak+' streak';
 }
-function savePuzzleStats(){
-  if(!currentUser||currentUser.isAnonymous) return;
-  DB.ref('puzzleStats/'+currentUser.uid).set({solved,failed,bestStreak,ts:Date.now()});
-}
 
-window.onload=loadPuzzle;
+window.onload=()=>{loadPuzzle();updateStreakBar();};
 </script>
 </body></html>
