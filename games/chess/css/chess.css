@@ -1,105 +1,178 @@
 /* ============================================================
-   CHESS BOARD & GAME CSS
+   CHESS BOARD & GAME — Fixed size, no flicker, smooth moves
    ============================================================ */
-.game-layout{display:flex;gap:20px;max-width:1100px;margin:0 auto;padding:20px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
-.board-wrapper{display:flex;flex-direction:column;gap:8px;width:100%;max-width:540px;flex-shrink:0}
 
-/* Player Cards */
-.player-card{background:var(--bg-2);border:1px solid var(--border-1);padding:10px 14px;border-radius:var(--r-md);display:flex;justify-content:space-between;align-items:center;min-height:56px}
+/* ── LAYOUT ── */
+.game-layout{display:flex;gap:20px;max-width:1060px;margin:0 auto;padding:16px 16px;align-items:flex-start;justify-content:center;flex-wrap:wrap;min-height:calc(100vh - 60px)}
+.board-wrapper{display:flex;flex-direction:column;gap:8px;flex-shrink:0;width:min(520px, calc(100vw - 32px))}
+
+/* ── PLAYER CARDS ── */
+.player-card{background:var(--bg-2);border:1px solid var(--border-1);padding:9px 14px;border-radius:var(--r-md);display:flex;justify-content:space-between;align-items:center;min-height:52px;transition:border-color .2s}
 .player-card.active-player{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold-dim)}
-.player-detail{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.93rem}
-.p-avatar{width:36px;height:36px;background:var(--bg-4);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;overflow:hidden}
+.player-detail{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.9rem;min-width:0}
+.p-avatar{width:34px;height:34px;background:var(--bg-4);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;overflow:hidden}
 .p-avatar img{width:100%;height:100%;object-fit:cover}
-.player-meta{display:flex;flex-direction:column;gap:2px}
-.player-name{font-size:.9rem;font-weight:700;color:var(--t-1)}
-.captured-row{display:flex;gap:1px;flex-wrap:wrap;font-size:.8rem;min-height:14px;color:var(--t-3)}
-.material-adv{font-size:.72rem;color:var(--gold);font-weight:600;font-family:var(--font-mono)}
-.thinking-badge{font-size:.78rem;color:#fbbf24;font-weight:600;opacity:0;transition:opacity .2s ease;display:flex;align-items:center;gap:5px}
+.player-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
+.player-name{font-size:.88rem;font-weight:700;color:var(--t-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.captured-row{display:flex;gap:1px;flex-wrap:wrap;font-size:.78rem;min-height:13px;color:var(--t-3);line-height:1}
+.thinking-badge{font-size:.76rem;color:#fbbf24;font-weight:600;opacity:0;transition:opacity .2s;display:flex;align-items:center;gap:4px}
 .thinking-badge.visible{opacity:1}
 .thinking-dots span{animation:blink 1.2s infinite}.thinking-dots span:nth-child(2){animation-delay:.2s}.thinking-dots span:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
-.clock-badge{background:#0d0c0b;color:#fff;padding:6px 12px;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:1.2rem;font-weight:700;border:1px solid var(--border-2);transition:background .2s,color .2s;letter-spacing:1px}
+.clock-badge{background:#0c0b0a;color:#fff;padding:5px 11px;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:1.15rem;font-weight:700;border:1px solid var(--border-2);transition:background .2s,color .2s;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
 .clock-badge.active{background:#e9e9e9;color:#000}
 .clock-badge.low-time{background:#dc2626!important;color:#fff!important;animation:clockPulse 1s infinite}
-@keyframes clockPulse{0%,100%{opacity:1}50%{opacity:.7}}
+@keyframes clockPulse{0%,100%{opacity:1}50%{opacity:.6}}
 
-/* CHESSBOARD */
-.chessboard{width:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);border-radius:var(--r-sm);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8);position:relative;user-select:none}
-.square{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:clamp(1.8rem,6.5vw,3rem);cursor:pointer;position:relative;transition:background .08s ease}
-.square.light{background:var(--board-light);color:#312e2b}.square.dark{background:var(--board-dark);color:#f0d9b5}
-.square.selected{background:rgba(20,85,30,.65)!important}
-.square.last-move-from{background:rgba(155,199,0,.35)!important}.square.last-move-to{background:rgba(155,199,0,.5)!important;animation:movePulse .35s ease-out}
-.square.in-check{background:rgba(220,40,40,.7)!important;animation:checkPulse .5s ease}
+/* ── CHESSBOARD — FIXED SIZE, NO FLICKER ── */
+.chessboard-container{
+  width:100%;
+  /* Perfect square always */
+  aspect-ratio:1/1;
+  position:relative;
+  border-radius:4px;
+  overflow:hidden;
+  box-shadow:0 16px 48px rgba(0,0,0,.85);
+  user-select:none;
+  /* Prevent ANY layout shift */
+  flex-shrink:0;
+}
+.chessboard{
+  position:absolute;
+  inset:0;
+  display:grid;
+  grid-template-columns:repeat(8,12.5%);
+  grid-template-rows:repeat(8,12.5%);
+  width:100%;
+  height:100%;
+}
+.square{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  position:relative;
+  /* NO transition on background to prevent flicker */
+}
+.square.light{background:var(--board-light)}
+.square.dark{background:var(--board-dark)}
+.square.selected{background:rgba(20,85,30,.68)!important}
+.square.last-move-from{background:rgba(155,199,0,.32)!important}
+.square.last-move-to{background:rgba(155,199,0,.52)!important}
+.square.in-check{background:rgba(220,40,40,.72)!important;animation:checkFlash .5s ease}
 .square.disabled{cursor:default}
-.square.hint::after{content:'';width:28%;height:28%;background:rgba(0,0,0,.2);border-radius:50%;position:absolute;pointer-events:none}
-.square.capture-hint::after{width:84%;height:84%;background:transparent;border:5px solid rgba(0,0,0,.18);border-radius:50%}
-@keyframes movePulse{0%{filter:brightness(1.3)}100%{filter:brightness(1)}}
-@keyframes checkPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+@keyframes checkFlash{0%{filter:brightness(1.5)}100%{filter:brightness(1)}}
 
-/* Rank/File coordinates */
-.coord{position:absolute;font-size:.6rem;font-weight:700;opacity:.65;pointer-events:none;line-height:1}
+/* ── PIECE — fixed size relative to cell, no font-size weirdness ── */
+.piece{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:min(6.5vw, 54px);   /* capped, never too big */
+  line-height:1;
+  pointer-events:none;
+  will-change:transform;
+  transition:transform .12s ease;
+  z-index:2;
+}
+/* On small boards use smaller font */
+@media(max-width:480px){.piece{font-size:min(10vw, 38px)}}
+
+/* Slide animation */
+.piece.sliding{
+  transition:transform .22s cubic-bezier(.25,.46,.45,.94);
+}
+.square.selected .piece{transform:scale(1.08)}
+
+/* ── MOVE HINTS ── */
+.square.hint::after{
+  content:'';
+  position:absolute;
+  width:30%;height:30%;
+  background:rgba(0,0,0,.19);
+  border-radius:50%;
+  z-index:3;
+  pointer-events:none;
+}
+.square.capture-hint::after{
+  width:86%;height:86%;
+  background:transparent;
+  border:5px solid rgba(0,0,0,.18);
+}
+
+/* ── COORDINATES ── */
+.coord{position:absolute;font-size:min(1.4vw,10px);font-weight:700;opacity:.65;pointer-events:none;line-height:1;z-index:1}
 .coord.file{bottom:2px;right:3px}.coord.rank{top:2px;left:3px}
 .square.light .coord{color:#8a7450}.square.dark .coord{color:#f0d9b5}
 
-/* Piece drag ghost */
-.square .piece-wrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:transform .1s ease}
-.square.selected .piece-wrap{transform:scale(1.1)}
-
-/* Board overlays */
-.board-overlay{position:absolute;inset:0;background:rgba(10,9,8,.9);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;border-radius:var(--r-sm);z-index:10;text-align:center;padding:24px}
+/* ── BOARD OVERLAYS ── */
+.board-overlay{position:absolute;inset:0;background:rgba(10,9,8,.91);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:20;text-align:center;padding:24px}
 .board-overlay.visible{display:flex}
-.board-overlay h3{font-size:1.5rem}.board-overlay p{color:var(--t-3);font-size:.9rem}
+.board-overlay h3{font-size:clamp(1.1rem,3vw,1.5rem)}.board-overlay p{color:var(--t-3);font-size:.88rem}
+.promo-row{display:flex;gap:8px;margin-top:4px}
+.promo-piece{width:clamp(48px,11vw,64px);height:clamp(48px,11vw,64px);background:var(--bg-3);border:2px solid var(--border-2);border-radius:var(--r-md);font-size:clamp(1.6rem,5vw,2.2rem);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all var(--t-base)}
+.promo-piece:hover{background:var(--gold);border-color:var(--gold);transform:scale(1.06)}
 
-/* Promotion picker */
-.promo-row{display:flex;gap:10px;margin-top:4px}
-.promo-piece{width:64px;height:64px;background:var(--bg-3);border:2px solid var(--border-2);border-radius:var(--r-md);font-size:2.2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all var(--t-base)}
-.promo-piece:hover{background:var(--gold);border-color:var(--gold);transform:scale(1.05)}
+/* ── SIDEBAR ── */
+.game-sidebar{width:272px;display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.sidebar-box{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-lg);padding:14px;display:flex;flex-direction:column;gap:10px}
+.sidebar-box h3{font-size:.74rem;color:var(--t-3);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
 
-/* SIDEBAR */
-.game-sidebar{width:280px;display:flex;flex-direction:column;gap:12px;flex-shrink:0}
-.sidebar-box{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:12px}
-.sidebar-box h3{font-size:.78rem;color:var(--t-3);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
-
-/* Move list */
-.move-list-wrap{max-height:240px;overflow-y:auto}
+/* ── MOVE LIST ── */
+.move-list-wrap{max-height:220px;overflow-y:auto}
 .move-list{display:flex;flex-direction:column;gap:1px}
-.move-row{display:grid;grid-template-columns:28px 1fr 1fr;gap:6px;padding:4px 6px;border-radius:3px;font-family:var(--font-mono);font-size:.82rem}
+.move-row{display:grid;grid-template-columns:26px 1fr 1fr;gap:4px;padding:3px 5px;border-radius:3px;font-family:var(--font-mono);font-size:.8rem}
 .move-row:nth-child(odd){background:rgba(255,255,255,.03)}
 .move-row .m-idx{color:var(--t-4)}.move-row .m-w{color:var(--t-1)}.move-row .m-b{color:var(--t-2)}
-.move-row .m-w:hover,.move-row .m-b:hover{color:var(--gold);cursor:pointer}
 
-/* Game controls sidebar */
-.game-controls{display:flex;flex-direction:column;gap:8px}
-.ctrl-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-
-/* Status banner */
-.status-banner{background:var(--bg-3);border:1px solid var(--border-1);border-radius:var(--r-sm);padding:10px 14px;font-size:.88rem;font-weight:600;color:var(--t-2);text-align:center}
-.status-banner.check{border-color:rgba(217,64,64,.4);color:#ef6666;background:rgba(217,64,64,.08)}
+/* ── CONTROLS ── */
+.game-controls{display:flex;flex-direction:column;gap:7px}
+.ctrl-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.status-banner{background:var(--bg-3);border:1px solid var(--border-1);border-radius:var(--r-sm);padding:9px 12px;font-size:.86rem;font-weight:600;color:var(--t-2);text-align:center}
+.status-banner.check{border-color:rgba(217,64,64,.4);color:#ef6666;background:rgba(217,64,64,.07)}
 .status-banner.info{border-color:rgba(201,162,39,.3);color:var(--gold);background:var(--gold-dim)}
 .status-banner.success{border-color:rgba(88,161,74,.3);color:var(--green-light)}
 
-/* Online game specific */
-.connection-status{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--t-3)}
-.room-code-display{font-family:var(--font-mono);font-size:1.6rem;letter-spacing:5px;text-align:center;color:var(--gold);padding:12px;background:var(--bg-3);border:1px solid var(--border-2);border-radius:var(--r-sm);font-weight:700}
+/* ── ONLINE ── */
+.connection-status{display:flex;align-items:center;gap:6px;font-size:.76rem;color:var(--t-3)}
+.room-code-display{font-family:var(--font-mono);font-size:2.2rem;font-weight:800;letter-spacing:6px;text-align:center;color:var(--gold);padding:12px;background:var(--bg-3);border:1px solid var(--border-2);border-radius:var(--r-sm)}
 
-/* Eval bar */
-.eval-bar-wrap{display:flex;align-items:stretch;gap:10px}
-.eval-bar{width:16px;background:var(--bg-0);border-radius:var(--r-sm);overflow:hidden;flex-shrink:0;border:1px solid var(--border-1)}
-.eval-bar-fill{background:#e9e9e9;border-radius:0 0 var(--r-sm) var(--r-sm);transition:height .4s ease;min-height:4px}
-.eval-value{font-family:var(--font-mono);font-size:.8rem;color:var(--t-3);text-align:center;margin-top:4px}
-
-/* Chat */
-.chat-box{display:flex;flex-direction:column;gap:0}
-.chat-messages{max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding:8px 0}
-.chat-msg{font-size:.82rem}.chat-msg .chat-author{font-weight:700;color:var(--gold)}.chat-msg .chat-text{color:var(--t-2)}
-.chat-input-row{display:flex;gap:6px;margin-top:8px}
-.chat-input-row input{flex:1;background:var(--bg-3);border:1px solid var(--border-2);color:var(--t-1);border-radius:var(--r-sm);padding:7px 10px;font-size:.82rem;font-family:var(--font-sans)}
+/* ── CHAT ── */
+.chat-messages{max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding:4px 0}
+.chat-msg .chat-author{font-weight:700;color:var(--gold);font-size:.8rem}.chat-msg .chat-text{color:var(--t-2);font-size:.8rem}
+.chat-input-row{display:flex;gap:6px;margin-top:6px}
+.chat-input-row input{flex:1;background:var(--bg-3);border:1px solid var(--border-2);color:var(--t-1);border-radius:var(--r-sm);padding:6px 9px;font-size:.8rem;font-family:var(--font-sans)}
 .chat-input-row input:focus{outline:none;border-color:var(--gold)}
 
-/* Draw offer banner */
-.draw-offer-banner{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:var(--r-sm);padding:10px 14px;font-size:.85rem;color:var(--gold);display:flex;flex-direction:column;gap:8px}
-.draw-offer-btns{display:flex;gap:8px}
+/* ── DRAW/REMATCH BANNERS ── */
+.draw-banner{background:rgba(201,162,39,.09);border:1px solid rgba(201,162,39,.28);border-radius:var(--r-sm);padding:10px 12px;font-size:.84rem;color:var(--gold);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.draw-banner-btns{display:flex;gap:6px}
 
-/* RESPONSIVE */
-@media(max-width:900px){.game-sidebar{width:100%;max-width:540px}.game-layout{padding:12px}}
-@media(max-width:600px){.game-layout{gap:12px;padding:8px 10px}.board-wrapper{max-width:100%}.game-sidebar{width:100%}.clock-badge{font-size:1rem;padding:5px 10px}}
+/* ── DIFF CARDS (computer page) ── */
+.diff-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.diff-card{background:var(--bg-3);border:1px solid var(--border-2);border-radius:var(--r-sm);padding:11px 9px;text-align:center;cursor:pointer;transition:all var(--t-fast)}
+.diff-card:hover{border-color:var(--border-3)}.diff-card.active{border-color:var(--gold);background:var(--gold-dim)}
+.diff-card .dc-icon{font-size:1.3rem;line-height:1}.diff-card .dc-name{font-size:.8rem;font-weight:700;color:var(--t-1);margin-top:3px}.diff-card .dc-desc{font-size:.7rem;color:var(--t-4);margin-top:1px}
+.ai-info-box{background:var(--bg-3);border-radius:var(--r-sm);padding:11px;display:flex;flex-direction:column;gap:7px}
+.ai-row{display:flex;justify-content:space-between;font-size:.8rem}
+.ai-row span:first-child{color:var(--t-3)}.ai-row span:last-child{font-weight:600;font-family:var(--font-mono);color:var(--t-1)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .game-sidebar{width:100%;max-width:520px}
+  .game-layout{padding:12px}
+}
+@media(max-width:600px){
+  .game-layout{gap:10px;padding:8px 8px;align-items:center}
+  .board-wrapper{width:calc(100vw - 16px);max-width:100%}
+  .game-sidebar{width:calc(100vw - 16px)}
+  .clock-badge{font-size:1rem;padding:4px 9px}
+  .player-name{max-width:130px}
+}
+@media(max-width:380px){
+  .clock-badge{font-size:.9rem;padding:4px 7px;letter-spacing:.5px}
+}
