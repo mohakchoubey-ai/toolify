@@ -479,6 +479,23 @@ body {
   height: 100%;
   object-fit: contain;
 }
+  .tc-icon {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.tc-icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+  
 </style>
 </head>
 <body>
@@ -711,7 +728,9 @@ function makeCard(t, delay = 0, showRecent = false) {
   a.style.animationDelay = delay + 'ms';
   a.title = t.name;
   a.innerHTML = `
-    <div class="tc-icon">${t.icon}</div>
+    <div class="tc-icon">
+    <img src="${t.icon}" alt="${t.name}" class="tc-icon-img">
+</div>
     <div class="tc-name">${t.name}</div>
     ${t.badge === 'new' ? '<span class="badge-new">NEW</span>' : ''}
     ${t.badge === 'hot' ? '<span class="badge-hot">HOT</span>' : ''}
