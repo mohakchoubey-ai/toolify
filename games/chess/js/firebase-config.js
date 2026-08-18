@@ -14,6 +14,9 @@ if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CON
 const DB   = firebase.database();
 const FS   = firebase.firestore();
 const AUTH = firebase.auth();
+// Set explicit persistence so auth survives page navigation
+AUTH.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .catch(err => console.warn('Persistence init:', err.message));
 const GoogleProvider = new firebase.auth.GoogleAuthProvider();
 GoogleProvider.addScope('profile'); GoogleProvider.addScope('email');
 let currentUser = null;
@@ -106,6 +109,11 @@ function updateNavUser(user){
     if(authBtns) authBtns.style.display='flex';
     if(userMenu) userMenu.style.display='none';
     if(msmUser) msmUser.style.display='none';
+    // ✓ NEW: Hide sign out, show sign in in mobile menu
+    const msmLogout=document.getElementById('msm-logout-link');
+    const msmLogin=document.getElementById('msm-login-link');
+    if(msmLogout) msmLogout.style.display='none';
+    if(msmLogin) msmLogin.style.display='block';
   }
 }
 function showToast(msg,type='info',dur=3500){

@@ -76,13 +76,15 @@
       <a href="login.html" id="msm-login-link"><span class="msm-icon">🔑</span>Sign In</a>
     </div>
   </div>
-  <div class="msm-section">
-    <div class="msm-label">Info</div>
+   <div class="msm-section">
+    <div class="msm-label">Account</div>
     <div class="msm-links">
-      <a href="about.html"><span class="msm-icon">ℹ️</span>About</a>
-      <a href="faq.html"><span class="msm-icon">❓</span>FAQ</a>
-      <a href="contact.html"><span class="msm-icon">📬</span>Contact</a>
+      <a href="profile.html"><span class="msm-icon">👤</span>Profile</a>
+      <a href="settings.html"><span class="msm-icon">⚙️</span>Settings</a>
+      <a href="login.html" id="msm-login-link"><span class="msm-icon">🔑</span>Sign In</a>
+      <a href="#" id="msm-logout-link" style="display:none" onclick="signOut().then(()=>location.href='index.html');return false"><span class="msm-icon">🚪</span>Sign Out</a>
     </div>
+  </div>
   </div>
 </div>
 
