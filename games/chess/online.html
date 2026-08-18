@@ -185,12 +185,11 @@
 </div>
 
 <script>
-let game=null, myRoom=null, myColor=null, myUser=null;
+let game=null, myRoom=null, myColor=null;
 let roomRef=null, roomListener=null, applyingRemote=false;
 let selectedTime=300, selectedColor='white';
 
 function onAuthReady(user){
-  myUser=user;
   if(!user||user.isAnonymous){
     document.getElementById('auth-wall').style.display='block';
     document.getElementById('lobby').style.display='none';
@@ -201,12 +200,17 @@ function onAuthReady(user){
 }
 
 function doGoogleSignIn(){
-  signInWithGoogle().then(r=>{
-    myUser=r.user;
-    document.getElementById('auth-wall').style.display='none';
-    document.getElementById('lobby').style.display='block';
-    showToast('Welcome, '+getDisplayName(r.user)+'!','success');
-  }).catch(e=>showToast(e.message,'error'));
+  signInWithGoogle()
+    .then(r=>{
+      showToast('Welcome, '+getDisplayName(r.user)+'!','success');
+      setTimeout(()=>{
+        if(currentUser && !currentUser.isAnonymous){
+          document.getElementById('auth-wall').style.display='none';
+          document.getElementById('lobby').style.display='block';
+        }
+      }, 100);
+    })
+    .catch(e=>showToast(e.message,'error'));
 }
 
 // Lobby options
@@ -218,19 +222,19 @@ document.querySelectorAll('.color-opt').forEach(el=>{
 });
 
 async function createRoom(){
-  if(!myUser) return;
+  if(!currentUser || currentUser.isAnonymous) return;
   let code=null;
   for(let i=0;i<10;i++){const c=randomCode(6);const s=await DB.ref('rooms/'+c).once('value');if(!s.exists()){code=c;break;}}
   if(!code){showToast('Could not create room','error');return;}
   const color=selectedColor==='random'?(Math.random()<.5?'white':'black'):selectedColor;
   myColor=color; myRoom=code;
-  await DB.ref('rooms/'+code).set({[color]:{uid:myUser.uid,name:getDisplayName(myUser),photo:myUser.photoURL||''},timeControl:selectedTime,status:'waiting',createdAt:firebase.database.ServerValue.TIMESTAMP});
+  await DB.ref('rooms/'+code).set({[color]:{uid:currentUser.uid,name:getDisplayName(currentUser),photo:currentUser.photoURL||''},timeControl:selectedTime,status:'waiting',createdAt:firebase.database.ServerValue.TIMESTAMP});
   DB.ref('rooms/'+code+'/'+color+'/online').onDisconnect().set(false);
   showWaitingRoom(code);
 }
 
 async function joinRoom(){
-  if(!myUser) return;
+  if(!currentUser || currentUser.isAnonymous) return;
   const code=document.getElementById('join-code').value.trim().toUpperCase();
   if(code.length<4){showToast('Enter a valid room code','error');return;}
   const snap=await DB.ref('rooms/'+code).once('value');
@@ -241,7 +245,7 @@ async function joinRoom(){
   if(taken.length>=2){showToast('Room is full','error');return;}
   const freeColor=taken.includes('white')?'black':'white';
   myColor=freeColor; myRoom=code;
-  await DB.ref('rooms/'+code+'/'+freeColor).set({uid:myUser.uid,name:getDisplayName(myUser),photo:myUser.photoURL||''});
+  await DB.ref('rooms/'+code+'/'+freeColor).set({uid:currentUser.uid,name:getDisplayName(currentUser),photo:currentUser.photoURL||''});
   await DB.ref('rooms/'+code+'/status').set('active');
   DB.ref('rooms/'+code+'/'+freeColor+'/online').onDisconnect().set(false);
   showWaitingRoom(code);
@@ -380,7 +384,7 @@ function sendChat(){
   const input=document.getElementById('chat-input');
   const msg=input.value.trim().replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
   if(!msg||!roomRef) return; input.value='';
-  roomRef.child('chat/'+Date.now()).set({name:getDisplayName(myUser),msg,ts:Date.now()});
+  roomRef.child('chat/'+Date.now()).set({name:getDisplayName(currentUser),msg,ts:Date.now()});
 }
 function renderChat(chatData){
   const el=document.getElementById('chat-messages'); if(!el) return;
