@@ -76,7 +76,7 @@
   // ── Single import — same instance Toolify already initialised ──
   import {
     auth,
-    onAuthStateChanged,
+    onAuthReady,
     signInWithGoogle,
     getDisplayName,
     showToast
@@ -91,24 +91,6 @@
   // Resolve redirect target (e.g. protect.js sent ?redirect=/toolify/games/chess/play.html)
   const params     = new URLSearchParams(window.location.search);
   const redirectTo = params.get("redirect") || "profile.html";
-
-  // ── If user is ALREADY signed in (from Toolify), skip straight through ──
-  window.onAuthReady = user => {
-    if (user && !user.isAnonymous) {
-      // Show "already signed in" pill and go button instead of features
-      alreadyBox.classList.add("visible");
-      featureList.style.display = "none";
-      alreadyName.textContent = getDisplayName(user);
-      avatarWrap.innerHTML = user.photoURL
-        ? `<img src="${user.photoURL}" class="already-avatar" alt="">`
-        : `<div class="already-avatar">${getDisplayName(user).slice(0,2).toUpperCase()}</div>`;
-
-      btn.textContent = "Continue to CheckMate →";
-      btn.onclick = () => { window.location.href = redirectTo; };
-    } else {
-      btn.onclick = doSignIn;
-    }
-  };
 
   async function doSignIn() {
     btn.disabled   = true;
@@ -129,7 +111,25 @@
     }
   }
 
-  // Default click handler (overridden by onAuthReady if already signed in)
+  // Register auth-ready callback (won't race, guaranteed to fire)
+  onAuthReady(user => {
+    if (user && !user.isAnonymous) {
+      // Show "already signed in" pill and go button instead of features
+      alreadyBox.classList.add("visible");
+      featureList.style.display = "none";
+      alreadyName.textContent = getDisplayName(user);
+      avatarWrap.innerHTML = user.photoURL
+        ? `<img src="${user.photoURL}" class="already-avatar" alt="">`
+        : `<div class="already-avatar">${getDisplayName(user).slice(0,2).toUpperCase()}</div>`;
+
+      btn.textContent = "Continue to CheckMate →";
+      btn.onclick = () => { window.location.href = redirectTo; };
+    } else {
+      btn.onclick = doSignIn;
+    }
+  });
+
+  // Default click handler (overridden by onAuthReady callback if already signed in)
   btn.onclick = doSignIn;
 </script>
 </body>
