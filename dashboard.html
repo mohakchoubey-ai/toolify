@@ -568,7 +568,7 @@ body {
         <div class="nav-user-status" id="navStatus">● Online</div>
       </div>
     </div>
-    <button class="nav-signout" onclick="signOut()">Sign out</button>
+    <button class="nav-signout" id="signOutBtn">Sign out</button>
   </div>
 </nav>
 
@@ -690,7 +690,46 @@ body {
 
 
   
-<script>
+<script type="module">
+// ── FIREBASE AUTH IMPORTS ──
+import { auth, onAuthStateChanged, fbSignOut } from './firebase-auth.js';
+
+// ── AUTH CHECK ──
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.replace('/toolify/login.html');
+    return;
+  }
+  
+  // User is authenticated — populate UI
+  const firstName = user.displayName?.split(' ')[0] || 'User';
+  document.querySelector('.nav-user-name').textContent = firstName;
+  document.querySelector('.nav-avatar').textContent = firstName.charAt(0).toUpperCase();
+  
+  console.log('✅ User authenticated:', user.email);
+});
+
+// ── SIGN OUT HANDLER ──
+document.getElementById('signOutBtn').addEventListener('click', async () => {
+  try {
+    await fbSignOut(auth);
+    
+    showToast('Signed out. See you soon!');
+    
+    // Clear all local/session storage
+    sessionStorage.clear();
+    localStorage.removeItem('toolify_session_start');
+    
+    // Redirect to login after 800ms
+    setTimeout(() => {
+      window.location.replace('/toolify/login.html');
+    }, 800);
+  } catch (err) {
+    console.error('Sign out error:', err);
+    showToast('Error signing out. Please try again.');
+  }
+});
+
 // ── DATA ──
 const tools = [
   // section, icon, name, url, badge
@@ -725,7 +764,7 @@ const tools = [
   { s:'utilities', icon:'📄', name:'PDF Maker', url:'https://mohakchoubey.github.io/toolify/pdf', badge:null },
   { s:'utilities', icon:'🔒', name:'Password Gen', url:'https://mohakchoubey.github.io/toolify/password', badge:null },
   { s:'utilities', icon:'🎮', name:'Games', url:'https://mohakchoubey.github.io/toolify/games.html', badge:null },
-  { s:'utilities', icon:'https://mohakchoubey.github.io/toolify/websites-preview.webp', name:'Website previewer', url:'  https://mohakchoubey.github.io/toolify/website-previewer', badge: 'new' },
+  { s:'utilities', icon:'https://mohakchoubey.github.io/toolify/websites-preview.webp', name:'Website previewer', url:'https://mohakchoubey.github.io/toolify/website-previewer', badge: 'new' },
 
 
   { s:'time', icon:'🕓', name:'Clock', url:'https://mohakchoubey.github.io/toolify/time', badge:null },
@@ -912,9 +951,7 @@ document.querySelectorAll('.theme-dot').forEach(dot => {
 });
 
 function setAccent(c) {
-  // derive light version for accent2
   document.documentElement.style.setProperty('--accent', c);
-  // Simple lightened accent2: just use the color at low opacity
   document.documentElement.style.setProperty('--accent2', c + '22');
 }
 const savedAccent = localStorage.getItem('toolify_accent');
@@ -949,12 +986,6 @@ document.querySelectorAll('.nav-item').forEach(item => {
     }
   });
 });
-
-// ── SIGN OUT ──
-function signOut() {
-  showToast('Signed out. See you soon, Mohak!');
-  setTimeout(() => { location.reload(); }, 1500);
-}
 
 // ── TOAST ──
 function showToast(msg) {
@@ -1023,7 +1054,6 @@ window.addEventListener('appinstalled', () => {
   deferredInstallPrompt = null;
   showToast('Toolify installed successfully.');
 });
-
 </script>
 
 </body>
