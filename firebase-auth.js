@@ -1,26 +1,89 @@
 // ══════════════════════════════════════════
-//  FIREBASE-AUTH.JS
-//  Firebase initialization and auth exports
+//  PROTECT.JS — Enhanced Auth Protection
 // ══════════════════════════════════════════
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getAuth,
-  onAuthStateChanged,
-  signOut as fbSignOut
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    auth,
+    onAuthStateChanged
+} from "./firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
-  authDomain: "toolbox-hub-98c03.firebaseapp.com",
-  projectId: "toolbox-hub-98c03",
-  storageBucket: "toolbox-hub-98c03.firebasestorage.app",
-  messagingSenderId: "321020105472",
-  appId: "1:321020105472:web:356e7c2903def7b9d859e5",
-  databaseURL: "https://toolbox-hub-98c03-default-rtdb.firebaseio.com"
-};
+// ─── 1. INSTANT HIDE ───
+document.documentElement.style.display = "none";
+let isPageAllowed = false;
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+// ─── 2. AUTH CHECK ───
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        const currentPage = encodeURIComponent(
+            window.location.pathname + window.location.search
+        );
+        window.location.replace(
+            `/toolify/login.html?redirect=${currentPage}`
+        );
+        return;
+    }
+    
+    // User exists — restore display (empty string restores CSS default)
+    isPageAllowed = true;
+    document.documentElement.style.display = "";
+    document.body.style.visibility = "visible";
+});
 
-export { auth, onAuthStateChanged, fbSignOut };
+// ─── 3. BUTTON-LEVEL PROTECTION ───
+document.addEventListener("click", (e) => {
+    if (!isPageAllowed) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const currentPage = encodeURIComponent(
+            window.location.pathname + window.location.search
+        );
+        window.location.replace(
+            `/toolify/login.html?redirect=${currentPage}`
+        );
+    }
+}, true);
+
+// ─── 4. KEY PRESS PROTECTION ───
+document.addEventListener("keydown", (e) => {
+    if (!isPageAllowed && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const currentPage = encodeURIComponent(
+            window.location.pathname + window.location.search
+        );
+        window.location.replace(
+            `/toolify/login.html?redirect=${currentPage}`
+        );
+    }
+}, true);
+
+// ─── 5. FORM SUBMISSION PROTECTION ───
+document.addEventListener("submit", (e) => {
+    if (!isPageAllowed) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const currentPage = encodeURIComponent(
+            window.location.pathname + window.location.search
+        );
+        window.location.replace(
+            `/toolify/login.html?redirect=${currentPage}`
+        );
+    }
+}, true);
+
+// ─── 6. PREVENT PAGE CACHING ───
+window.addEventListener("pageshow", (e) => {
+    if (e.persisted && !isPageAllowed) {
+        const currentPage = encodeURIComponent(
+            window.location.pathname + window.location.search
+        );
+        window.location.replace(
+            `/toolify/login.html?redirect=${currentPage}`
+        );
+    }
+});
+
+export { isPageAllowed };
