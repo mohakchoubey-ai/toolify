@@ -73,9 +73,47 @@ export function onAuthReady(cb) {
   }
 }
 
+// ─── UPDATE NAV UI ─────────────────────────────────────────
+export function updateNavUser(user) {
+  const authBtns    = document.getElementById("nav-auth-btns");
+  const userMenu    = document.getElementById("nav-user-menu");
+  const avatarWrap  = document.getElementById("nav-user-avatar");
+  const nameEl      = document.getElementById("nav-user-name");
+  const msmUser     = document.getElementById("msm-user-section");
+
+  if (user && !user.isAnonymous) {
+    if (authBtns) authBtns.style.display = "none";
+    if (userMenu) userMenu.style.display = "flex";
+    if (avatarWrap) avatarWrap.innerHTML = user.photoURL
+      ? `<img src="${user.photoURL}" class="nav-avatar" onclick="location.href='profile.html'">`
+      : `<div class="nav-avatar-placeholder" onclick="location.href='profile.html'">${getDisplayName(user).slice(0,2).toUpperCase()}</div>`;
+    if (nameEl) nameEl.textContent = getDisplayName(user);
+    if (msmUser) {
+      msmUser.style.display = "flex";
+      const av = document.getElementById("msm-avatar");
+      if (av) av.innerHTML = user.photoURL
+        ? `<img src="${user.photoURL}" alt="">`
+        : getDisplayName(user).slice(0,2).toUpperCase();
+      const mn = document.getElementById("msm-name");
+      if (mn) mn.textContent = getDisplayName(user);
+      const me = document.getElementById("msm-email");
+      if (me) me.textContent = user.email || "";
+    }
+  } else {
+    if (authBtns) authBtns.style.display = "flex";
+    if (userMenu) userMenu.style.display = "none";
+    if (msmUser) msmUser.style.display = "none";
+    const msmLogout = document.getElementById("msm-logout-link");
+    const msmLogin  = document.getElementById("msm-login-link");
+    if (msmLogout) msmLogout.style.display = "none";
+    if (msmLogin) msmLogin.style.display = "block";
+  }
+}
+
 onAuthStateChanged(auth, user => {
   currentUser = user;
   if (user && !user.isAnonymous) _ensureUserDoc(user);
+  updateNavUser(user); // ✓ Call this EVERY time auth changes
   // Fire all registered callbacks
   authReadyCallbacks.forEach(cb => {
     try { cb(user); } catch (e) { console.error("[auth] callback error:", e); }
