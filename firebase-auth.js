@@ -297,9 +297,11 @@ export function fmtTimeSec(s) {
 export function squareName(r, c) { return "abcdefgh"[c] + (8 - r); }
 export function cloneBoard(bd)   { return bd.map(r => r.slice()); }
 
+
 // Re-export raw SDK pieces Chess files might import directly
 export {
   auth,
+  onAuthStateChanged, // <--- Add this line here
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   DB, FS
