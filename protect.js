@@ -7,11 +7,11 @@ import {
     onAuthStateChanged
 } from "./firebase-auth.js";
 
-// ─── 1. INSTANT HIDE ───
+// ─── 1. INSTANT HIDE (Before Auth Check) ───
 document.documentElement.style.display = "none";
 let isPageAllowed = false;
 
-// ─── 2. AUTH CHECK ───
+// ─── 2. AUTH CHECK ──────────────────────
 onAuthStateChanged(auth, (user) => {
     if (!user) {
         const currentPage = encodeURIComponent(
@@ -23,13 +23,13 @@ onAuthStateChanged(auth, (user) => {
         return;
     }
     
-    // User exists — restore display (empty string restores CSS default)
+    // User exists — mark as allowed & show page
     isPageAllowed = true;
     document.documentElement.style.display = "";
     document.body.style.visibility = "visible";
 });
 
-// ─── 3. BUTTON-LEVEL PROTECTION ───
+// ─── 3. BUTTON-LEVEL PROTECTION (Fallback) ──
 document.addEventListener("click", (e) => {
     if (!isPageAllowed) {
         e.preventDefault();
@@ -44,7 +44,7 @@ document.addEventListener("click", (e) => {
     }
 }, true);
 
-// ─── 4. KEY PRESS PROTECTION ───
+// ─── 4. KEY PRESS PROTECTION (Secondary Fallback) ──
 document.addEventListener("keydown", (e) => {
     if (!isPageAllowed && (e.key === "Enter" || e.key === " ")) {
         e.preventDefault();
@@ -59,7 +59,7 @@ document.addEventListener("keydown", (e) => {
     }
 }, true);
 
-// ─── 5. FORM SUBMISSION PROTECTION ───
+// ─── 5. FORM SUBMISSION PROTECTION ──────
 document.addEventListener("submit", (e) => {
     if (!isPageAllowed) {
         e.preventDefault();
@@ -74,7 +74,7 @@ document.addEventListener("submit", (e) => {
     }
 }, true);
 
-// ─── 6. PREVENT PAGE CACHING ───
+// ─── 6. PREVENT PAGE CACHING ────────────
 window.addEventListener("pageshow", (e) => {
     if (e.persisted && !isPageAllowed) {
         const currentPage = encodeURIComponent(
@@ -84,6 +84,11 @@ window.addEventListener("pageshow", (e) => {
             `/toolify/login.html?redirect=${currentPage}`
         );
     }
+});
+
+// ─── 7. UNLOAD CLEANUP & RESTORE ──────────
+window.addEventListener("beforeunload", () => {
+    document.documentElement.style.display = "none";
 });
 
 export { isPageAllowed };
