@@ -1,6 +1,5 @@
 // ══════════════════════════════════════════
 //  FIREBASE-AUTH.JS
-//  Firebase Initialization & Auth Exports
 // ══════════════════════════════════════════
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -14,7 +13,6 @@ import {
     signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
     authDomain: "toolbox-hub-98c03.firebaseapp.com",
@@ -25,22 +23,18 @@ const firebaseConfig = {
     databaseURL: "https://toolbox-hub-98c03-default-rtdb.firebaseio.com"
 };
 
-// Initialize Firebase App
 const app = initializeApp(firebaseConfig);
-
-// Initialize Firebase Authentication
 const auth = getAuth(app);
-
-// Initialize Google Auth Provider
 const googleProvider = new GoogleAuthProvider();
 
-// Export auth instance and helper functions for use in protect.js & login.js
+// Export both 'signOut' and 'fbSignOut' to cover both naming conventions
 export {
     auth,
     onAuthStateChanged,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     signOut,
+    signOut as fbSignOut, // Fixes dashboard import
     googleProvider,
     signInWithPopup
 };
