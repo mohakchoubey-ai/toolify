@@ -695,41 +695,63 @@ body {
 import { auth, onAuthStateChanged, fbSignOut } from './firebase-auth.js';
 
 // ── AUTH CHECK ──
+// We'll store the name globally so the greeting function can access it
+window.currentUserName = 'Guest'; 
+
 onAuthStateChanged(auth, (user) => {
+  const signOutBtn = document.getElementById('signOutBtn');
+  
   if (!user) {
-    window.location.replace('/toolify/login.html');
+    // User is NOT authenticated — do NOT redirect. Let them explore.
+    window.currentUserName = 'Guest';
+    document.querySelector('.nav-user-name').textContent = 'Guest';
+    document.querySelector('.nav-avatar').textContent = 'G';
+    
+    // Change the button to offer Sign In instead of Sign Out
+    if (signOutBtn) signOutBtn.textContent = 'Sign In';
+    
+    console.log('👤 User is browsing as Guest');
+    setGreeting(); // Update the UI greeting
     return;
   }
   
-  // User is authenticated — populate UI
-  const firstName = user.displayName?.split(' ')[0] || 'User';
-  document.querySelector('.nav-user-name').textContent = firstName;
-  document.querySelector('.nav-avatar').textContent = firstName.charAt(0).toUpperCase();
+  // User is authenticated — populate UI with their actual name
+  window.currentUserName = user.displayName?.split(' ')[0] || 'User';
+  document.querySelector('.nav-user-name').textContent = window.currentUserName;
+  document.querySelector('.nav-avatar').textContent = window.currentUserName.charAt(0).toUpperCase();
+  
+  // Ensure the button says Sign Out
+  if (signOutBtn) signOutBtn.textContent = 'Sign Out';
   
   console.log('✅ User authenticated:', user.email);
+  setGreeting(); // Update the UI greeting
 });
 
-// ── SIGN OUT HANDLER ──
+// ── SIGN OUT / SIGN IN HANDLER ──
 document.getElementById('signOutBtn').addEventListener('click', async () => {
+  // If they aren't logged in, redirect them to the login page so they can sign in
+  if (!auth.currentUser) {
+    window.location.href = '/toolify/login.html';
+    return;
+  }
+
   try {
     await fbSignOut(auth);
-    
     showToast('Signed out. See you soon!');
     
     // Clear all local/session storage
     sessionStorage.clear();
     localStorage.removeItem('toolify_session_start');
     
-    // Redirect to login after 800ms
+    // Refresh the page so they revert to "Guest" mode (or redirect to login)
     setTimeout(() => {
-      window.location.replace('/toolify/login.html');
+      window.location.reload(); 
     }, 800);
   } catch (err) {
     console.error('Sign out error:', err);
     showToast('Error signing out. Please try again.');
   }
 });
-
 // ── DATA ──
 const tools = [
   // section, icon, name, url, badge
@@ -845,8 +867,11 @@ function setGreeting() {
   if (h < 12)      { g = 'Good morning';   emoji = '👋'; }
   else if (h < 17) { g = 'Good afternoon'; emoji = '☀️'; }
   else if (h < 21) { g = 'Good evening';   emoji = '🌆'; }
-  else              { g = 'Good night';     emoji = '🌙'; }
-  document.getElementById('greetingTitle').textContent = `${g}, Mohak ${emoji}`;
+  else             { g = 'Good night';     emoji = '🌙'; }
+  
+  // Uses the actual user's name or "Guest"
+  const name = window.currentUserName || 'Guest';
+  document.getElementById('greetingTitle').textContent = `${g}, ${name} ${emoji}`;
 
   const tips = [
     'Your workspace is ready.',
@@ -857,7 +882,6 @@ function setGreeting() {
   ];
   document.getElementById('greetingLine').textContent = tips[Math.floor(Math.random()*tips.length)];
 }
-
 // ── DATE ──
 function setDate() {
   const d = new Date();
