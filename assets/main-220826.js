@@ -13,14 +13,17 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAeHDhdiTRwftUGYgrb1m19v7hm2R5rb-Y",
+  apiKey: "AIzaSyAoj4yHcaRW4wdOPA7SrZhGQZqAobHDdB0",
   authDomain: "toolbox-hub-98c03.firebaseapp.com",
+  databaseURL: "https://toolbox-hub-98c03-default-rtdb.firebaseio.com",
   projectId: "toolbox-hub-98c03",
   storageBucket: "toolbox-hub-98c03.firebasestorage.app",
   messagingSenderId: "321020105472",
-  appId: "1:321020105472:web:356e7c2903def7b9d859e5"
+  appId: "1:321020105472:web:698ba3bf9dfe75add859e5"
 };
+
 
 const app      = initializeApp(firebaseConfig);
 const auth     = getAuth(app);
