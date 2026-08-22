@@ -13,7 +13,8 @@
 //    window.PROTECT_ALLOW_ANON — set true to allow anon users
 // ══════════════════════════════════════════════════════════════
 
-import { auth, onAuthStateChanged } from "/toolify/js/firebase-auth.js";
+import { auth } from "/toolify/js/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // ─── 1. INSTANT HIDE ───────────────────────────────────────────
 document.documentElement.style.display = "none";
