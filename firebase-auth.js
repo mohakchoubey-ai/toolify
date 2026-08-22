@@ -62,11 +62,28 @@ googleProvider.addScope("email");
 // ─── CURRENT USER (module-level, updated by listener) ──────────
 export let currentUser = null;
 
+// Queue for auth-ready callbacks (handles race conditions)
+let authReadyCallbacks = [];
+export function onAuthReady(cb) {
+  if (currentUser !== null) {
+    // Already initialized, fire immediately
+    cb(currentUser);
+  } else {
+    authReadyCallbacks.push(cb);
+  }
+}
+
 onAuthStateChanged(auth, user => {
   currentUser = user;
   if (user && !user.isAnonymous) _ensureUserDoc(user);
-  // Fire any page-level callback (Chess's onAuthReady, Toolify's etc.)
-  if (typeof window.onAuthReady === "function") window.onAuthReady(user);
+  // Fire all registered callbacks
+  authReadyCallbacks.forEach(cb => {
+    try { cb(user); } catch (e) { console.error("[auth] callback error:", e); }
+  });
+  // Also fire legacy window.onAuthReady if it exists
+  if (typeof window.onAuthReady === "function") {
+    try { window.onAuthReady(user); } catch (e) { console.error("[auth] window.onAuthReady error:", e); }
+  }
 });
 
 // ─── AUTH HELPERS ──────────────────────────────────────────────
@@ -78,7 +95,7 @@ export function fbSignOut() {
   return signOut(auth);
 }
 
-export { signOut };   // keep named export for Toolify imports
+// Don't double-export signOut — fbSignOut above is the export
 
 export function requireGoogleAuth(cb) {
   if (currentUser && !currentUser.isAnonymous) { cb(currentUser); return; }
@@ -245,7 +262,6 @@ export function cloneBoard(bd)   { return bd.map(r => r.slice()); }
 // Re-export raw SDK pieces Chess files might import directly
 export {
   auth,
-  onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   DB, FS
