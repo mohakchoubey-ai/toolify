@@ -20,7 +20,7 @@ import {
   getDatabase,
   ref,
   update,
-  transaction
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import {
   getFirestore,
@@ -173,7 +173,7 @@ export async function saveGameResult(myColor, result, opponentName, timeControl)
   });
 
   // Realtime DB transaction
-  await transaction(ref(DB, "users/" + uid), u => {
+  await runTransaction(ref(DB, "users/" + uid), u => {
     if (!u) return u;
     u.gamesPlayed = (u.gamesPlayed || 0) + 1;
     if (isWin)  u.wins   = (u.wins   || 0) + 1;
