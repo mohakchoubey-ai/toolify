@@ -1,0 +1,2204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Toolify — English Hindi</title>
+<link rel="icon" href="logo.png">
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --surface-2: #ededed;
+    --card: #ffffff;
+    --border: #dedede;
+    --text: #111111;
+    --muted: #737373;
+    --strong: #111111;
+    --strong-text: #ffffff;
+    --shadow: 0 14px 45px rgba(0,0,0,.06);
+}
+
+body.dark {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface-2: #1d1d1d;
+    --card: #101010;
+    --border: #2a2a2a;
+    --text: #f5f5f5;
+    --muted: #999999;
+    --strong: #ffffff;
+    --strong-text: #111111;
+    --shadow: 0 16px 50px rgba(0,0,0,.35);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+    transition:
+        background .3s ease,
+        color .3s ease;
+}
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 72px;
+    padding: 0 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.nav-left,
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+.nav-left {
+    gap: 13px;
+}
+
+.nav-right {
+    gap: 9px;
+}
+
+.back-btn,
+.theme-btn {
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.back-btn {
+    height: 38px;
+    padding: 0 13px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.theme-btn {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    font-size: 16px;
+}
+
+.back-btn:hover,
+.theme-btn:hover {
+    background: var(--surface);
+    transform: translateY(-1px);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 850;
+    letter-spacing: -.8px;
+}
+
+.brand img {
+    width: 35px;
+    height: 35px;
+    object-fit: cover;
+    border-radius: 9px;
+}
+
+/* =========================================================
+   USER PROFILE
+========================================================= */
+
+.user-profile {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 3px 10px 3px 4px;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background: var(--card);
+}
+
+.user-profile.visible {
+    display: flex;
+}
+
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--surface-2);
+}
+
+.user-email {
+    max-width: 190px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero {
+    width: min(850px, 92%);
+    margin: auto;
+    padding: 68px 0 43px;
+    text-align: center;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 20px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .9px;
+    text-transform: uppercase;
+}
+
+.hero-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text);
+}
+
+.hero h1 {
+    font-size: clamp(43px, 6vw, 72px);
+    line-height: .98;
+    letter-spacing: -4px;
+    font-weight: 900;
+}
+
+.hero p {
+    max-width: 650px;
+    margin: 20px auto 0;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.container {
+    width: min(1080px, 92%);
+    margin: 0 auto;
+}
+
+/* =========================================================
+   TOOL
+========================================================= */
+
+.tool {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--card);
+    box-shadow: var(--shadow);
+}
+
+/* =========================================================
+   MODE SWITCH
+========================================================= */
+
+.section-switcher {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.switch-track {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: min(470px, 100%);
+    height: 52px;
+    margin: auto;
+    padding: 4px;
+    border-radius: 13px;
+    background: var(--surface-2);
+}
+
+.switch-slider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    height: 44px;
+    border-radius: 10px;
+    background: var(--strong);
+    transition: transform .45s cubic-bezier(.65,0,.35,1);
+}
+
+.switch-track.translation .switch-slider {
+    transform: translateX(100%);
+}
+
+.switch-btn {
+    position: relative;
+    z-index: 2;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+    transition: color .3s ease;
+}
+
+.switch-btn.active {
+    color: var(--strong-text);
+}
+
+/* =========================================================
+   WORKSPACE
+========================================================= */
+
+.workspace {
+    overflow: hidden;
+}
+
+.workspace-inner {
+    transition:
+        opacity .22s ease,
+        transform .42s cubic-bezier(.65,0,.35,1);
+}
+
+.workspace.switching .workspace-inner {
+    opacity: 0;
+    transform: translateY(10px) scale(.985);
+}
+
+/* =========================================================
+   LANGUAGE BAR
+========================================================= */
+
+.language-bar {
+    display: grid;
+    grid-template-columns: 1fr 48px 1fr;
+    gap: 12px;
+    align-items: end;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.language-box {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.language-label {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+select {
+    width: 100%;
+    height: 45px;
+    padding: 0 13px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+select:focus {
+    border-color: var(--text);
+}
+
+.swap-btn {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 18px;
+    transition: .25s ease;
+}
+
+.swap-btn:hover {
+    background: var(--strong);
+    color: var(--strong-text);
+    transform: rotate(180deg);
+}
+
+/* =========================================================
+   EDITORS
+========================================================= */
+
+.editors {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.editor {
+    min-width: 0;
+}
+
+.editor:first-child {
+    border-right: 1px solid var(--border);
+}
+
+textarea {
+    display: block;
+    width: 100%;
+    height: 310px;
+    padding: 24px;
+    border: 0;
+    outline: 0;
+    resize: none;
+    background: var(--card);
+    color: var(--text);
+    font-size: 19px;
+    line-height: 1.7;
+}
+
+textarea::placeholder {
+    color: var(--muted);
+}
+
+textarea[readonly] {
+    background: var(--surface);
+}
+
+.editor-footer {
+    height: 48px;
+    padding: 0 17px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.footer-action {
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    font-weight: 750;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 18px;
+    border-top: 1px solid var(--border);
+}
+
+.action-left {
+    display: flex;
+    gap: 8px;
+}
+
+.secondary-btn,
+.convert-btn {
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.secondary-btn {
+    padding: 10px 13px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text);
+}
+
+.secondary-btn:hover {
+    background: var(--surface);
+}
+
+.convert-btn {
+    min-width: 135px;
+    padding: 12px 25px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--strong);
+    color: var(--strong-text);
+    font-size: 12px;
+}
+
+.convert-btn:disabled {
+    opacity: .55;
+    cursor: wait;
+}
+
+/* =========================================================
+   EXAMPLES
+========================================================= */
+
+.examples {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+    padding: 20px 0;
+}
+
+.examples-label {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.example {
+    padding: 8px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.example:hover {
+    background: var(--strong);
+    color: var(--strong-text);
+}
+
+/* =========================================================
+   INFO
+========================================================= */
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    padding: 55px 0 75px;
+}
+
+.info-card {
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    background: var(--card);
+}
+
+.info-icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 17px;
+    border-radius: 9px;
+    background: var(--strong);
+    color: var(--strong-text);
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.info-card h3 {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.info-card p {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer {
+    width: min(1080px, 92%);
+    min-height: 90px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.footer-left {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.footer-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.footer-links a:hover {
+    color: var(--text);
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    z-index: 300;
+    padding: 11px 17px;
+    border-radius: 9px;
+    background: var(--strong);
+    color: var(--strong-text);
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0;
+    transform: translate(-50%, 80px);
+    pointer-events: none;
+    transition: .25s ease;
+}
+
+.status.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .navbar {
+        padding: 0 15px;
+    }
+
+    .back-btn span {
+        display: none;
+    }
+
+    .user-email {
+        display: none;
+    }
+
+    .hero {
+        padding-top: 50px;
+    }
+
+    .hero h1 {
+        letter-spacing: -2.5px;
+    }
+
+    .language-bar {
+        grid-template-columns: 1fr;
+    }
+
+    .swap-btn {
+        margin: auto;
+    }
+
+    .editors {
+        grid-template-columns: 1fr;
+    }
+
+    .editor:first-child {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    textarea {
+        height: 230px;
+        font-size: 17px;
+    }
+
+    .action-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .action-left {
+        justify-content: space-between;
+    }
+
+    .convert-btn {
+        width: 100%;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        padding-top: 30px;
+    }
+
+    .footer {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 22px 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="navbar">
+
+    <div class="nav-left">
+
+        <button
+            type="button"
+            class="back-btn"
+            id="backBtn"
+        >
+            ← <span>Back</span>
+        </button>
+
+        <div class="brand">
+            <img src="logo.png" alt="Toolify">
+            <span>Toolify</span>
+        </div>
+
+    </div>
+
+    <div class="nav-right">
+
+        <button
+            type="button"
+            class="theme-btn"
+            id="themeBtn"
+            title="Toggle theme"
+            aria-label="Toggle theme"
+        >
+            ☾
+        </button>
+
+        <!--
+            Future auth script can call:
+
+            ToolifyProfile.setUser({
+                email: user.email,
+                photoURL: user.photoURL
+            });
+
+            No login or redirect is performed here.
+        -->
+
+        <div
+            class="user-profile"
+            id="userProfile"
+        >
+
+            <img
+                class="user-avatar"
+                id="userAvatar"
+                src="logo.png"
+                alt="User"
+            >
+
+            <span
+                class="user-email"
+                id="userEmail"
+            ></span>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<section class="hero">
+
+    <div class="hero-badge">
+        <span class="hero-dot"></span>
+        Toolify Language
+    </div>
+
+    <h1>
+        English. Hindi. Simple.
+    </h1>
+
+    <p>
+        Type Hindi using English letters, convert it into Hindi
+        script, or translate naturally between English and Hindi.
+    </p>
+
+</section>
+
+
+<main class="container">
+
+<section class="tool">
+
+    <div class="section-switcher">
+
+        <div
+            class="switch-track"
+            id="switchTrack"
+        >
+
+            <div class="switch-slider"></div>
+
+            <button
+                type="button"
+                class="switch-btn active"
+                id="transliterationBtn"
+            >
+                Transliteration
+            </button>
+
+            <button
+                type="button"
+                class="switch-btn"
+                id="translationBtn"
+            >
+                Translation
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="workspace"
+        id="workspace"
+    >
+
+        <div class="workspace-inner">
+
+            <div class="language-bar">
+
+                <div class="language-box">
+
+                    <label
+                        class="language-label"
+                        for="sourceLang"
+                    >
+                        From
+                    </label>
+
+                    <select id="sourceLang">
+
+                        <option value="en">
+                            English
+                        </option>
+
+                        <option value="hi">
+                            Hindi
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="swap-btn"
+                    id="swapBtn"
+                    title="Swap languages"
+                    aria-label="Swap languages"
+                >
+                    ⇄
+                </button>
+
+
+                <div class="language-box">
+
+                    <label
+                        class="language-label"
+                        for="targetLang"
+                    >
+                        To
+                    </label>
+
+                    <select id="targetLang">
+
+                        <option value="hi">
+                            Hindi
+                        </option>
+
+                        <option value="en">
+                            English
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="editors">
+
+                <div class="editor">
+
+                    <textarea
+                        id="inputText"
+                        placeholder="Type something here..."
+                        spellcheck="false"
+                        aria-label="Input text"
+                    ></textarea>
+
+                    <div class="editor-footer">
+
+                        <span id="inputCount">
+                            0 characters · 0 words
+                        </span>
+
+                        <button
+                            type="button"
+                            class="footer-action"
+                            id="clearBtn"
+                        >
+                            Clear
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="editor">
+
+                    <textarea
+                        id="outputText"
+                        placeholder="Your result will appear here..."
+                        readonly
+                        aria-label="Output text"
+                    ></textarea>
+
+                    <div class="editor-footer">
+
+                        <span id="outputCount">
+                            0 characters · 0 words
+                        </span>
+
+                        <button
+                            type="button"
+                            class="footer-action"
+                            id="copyBtn"
+                        >
+                            Copy
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="action-bar">
+
+                <div class="action-left">
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        id="detectBtn"
+                    >
+                        Detect language
+                    </button>
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        id="clearAllBtn"
+                    >
+                        Clear
+                    </button>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="convert-btn"
+                    id="convertBtn"
+                >
+                    Transliterate
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<div class="examples">
+
+    <span class="examples-label">
+        Try:
+    </span>
+
+    <button
+        type="button"
+        class="example"
+        data-text="namaste"
+    >
+        namaste
+    </button>
+
+    <button
+        type="button"
+        class="example"
+        data-text="namaste aap kaise hain"
+    >
+        namaste aap kaise hain
+    </button>
+
+    <button
+        type="button"
+        class="example"
+        data-text="good morning"
+    >
+        good morning
+    </button>
+
+    <button
+        type="button"
+        class="example"
+        data-text="how are you today?"
+    >
+        how are you today?
+    </button>
+
+</div>
+
+
+<section class="info-grid">
+
+    <article class="info-card">
+
+        <div class="info-icon">अ</div>
+
+        <h3>
+            Transliteration
+        </h3>
+
+        <p>
+            Type Hindi phonetically using English letters,
+            such as "namaste", and convert it into Hindi script.
+        </p>
+
+    </article>
+
+
+    <article class="info-card">
+
+        <div class="info-icon">文</div>
+
+        <h3>
+            Translation
+        </h3>
+
+        <p>
+            Translate complete sentences naturally between
+            English and Hindi in either direction.
+        </p>
+
+    </article>
+
+
+    <article class="info-card">
+
+        <div class="info-icon">↗</div>
+
+        <h3>
+            No history
+        </h3>
+
+        <p>
+            No translation or transliteration history is stored
+            by this page.
+        </p>
+
+    </article>
+
+</section>
+
+</main>
+
+
+<footer class="footer">
+
+    <div class="footer-left">
+        © 2026 Toolify
+    </div>
+
+    <nav class="footer-links">
+
+        <a href="feedback.html">Feedback</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms</a>
+        <a href="about.html">About</a>
+
+    </nav>
+
+</footer>
+
+
+<div
+    class="status"
+    id="status"
+>
+    Done
+</div>
+
+
+<script>
+"use strict";
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const input = document.getElementById("inputText");
+const output = document.getElementById("outputText");
+const sourceLang = document.getElementById("sourceLang");
+const targetLang = document.getElementById("targetLang");
+const convertBtn = document.getElementById("convertBtn");
+const workspace = document.getElementById("workspace");
+const switchTrack = document.getElementById("switchTrack");
+const transliterationBtn = document.getElementById("transliterationBtn");
+const translationBtn = document.getElementById("translationBtn");
+const statusBox = document.getElementById("status");
+const themeBtn = document.getElementById("themeBtn");
+
+let currentMode = "transliteration";
+let requestNumber = 0;
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function showStatus(message) {
+
+    statusBox.textContent = message;
+    statusBox.classList.add("show");
+
+    clearTimeout(window.__toolifyStatusTimer);
+
+    window.__toolifyStatusTimer = setTimeout(() => {
+        statusBox.classList.remove("show");
+    }, 1800);
+}
+
+
+/* =========================================================
+   COUNTERS
+========================================================= */
+
+function countWords(text) {
+
+    const trimmed = text.trim();
+
+    if (!trimmed) {
+        return 0;
+    }
+
+    return trimmed.split(/\s+/).length;
+}
+
+function updateCounts() {
+
+    document.getElementById("inputCount").textContent =
+        `${[...input.value].length} characters · ${countWords(input.value)} words`;
+
+    document.getElementById("outputCount").textContent =
+        `${[...output.value].length} characters · ${countWords(output.value)} words`;
+}
+
+
+/* =========================================================
+   MODE SWITCH
+========================================================= */
+
+function switchMode(mode) {
+
+    if (mode === currentMode) {
+        return;
+    }
+
+    currentMode = mode;
+
+    workspace.classList.add("switching");
+
+    setTimeout(() => {
+
+        if (currentMode === "translation") {
+
+            switchTrack.classList.add("translation");
+
+            translationBtn.classList.add("active");
+            transliterationBtn.classList.remove("active");
+
+            convertBtn.textContent = "Translate";
+
+        } else {
+
+            switchTrack.classList.remove("translation");
+
+            transliterationBtn.classList.add("active");
+            translationBtn.classList.remove("active");
+
+            convertBtn.textContent = "Transliterate";
+        }
+
+        output.value = "";
+
+        updateCounts();
+
+        workspace.classList.remove("switching");
+
+    }, 230);
+}
+
+transliterationBtn.addEventListener(
+    "click",
+    () => switchMode("transliteration")
+);
+
+translationBtn.addEventListener(
+    "click",
+    () => switchMode("translation")
+);
+
+
+/* =========================================================
+   COMMON HINDI WORDS
+   Generic only — no personal names
+========================================================= */
+
+const COMMON_HINDI = {
+    "namaste": "नमस्ते",
+    "namaskar": "नमस्कार",
+    "aap": "आप",
+    "aapka": "आपका",
+    "aapki": "आपकी",
+    "aapke": "आपके",
+    "kaise": "कैसे",
+    "kaisa": "कैसा",
+    "kaisi": "कैसी",
+    "hain": "हैं",
+    "hai": "है",
+    "hoon": "हूँ",
+    "hu": "हूँ",
+    "main": "मैं",
+    "mai": "मैं",
+    "mein": "में",
+    "mera": "मेरा",
+    "meri": "मेरी",
+    "mere": "मेरे",
+    "naam": "नाम",
+    "kya": "क्या",
+    "kyun": "क्यों",
+    "kyon": "क्यों",
+    "kahan": "कहाँ",
+    "kab": "कब",
+    "yah": "यह",
+    "yeh": "यह",
+    "vo": "वो",
+    "woh": "वह",
+    "hum": "हम",
+    "ham": "हम",
+    "tum": "तुम",
+    "aap": "आप",
+    "dost": "दोस्त",
+    "bhai": "भाई",
+    "behen": "बहन",
+    "ghar": "घर",
+    "school": "स्कूल",
+    "padhai": "पढ़ाई",
+    "padhaai": "पढ़ाई",
+    "accha": "अच्छा",
+    "acha": "अच्छा",
+    "achha": "अच्छा",
+    "bahut": "बहुत",
+    "bohot": "बहुत",
+    "theek": "ठीक",
+    "thik": "ठीक",
+    "nahi": "नहीं",
+    "nahin": "नहीं",
+    "haan": "हाँ",
+    "han": "हाँ",
+    "ji": "जी",
+    "kripya": "कृपया",
+    "please": "प्लीज़",
+    "dhanyavaad": "धन्यवाद",
+    "dhanyavad": "धन्यवाद",
+    "shukriya": "शुक्रिया",
+    "pyaar": "प्यार",
+    "pyar": "प्यार",
+    "dil": "दिल",
+    "zindagi": "ज़िंदगी",
+    "jindagi": "ज़िंदगी",
+    "khana": "खाना",
+    "paani": "पानी",
+    "pani": "पानी",
+    "aaj": "आज",
+    "kal": "कल",
+    "abhi": "अभी",
+    "yahan": "यहाँ",
+    "wahan": "वहाँ",
+    "ek": "एक",
+    "do": "दो",
+    "teen": "तीन",
+    "char": "चार",
+    "chaar": "चार",
+    "paanch": "पाँच",
+    "panch": "पाँच"
+};
+
+
+/* =========================================================
+   LOCAL FALLBACK TRANSLITERATOR
+========================================================= */
+
+const consonants = {
+    "ksh": "क्ष",
+    "chh": "छ",
+    "shr": "श्र",
+    "gy": "ज्ञ",
+    "tr": "त्र",
+    "dh": "ध",
+    "th": "थ",
+    "bh": "भ",
+    "kh": "ख",
+    "gh": "घ",
+    "ph": "फ",
+    "ch": "च",
+    "jh": "झ",
+    "sh": "श",
+    "k": "क",
+    "g": "ग",
+    "c": "क",
+    "j": "ज",
+    "t": "त",
+    "d": "द",
+    "n": "न",
+    "p": "प",
+    "b": "ब",
+    "m": "म",
+    "y": "य",
+    "r": "र",
+    "l": "ल",
+    "v": "व",
+    "w": "व",
+    "s": "स",
+    "h": "ह"
+};
+
+const vowels = {
+    "aa": "आ",
+    "ii": "ई",
+    "ee": "ई",
+    "uu": "ऊ",
+    "oo": "ऊ",
+    "ai": "ऐ",
+    "au": "औ",
+    "a": "अ",
+    "i": "इ",
+    "u": "उ",
+    "e": "ए",
+    "o": "ओ"
+};
+
+const vowelSigns = {
+    "aa": "ा",
+    "ii": "ी",
+    "ee": "ी",
+    "uu": "ू",
+    "oo": "ू",
+    "ai": "ै",
+    "au": "ौ",
+    "a": "",
+    "i": "ि",
+    "u": "ु",
+    "e": "े",
+    "o": "ो"
+};
+
+const consonantKeys =
+    Object.keys(consonants).sort(
+        (a, b) => b.length - a.length
+    );
+
+const vowelKeys =
+    Object.keys(vowels).sort(
+        (a, b) => b.length - a.length
+    );
+
+function transliterateWordLocally(word) {
+
+    const lower = word.toLowerCase();
+
+    if (COMMON_HINDI[lower]) {
+        return COMMON_HINDI[lower];
+    }
+
+    let position = 0;
+    let result = "";
+    let foundSomething = false;
+
+    while (position < lower.length) {
+
+        let consonant = null;
+
+        for (const key of consonantKeys) {
+
+            if (lower.startsWith(key, position)) {
+                consonant = key;
+                break;
+            }
+        }
+
+        if (consonant) {
+
+            result += consonants[consonant];
+
+            position += consonant.length;
+            foundSomething = true;
+
+            let vowel = null;
+
+            for (const key of vowelKeys) {
+
+                if (lower.startsWith(key, position)) {
+                    vowel = key;
+                    break;
+                }
+            }
+
+            if (vowel) {
+
+                result += vowelSigns[vowel];
+
+                position += vowel.length;
+
+            } else {
+
+                /*
+                    Leave implicit "a" pronunciation.
+                */
+            }
+
+            continue;
+        }
+
+        let vowel = null;
+
+        for (const key of vowelKeys) {
+
+            if (lower.startsWith(key, position)) {
+                vowel = key;
+                break;
+            }
+        }
+
+        if (vowel) {
+
+            result += vowels[vowel];
+
+            position += vowel.length;
+
+            foundSomething = true;
+
+            continue;
+        }
+
+        result += word[position];
+
+        position++;
+    }
+
+    return foundSomething ? result : word;
+}
+
+function localTransliterate(text) {
+
+    return text
+        .split(/(\s+|[,.!?;:'"()\-\u2013\u2014]+)/)
+        .map(part => {
+
+            if (!part) {
+                return "";
+            }
+
+            if (/^\s+$/.test(part)) {
+                return part;
+            }
+
+            if (/^[,.!?;:'"()\-\u2013\u2014]+$/.test(part)) {
+                return part;
+            }
+
+            return transliterateWordLocally(part);
+        })
+        .join("");
+}
+
+
+/* =========================================================
+   GOOGLE INPUT TOOLS
+========================================================= */
+
+async function googleTransliterate(text) {
+
+    const url =
+        "https://inputtools.google.com/request" +
+        "?text=" + encodeURIComponent(text) +
+        "&itc=hi-t-i0-und" +
+        "&num=50" +
+        "&cp=0" +
+        "&cs=1" +
+        "&ie=utf-8" +
+        "&oe=utf-8";
+
+    const controller = new AbortController();
+
+    const timeout = setTimeout(() => {
+        controller.abort();
+    }, 5000);
+
+    try {
+
+        const response = await fetch(
+            url,
+            {
+                method: "GET",
+                signal: controller.signal,
+                cache: "no-store"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        if (
+            !Array.isArray(data) ||
+            data[0] !== "SUCCESS" ||
+            !Array.isArray(data[1])
+        ) {
+            throw new Error("Invalid response");
+        }
+
+        const parts = data[1]
+            .map(segment => {
+
+                if (
+                    Array.isArray(segment) &&
+                    Array.isArray(segment[1]) &&
+                    typeof segment[1][0] === "string"
+                ) {
+                    return segment[1][0];
+                }
+
+                return "";
+            })
+            .filter(Boolean);
+
+        if (!parts.length) {
+            throw new Error("No result");
+        }
+
+        return parts.join(" ");
+
+    } finally {
+
+        clearTimeout(timeout);
+    }
+}
+
+
+/* =========================================================
+   TRANSLATION API
+========================================================= */
+
+async function translateWithAPI(text, from, to) {
+
+    const url =
+        "https://api.mymemory.translated.net/get" +
+        "?q=" + encodeURIComponent(text) +
+        "&langpair=" + encodeURIComponent(
+            `${from}|${to}`
+        );
+
+    const controller = new AbortController();
+
+    const timeout = setTimeout(() => {
+        controller.abort();
+    }, 7000);
+
+    try {
+
+        const response = await fetch(
+            url,
+            {
+                method: "GET",
+                signal: controller.signal,
+                cache: "no-store"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Translation request failed");
+        }
+
+        const data = await response.json();
+
+        const result =
+            data?.responseData?.translatedText;
+
+        if (!result) {
+            throw new Error("No translation returned");
+        }
+
+        return result;
+
+    } finally {
+
+        clearTimeout(timeout);
+    }
+}
+
+
+/* =========================================================
+   TRANSLATION
+========================================================= */
+
+async function translateText(text, from, to) {
+
+    if (!text.trim()) {
+        return "";
+    }
+
+    if (from === to) {
+        return text;
+    }
+
+    if (from === "en" && to === "hi") {
+
+        /*
+            Translation is meaning-based.
+            Use the translation API.
+        */
+
+        return await translateWithAPI(
+            text,
+            "en",
+            "hi"
+        );
+    }
+
+    if (from === "hi" && to === "en") {
+
+        return await translateWithAPI(
+            text,
+            "hi",
+            "en"
+        );
+    }
+
+    throw new Error(
+        "Only English and Hindi are supported."
+    );
+}
+
+
+/* =========================================================
+   MAIN CONVERTER
+========================================================= */
+
+async function convert() {
+
+    const text = input.value.trim();
+
+    if (!text) {
+
+        showStatus("Enter some text first");
+
+        input.focus();
+
+        return;
+    }
+
+    const thisRequest =
+        ++requestNumber;
+
+    convertBtn.disabled = true;
+
+    convertBtn.textContent =
+        currentMode === "translation"
+            ? "Translating..."
+            : "Converting...";
+
+    output.value = "";
+
+    try {
+
+        let result = "";
+
+        /* ---------------------------------------------
+           TRANSLITERATION
+        --------------------------------------------- */
+
+        if (currentMode === "transliteration") {
+
+            if (
+                sourceLang.value === "en" &&
+                targetLang.value === "hi"
+            ) {
+
+                /*
+                    Try the proper phonetic service first.
+                    Preview/network failure automatically
+                    falls back to local conversion.
+                */
+
+                try {
+
+                    result =
+                        await googleTransliterate(text);
+
+                } catch {
+
+                    result =
+                        localTransliterate(text);
+
+                }
+
+            }
+
+            else if (
+                sourceLang.value === "hi" &&
+                targetLang.value === "en"
+            ) {
+
+                /*
+                    Hindi → English in this section uses
+                    translation because it is useful for
+                    reading meaning rather than replacing
+                    Hindi characters one-by-one.
+                */
+
+                try {
+
+                    result =
+                        await translateText(
+                            text,
+                            "hi",
+                            "en"
+                        );
+
+                } catch {
+
+                    /*
+                        Don't produce fake English when the
+                        translation service is unavailable.
+                    */
+
+                    throw new Error(
+                        "Hindi to English translation requires the translation service."
+                    );
+                }
+
+            }
+
+            else {
+
+                result = text;
+            }
+
+        }
+
+        /* ---------------------------------------------
+           TRANSLATION
+        --------------------------------------------- */
+
+        else {
+
+            result =
+                await translateText(
+                    text,
+                    sourceLang.value,
+                    targetLang.value
+                );
+        }
+
+
+        if (
+            thisRequest !== requestNumber
+        ) {
+            return;
+        }
+
+        output.value =
+            result || "";
+
+        updateCounts();
+
+        showStatus(
+            currentMode === "translation"
+                ? "Translation complete"
+                : "Transliteration complete"
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        if (
+            thisRequest !== requestNumber
+        ) {
+            return;
+        }
+
+        output.value =
+            "The conversion service is unavailable right now.";
+
+        updateCounts();
+
+        showStatus(
+            "Service unavailable"
+        );
+
+    } finally {
+
+        if (
+            thisRequest === requestNumber
+        ) {
+
+            convertBtn.disabled = false;
+
+            convertBtn.textContent =
+                currentMode === "translation"
+                    ? "Translate"
+                    : "Transliterate";
+        }
+    }
+}
+
+
+/* =========================================================
+   CONVERT BUTTON
+========================================================= */
+
+convertBtn.addEventListener(
+    "click",
+    convert
+);
+
+
+/* =========================================================
+   CTRL + ENTER
+========================================================= */
+
+input.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.ctrlKey &&
+            event.key === "Enter"
+        ) {
+
+            event.preventDefault();
+
+            convert();
+        }
+    }
+);
+
+
+/* =========================================================
+   COPY
+========================================================= */
+
+document
+    .getElementById("copyBtn")
+    .addEventListener(
+        "click",
+        async () => {
+
+            if (!output.value) {
+
+                showStatus("Nothing to copy");
+
+                return;
+            }
+
+            try {
+
+                await navigator.clipboard.writeText(
+                    output.value
+                );
+
+                showStatus(
+                    "Copied to clipboard"
+                );
+
+            } catch {
+
+                output.focus();
+                output.select();
+
+                document.execCommand("copy");
+
+                showStatus("Copied");
+            }
+        }
+    );
+
+
+/* =========================================================
+   CLEAR
+========================================================= */
+
+function clearAll() {
+
+    ++requestNumber;
+
+    input.value = "";
+    output.value = "";
+
+    updateCounts();
+
+    input.focus();
+}
+
+document
+    .getElementById("clearBtn")
+    .addEventListener(
+        "click",
+        clearAll
+    );
+
+document
+    .getElementById("clearAllBtn")
+    .addEventListener(
+        "click",
+        clearAll
+    );
+
+
+/* =========================================================
+   SWAP
+========================================================= */
+
+document
+    .getElementById("swapBtn")
+    .addEventListener(
+        "click",
+        () => {
+
+            const oldSource =
+                sourceLang.value;
+
+            const oldTarget =
+                targetLang.value;
+
+            sourceLang.value =
+                oldTarget;
+
+            targetLang.value =
+                oldSource;
+
+            const oldInput =
+                input.value;
+
+            input.value =
+                output.value;
+
+            output.value =
+                oldInput;
+
+            updateCounts();
+        }
+    );
+
+
+/* =========================================================
+   EXAMPLES
+========================================================= */
+
+document
+    .querySelectorAll(".example")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                input.value =
+                    button.dataset.text;
+
+                updateCounts();
+
+                input.focus();
+            }
+        );
+    });
+
+
+/* =========================================================
+   DETECT LANGUAGE
+========================================================= */
+
+document
+    .getElementById("detectBtn")
+    .addEventListener(
+        "click",
+        () => {
+
+            const text =
+                input.value.trim();
+
+            if (!text) {
+
+                showStatus(
+                    "Enter text first"
+                );
+
+                return;
+            }
+
+            const looksHindi =
+                /[\u0900-\u097F]/.test(text);
+
+            if (looksHindi) {
+
+                sourceLang.value = "hi";
+                targetLang.value = "en";
+
+                showStatus(
+                    "Hindi detected"
+                );
+
+            } else {
+
+                sourceLang.value = "en";
+                targetLang.value = "hi";
+
+                showStatus(
+                    "English detected"
+                );
+            }
+        }
+    );
+
+
+/* =========================================================
+   DARK / LIGHT MODE
+========================================================= */
+
+function applyTheme(theme) {
+
+    const dark =
+        theme === "dark";
+
+    document.body.classList.toggle(
+        "dark",
+        dark
+    );
+
+    themeBtn.textContent =
+        dark ? "☀" : "☾";
+}
+
+const savedTheme =
+    localStorage.getItem(
+        "toolify-language-theme"
+    );
+
+if (savedTheme === "dark" || savedTheme === "light") {
+
+    applyTheme(savedTheme);
+
+} else {
+
+    applyTheme(
+        window.matchMedia(
+            "(prefers-color-scheme: dark)"
+        ).matches
+            ? "dark"
+            : "light"
+    );
+}
+
+themeBtn.addEventListener(
+    "click",
+    () => {
+
+        const dark =
+            document.body.classList.contains("dark");
+
+        const next =
+            dark ? "light" : "dark";
+
+        applyTheme(next);
+
+        localStorage.setItem(
+            "toolify-language-theme",
+            next
+        );
+    }
+);
+
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
+
+document
+    .getElementById("backBtn")
+    .addEventListener(
+        "click",
+        () => {
+
+            if (window.history.length > 1) {
+
+                window.history.back();
+
+            } else {
+
+                window.location.href =
+                    "/toolify/";
+            }
+        }
+    );
+
+
+/* =========================================================
+   FUTURE AUTH PROFILE HOOK
+========================================================= */
+
+window.ToolifyProfile = {
+
+    setUser(user) {
+
+        if (!user) {
+            return;
+        }
+
+        const profile =
+            document.getElementById(
+                "userProfile"
+            );
+
+        const avatar =
+            document.getElementById(
+                "userAvatar"
+            );
+
+        const email =
+            document.getElementById(
+                "userEmail"
+            );
+
+        email.textContent =
+            user.email || "";
+
+        avatar.src =
+            user.photoURL || "logo.png";
+
+        profile.classList.add(
+            "visible"
+        );
+    },
+
+    clearUser() {
+
+        document
+            .getElementById("userProfile")
+            .classList.remove("visible");
+    }
+};
+
+
+/* =========================================================
+   INITIAL
+========================================================= */
+
+updateCounts();
+
+</script>
+  <script type="module" src="/toolify/protect.js"></script>
+
+</body>
+</html>
