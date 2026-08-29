@@ -183,7 +183,6 @@
     </div>
   </div>
 </div>
-
 <script>
 let game=null, myRoom=null, myColor=null;
 let roomRef=null, roomListener=null, applyingRemote=false;
@@ -213,7 +212,6 @@ function doGoogleSignIn(){
     .catch(e=>showToast(e.message,'error'));
 }
 
-// Lobby options
 document.querySelectorAll('.time-opt').forEach(el=>{
   el.onclick=()=>{document.querySelectorAll('.time-opt').forEach(x=>x.classList.remove('active'));el.classList.add('active');selectedTime=parseInt(el.dataset.secs);};
 });
@@ -224,11 +222,25 @@ document.querySelectorAll('.color-opt').forEach(el=>{
 async function createRoom(){
   if(!currentUser || currentUser.isAnonymous) return;
   let code=null;
-  for(let i=0;i<10;i++){const c=randomCode(6);const s=await DB.ref('rooms/'+c).once('value');if(!s.exists()){code=c;break;}}
+  for(let i=0;i<10;i++){
+    const c=randomCode(6);
+    const s=await DB.ref('rooms/'+c).once('value');
+    if(!s.exists()){code=c;break;}
+  }
   if(!code){showToast('Could not create room','error');return;}
+
   const color=selectedColor==='random'?(Math.random()<.5?'white':'black'):selectedColor;
   myColor=color; myRoom=code;
-  await DB.ref('rooms/'+code).set({[color]:{uid:currentUser.uid,name:getDisplayName(currentUser),photo:currentUser.photoURL||''},timeControl:selectedTime,status:'waiting',createdAt:firebase.database.ServerValue.TIMESTAMP});
+
+  // ✅ FIX: Use multi-path update instead of .set() on the parent node
+  // Each child has its own write rule — this lets them pass independently
+  const updates={};
+  updates[`rooms/${code}/${color}`]={uid:currentUser.uid,name:getDisplayName(currentUser),photo:currentUser.photoURL||'',online:true};
+  updates[`rooms/${code}/timeControl`]=selectedTime;
+  updates[`rooms/${code}/status`]='waiting';
+  updates[`rooms/${code}/createdAt`]=firebase.database.ServerValue.TIMESTAMP;
+  await DB.ref().update(updates);
+
   DB.ref('rooms/'+code+'/'+color+'/online').onDisconnect().set(false);
   showWaitingRoom(code);
 }
@@ -245,7 +257,9 @@ async function joinRoom(){
   if(taken.length>=2){showToast('Room is full','error');return;}
   const freeColor=taken.includes('white')?'black':'white';
   myColor=freeColor; myRoom=code;
-  await DB.ref('rooms/'+code+'/'+freeColor).set({uid:currentUser.uid,name:getDisplayName(currentUser),photo:currentUser.photoURL||''});
+
+  // ✅ These are already child-level writes — fine as-is
+  await DB.ref('rooms/'+code+'/'+freeColor).set({uid:currentUser.uid,name:getDisplayName(currentUser),photo:currentUser.photoURL||'',online:true});
   await DB.ref('rooms/'+code+'/status').set('active');
   DB.ref('rooms/'+code+'/'+freeColor+'/online').onDisconnect().set(false);
   showWaitingRoom(code);
@@ -277,7 +291,6 @@ function listenToRoom(code){
       applyingRemote=true; game._lastSync=room.game.updatedAt;
       game.applyState(room.game); applyingRemote=false;
     }
-    // Draw/rematch banners
     document.getElementById('draw-banner').style.display=(room.drawOffer&&room.drawOffer!==myColor)?'flex':'none';
     document.getElementById('rematch-banner').style.display=(room.rematch&&room.rematch!==myColor)?'flex':'none';
     if(room.chat) renderChat(room.chat);
@@ -383,8 +396,9 @@ function leaveRoom(){
 function sendChat(){
   const input=document.getElementById('chat-input');
   const msg=input.value.trim().replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
-  if(!msg||!roomRef) return; input.value='';
-  roomRef.child('chat/'+Date.now()).set({name:getDisplayName(currentUser),msg,ts:Date.now()});
+  if(!msg||!roomRef||!currentUser) return; input.value='';
+  // ✅ FIX: Added uid field — required by security rules
+  roomRef.child('chat/'+Date.now()).set({uid:currentUser.uid,name:getDisplayName(currentUser),msg,ts:Date.now()});
 }
 function renderChat(chatData){
   const el=document.getElementById('chat-messages'); if(!el) return;
