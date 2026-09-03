@@ -1,0 +1,1045 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notepad Pro — Toolify</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & BASE ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f2f7;
+  --sidebar-bg:#ffffff;
+  --panel:#ffffff;
+  --text:#111827;
+  --sub:#6b7280;
+  --border:#e5e7eb;
+  --accent:#4f46e5;
+  --accent-h:#4338ca;
+  --btn-bg:#f3f4f6;
+  --btn-h:#e5e7eb;
+  --danger:#ef4444;
+  --success:#10b981;
+  --page-bg:#ffffff;
+  --page-shadow:0 4px 32px rgba(0,0,0,.12);
+  --radius:8px;
+  --font-ui:'Inter',system-ui,sans-serif;
+  --transition:0.15s ease;
+}
+body.dark{
+  --bg:#0d1117;
+  --sidebar-bg:#161b22;
+  --panel:#1c2128;
+  --text:#e6edf3;
+  --sub:#7d8590;
+  --border:#30363d;
+  --btn-bg:#21262d;
+  --btn-h:#30363d;
+  --page-bg:#1c2128;
+  --page-shadow:0 4px 32px rgba(0,0,0,.5);
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-ui);background:var(--bg);color:var(--text);display:flex;flex-direction:column;transition:background var(--transition),color var(--transition)}
+
+/* ─── LAYOUT ────────────────────────────────────────────────────── */
+#app{display:flex;flex:1;overflow:hidden;height:calc(100vh - 0px)}
+#sidebar{width:260px;min-width:260px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:width var(--transition),min-width var(--transition),transform var(--transition);overflow:hidden;z-index:50;position:relative}
+#sidebar.collapsed{width:0;min-width:0}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ─── TOP BAR ───────────────────────────────────────────────────── */
+#topbar{background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:6px 10px;flex-wrap:nowrap;overflow-x:auto;min-height:48px;flex-shrink:0}
+#topbar::-webkit-scrollbar{height:4px}
+#topbar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.tb-group{display:flex;gap:3px;align-items:center;padding-right:8px;border-right:1px solid var(--border);flex-shrink:0}
+.tb-group:last-child{border-right:none;padding-right:0}
+.tb-btn{background:var(--btn-bg);color:var(--text);border:1px solid transparent;padding:5px 9px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;white-space:nowrap;transition:background var(--transition),border-color var(--transition);display:inline-flex;align-items:center;gap:4px;line-height:1.4}
+.tb-btn:hover{background:var(--btn-h)}
+.tb-btn.active{border-color:var(--accent);color:var(--accent)}
+.tb-btn.accent{background:var(--accent);color:#fff}
+.tb-btn.accent:hover{background:var(--accent-h)}
+.tb-btn.danger{background:var(--danger);color:#fff}
+.tb-btn.danger:hover{background:#dc2626}
+.tb-sel{background:var(--btn-bg);color:var(--text);border:1px solid var(--border);padding:4px 6px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
+.tb-sel:focus{outline:none;border-color:var(--accent)}
+.tb-color{width:28px;height:28px;padding:2px;border-radius:5px;border:1px solid var(--border);cursor:pointer;background:var(--btn-bg)}
+.title-input{background:transparent;border:none;outline:none;font-size:14px;font-weight:600;color:var(--text);min-width:140px;max-width:220px;flex:1}
+.title-input::placeholder{color:var(--sub)}
+
+/* ─── SIDEBAR INTERNALS ─────────────────────────────────────────── */
+.sb-top{padding:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sb-logo{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--accent);letter-spacing:-.3px}
+.sb-new-btn{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:background var(--transition)}
+.sb-new-btn:hover{background:var(--accent-h)}
+.sb-search{padding:8px 12px;border-bottom:1px solid var(--border)}
+.sb-search input{width:100%;background:var(--btn-bg);border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text);outline:none;font-family:inherit}
+.sb-search input:focus{border-color:var(--accent)}
+.sb-section{padding:8px 12px 4px;font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em}
+.sb-list{flex:1;overflow-y:auto;padding:4px 8px}
+.sb-list::-webkit-scrollbar{width:4px}
+.sb-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.doc-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background var(--transition);margin-bottom:2px}
+.doc-item:hover{background:var(--btn-bg)}
+.doc-item.active{background:var(--btn-bg);border-left:3px solid var(--accent)}
+.doc-item.active .doc-name{color:var(--accent)}
+.doc-icon{font-size:16px;flex-shrink:0}
+.doc-name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.doc-meta{font-size:10px;color:var(--sub)}
+.doc-actions{display:none;gap:3px}
+.doc-item:hover .doc-actions{display:flex}
+.doc-action-btn{background:none;border:none;cursor:pointer;padding:3px;border-radius:4px;font-size:13px;color:var(--sub);line-height:1}
+.doc-action-btn:hover{background:var(--btn-h);color:var(--text)}
+.fav-star{color:var(--sub)}
+.fav-star.on{color:#f59e0b}
+.sb-bottom{padding:8px 12px;border-top:1px solid var(--border);display:flex;gap:6px}
+.sb-icon-btn{background:var(--btn-bg);border:1px solid transparent;border-radius:6px;padding:6px 9px;cursor:pointer;font-size:13px;flex:1;text-align:center;color:var(--text);transition:background var(--transition)}
+.sb-icon-btn:hover{background:var(--btn-h)}
+
+/* ─── EDITOR AREA ───────────────────────────────────────────────── */
+#editor-area{flex:1;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:16px;background:var(--bg)}
+#editor-area::-webkit-scrollbar{width:6px}
+#editor-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.page-wrapper{position:relative;width:100%;display:flex;justify-content:center;z-index:1;margin-bottom:20px}
+.page{background:var(--page-bg);box-shadow:var(--page-shadow);border-radius:4px;min-height:297mm;width:210mm;max-width:calc(100vw - 48px);padding:25.4mm;outline:none;font-size:12pt;line-height:1.8;color:var(--text);caret-color:var(--accent);word-break:break-word;transition:background var(--transition),color var(--transition);position:relative;word-wrap:break-word;white-space:normal;text-align:left}
+.page:focus{box-shadow:var(--page-shadow),0 0 0 2px var(--accent)}
+.page[data-placeholder]:empty::before{content:attr(data-placeholder);color:var(--sub);pointer-events:none}
+.page-number-tag{text-align:center;font-size:11px;color:var(--sub);padding:4px;flex-shrink:0}
+.add-page-btn{background:var(--btn-bg);border:2px dashed var(--border);border-radius:8px;padding:12px 28px;font-size:13px;color:var(--sub);cursor:pointer;transition:all var(--transition);margin-top:4px}
+.add-page-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--btn-bg)}
+.page-del-btn{position:absolute;top:8px;right:-40px;background:var(--danger);color:#fff;border:none;border-radius:50%;width:26px;height:26px;font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:opacity var(--transition)}
+.page-wrapper:hover .page-del-btn{display:flex}
+
+/* ─── STATUS BAR ────────────────────────────────────────────────── */
+#statusbar{background:var(--panel);border-top:1px solid var(--border);padding:5px 16px;font-size:11px;color:var(--sub);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:8px}
+.sb-badge{background:var(--btn-bg);padding:2px 7px;border-radius:10px;font-weight:600}
+.status-right{display:flex;gap:12px;align-items:center}
+.autosave-dot{width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;margin-right:4px}
+.autosave-dot.saving{background:#f59e0b}
+
+/* ─── MODALS ─────────────────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--panel);border-radius:12px;padding:24px;min-width:300px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid var(--border)}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:16px}
+.modal label{font-size:12px;font-weight:600;color:var(--sub);display:block;margin-bottom:6px;margin-top:12px}
+.modal input,.modal select,.modal textarea{width:100%;background:var(--btn-bg);border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-size:13px;color:var(--text);outline:none;font-family:inherit}
+.modal input:focus,.modal select:focus,.modal textarea:focus{border-color:var(--accent)}
+.modal textarea{height:80px;resize:vertical}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.modal-btns button{padding:8px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:none}
+.modal-btn-cancel{background:var(--btn-bg);color:var(--text)}
+.modal-btn-ok{background:var(--accent);color:#fff}
+.modal-btn-ok:hover{background:var(--accent-h)}
+.modal-btn-danger{background:var(--danger);color:#fff}
+
+/* ─── FIND & REPLACE ────────────────────────────────────────────── */
+#find-bar{position:fixed;top:56px;right:16px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 14px;z-index:100;display:none;flex-direction:column;gap:8px;min-width:300px;box-shadow:var(--page-shadow)}
+#find-bar.open{display:flex}
+#find-bar input{background:var(--btn-bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--text);outline:none;font-family:inherit;width:100%}
+#find-bar input:focus{border-color:var(--accent)}
+.fr-row{display:flex;gap:6px;align-items:center}
+.fr-row label{font-size:11px;color:var(--sub);white-space:nowrap;min-width:48px}
+.fr-close{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--sub)}
+
+/* ─── PREVIEW ────────────────────────────────────────────────────── */
+#preview-overlay{position:fixed;inset:0;background:#fff;z-index:300;display:none;flex-direction:column;overflow:hidden}
+body.dark #preview-overlay{background:#0d1117}
+#preview-overlay.open{display:flex}
+#preview-header{background:var(--panel);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+#preview-header h2{font-size:16px;font-weight:700}
+#preview-content{flex:1;overflow-y:auto;padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:20px}
+.preview-page{background:#ffffff;box-shadow:0 4px 30px rgba(0,0,0,.15);border-radius:4px;width:210mm;max-width:calc(100vw - 40px);padding:25.4mm 25.4mm;min-height:100mm;font-size:12pt;line-height:1.8;color:#111}
+
+/* ─── TOAST ──────────────────────────────────────────────────────── */
+#toast{position:fixed;bottom:48px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:400;opacity:0;transition:all .25s;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ─── SIDEBAR TOGGLE ─────────────────────────────────────────────── */
+#toggle-sidebar{background:var(--btn-bg);border:1px solid transparent;border-radius:6px;padding:5px 9px;cursor:pointer;font-size:16px;color:var(--text);transition:background var(--transition);flex-shrink:0}
+#toggle-sidebar:hover{background:var(--btn-h)}
+
+/* ─── MOBILE OVERLAY ─────────────────────────────────────────────── */
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:49}
+
+/* ─── FOCUS MODE ─────────────────────────────────────────────────── */
+body.focus-mode #topbar,
+body.focus-mode #statusbar,
+body.focus-mode #sidebar {
+  display: none !important;
+}
+body.focus-mode #editor-area {
+  padding: 40px 20px;
+}
+body.focus-mode #editor-area:hover #topbar {
+  display: flex !important;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────── */
+@media(max-width:900px){
+  #sidebar{position:fixed;top:0;left:0;height:100%;width:260px !important;min-width:260px !important;z-index:51;transform:translateX(-100%);transition:transform .2s ease}
+  #sidebar.open{transform:translateX(0)}
+  #sidebar.collapsed{transform:translateX(-100%)}
+  #sidebar-overlay{display:none}
+  #sidebar-overlay.show{display:block}
+  .page-del-btn{right:4px;top:4px}
+}
+@media(max-width:600px){
+  .page{padding:16mm 14mm;font-size:11pt}
+  #topbar{gap:4px;padding:4px 8px}
+  .tb-btn{padding:4px 7px;font-size:11px}
+  .tb-sel{font-size:11px;padding:3px 5px}
+  #editor-area{padding:12px 8px;gap:10px}
+}
+@media print{
+  #sidebar,#topbar,#statusbar,#find-bar,#toast,#sidebar-overlay,#toggle-sidebar,.add-page-btn,.page-del-btn{display:none!important}
+  body,html{height:auto;overflow:auto}
+  #editor-area{padding:0;background:#fff;overflow:visible}
+  .page{box-shadow:none;border-radius:0;width:100%;max-width:100%;padding:20mm;min-height:0;break-after:page}
+}
+</style>
+</head>
+<body>
+
+<!-- FIND & REPLACE BAR -->
+<div id="find-bar">
+  <button class="fr-close" onclick="closeFindBar()">✕</button>
+  <div class="fr-row"><label>Find</label><input id="fr-find" placeholder="Search text…" oninput="highlightFind()"></div>
+  <div class="fr-row"><label>Replace</label><input id="fr-replace" placeholder="Replace with…"></div>
+  <div class="fr-row" style="justify-content:flex-end;gap:6px">
+    <button class="tb-btn" onclick="findPrev()">↑ Prev</button>
+    <button class="tb-btn" onclick="findNext()">↓ Next</button>
+    <button class="tb-btn accent" onclick="doReplace()">Replace</button>
+    <button class="tb-btn" onclick="doReplaceAll()">All</button>
+  </div>
+</div>
+
+<!-- PREVIEW OVERLAY -->
+<div id="preview-overlay">
+  <div id="preview-header">
+    <span>👁 Preview — <span id="preview-title"></span></span>
+    <button class="tb-btn danger" onclick="closePreview()">✕ Exit Preview</button>
+  </div>
+  <div id="preview-content"></div>
+</div>
+
+<!-- SIDEBAR MOBILE OVERLAY -->
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- MODALS -->
+<div id="modal-overlay" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-box">
+    <h3 id="modal-title">Modal</h3>
+    <div id="modal-body"></div>
+    <div class="modal-btns" id="modal-btns"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- APP ROOT -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sb-top">
+      <span class="sb-logo">📝 Notepad Pro</span>
+      <button class="sb-new-btn" onclick="createDoc()">+ New</button>
+    </div>
+    <div class="sb-search">
+      <input type="text" placeholder="🔍 Search documents…" oninput="renderDocList(this.value)">
+    </div>
+    <div class="sb-section">Favourites</div>
+    <div id="fav-list" class="sb-list"></div>
+    <div class="sb-section">All Documents</div>
+    <div id="doc-list" class="sb-list"></div>
+    <div class="sb-bottom">
+      <button class="sb-icon-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+      <button class="sb-icon-btn" onclick="history.back()" title="Back to Dashboard">⬅ Dashboard</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <!-- TOOLBAR -->
+    <div id="topbar">
+      <button id="toggle-sidebar" onclick="toggleSidebar()" title="Toggle Sidebar">☰</button>
+
+      <!-- Title -->
+      <div class="tb-group" style="flex:1;border-right:none;padding-right:12px">
+        <input type="text" class="title-input" id="doc-title" placeholder="Untitled Document" oninput="titleInputChange()">
+      </div>
+
+      <!-- File -->
+      <div class="tb-group">
+        <button class="tb-btn" onclick="createDoc()" title="New document">📄</button>
+        <button class="tb-btn" onclick="document.getElementById('file-open').click()" title="Open file">📂</button>
+        <input type="file" id="file-open" hidden accept=".txt,.html,.md" onchange="importFile(event)">
+        <button class="tb-btn" onclick="duplicateDoc()" title="Duplicate">⧉</button>
+        <button class="tb-btn" onclick="deleteDoc()" title="Delete document">🗑</button>
+      </div>
+
+      <!-- Export -->
+      <div class="tb-group">
+        <button class="tb-btn" onclick="exportTxt()">⬇ TXT</button>
+        <button class="tb-btn" onclick="exportHtml()">⬇ HTML</button>
+        <button class="tb-btn" onclick="window.print()">🖨 PDF</button>
+      </div>
+
+      <!-- View -->
+      <div class="tb-group">
+        <button class="tb-btn" onclick="openPreview()">👁 Preview</button>
+        <button class="tb-btn" onclick="openFindBar()" title="Find & Replace">🔍</button>
+        <button class="tb-btn" onclick="toggleFocusMode()" id="focus-btn" title="Focus mode">🧘</button>
+      </div>
+
+      <!-- Pages -->
+      <div class="tb-group">
+        <button class="tb-btn" onclick="addPage()" title="Add page">+ Page</button>
+      </div>
+
+      <!-- Block / Font -->
+      <div class="tb-group">
+        <select class="tb-sel" id="sel-block" onchange="execCmd('formatBlock',this.value)" title="Block style">
+          <option value="p">Paragraph</option>
+          <option value="h1">Heading 1</option>
+          <option value="h2">Heading 2</option>
+          <option value="h3">Heading 3</option>
+          <option value="pre">Code</option>
+          <option value="blockquote">Quote</option>
+        </select>
+        <select class="tb-sel" id="sel-font" onchange="execCmd('fontName',this.value)" title="Font">
+          <option value="Inter">Inter</option>
+          <option value="Georgia">Georgia</option>
+          <option value="JetBrains Mono">Mono</option>
+          <option value="Times New Roman">Times</option>
+          <option value="Arial">Arial</option>
+          <option value="Verdana">Verdana</option>
+        </select>
+        <select class="tb-sel" id="sel-size" onchange="execCmd('fontSize',this.value)" title="Font size">
+          <option value="">Size</option>
+          <option value="1">8pt</option>
+          <option value="2">10pt</option>
+          <option value="3">12pt</option>
+          <option value="4">14pt</option>
+          <option value="5">18pt</option>
+          <option value="6">24pt</option>
+          <option value="7">36pt</option>
+        </select>
+      </div>
+
+      <!-- Inline Styles -->
+      <div class="tb-group">
+        <button class="tb-btn" onclick="execCmd('bold')" title="Bold"><b>B</b></button>
+        <button class="tb-btn" onclick="execCmd('italic')" title="Italic"><i>I</i></button>
+        <button class="tb-btn" onclick="execCmd('underline')" title="Underline"><u>U</u></button>
+        <button class="tb-btn" onclick="execCmd('strikeThrough')" title="Strikethrough"><s>S</s></button>
+        <button class="tb-btn" onclick="execCmd('superscript')" title="Superscript">x²</button>
+        <button class="tb-btn" onclick="execCmd('subscript')" title="Subscript">x₂</button>
+      </div>
+
+      <!-- Lists & Align -->
+      <div class="tb-group">
+        <button class="tb-btn" onclick="execCmd('insertUnorderedList')" title="Bullet list">• List</button>
+        <button class="tb-btn" onclick="execCmd('insertOrderedList')" title="Numbered list">1. List</button>
+        <button class="tb-btn" onclick="execCmd('justifyLeft')" title="Left">◀</button>
+        <button class="tb-btn" onclick="execCmd('justifyCenter')" title="Center">⟺</button>
+        <button class="tb-btn" onclick="execCmd('justifyRight')" title="Right">▶</button>
+        <button class="tb-btn" onclick="execCmd('justifyFull')" title="Justify">≡</button>
+      </div>
+
+      <!-- Indent -->
+      <div class="tb-group">
+        <button class="tb-btn" onclick="execCmd('indent')" title="Indent">→|</button>
+        <button class="tb-btn" onclick="execCmd('outdent')" title="Outdent">|←</button>
+        <button class="tb-btn" onclick="execCmd('undo')" title="Undo">↩</button>
+        <button class="tb-btn" onclick="execCmd('redo')" title="Redo">↪</button>
+      </div>
+
+      <!-- Insert -->
+      <div class="tb-group">
+        <button class="tb-btn" onclick="insertLink()" title="Insert link">🔗</button>
+        <button class="tb-btn" onclick="insertImage()" title="Insert image">🖼</button>
+        <button class="tb-btn" onclick="insertTable()" title="Insert table">⊞ Table</button>
+        <button class="tb-btn" onclick="insertHR()" title="Horizontal rule">—</button>
+      </div>
+
+      <!-- Colors -->
+      <div class="tb-group">
+        <label style="font-size:10px;color:var(--sub);white-space:nowrap">Text</label>
+        <input type="color" class="tb-color" id="text-color" title="Text color" onchange="execCmd('foreColor',this.value)">
+        <label style="font-size:10px;color:var(--sub);white-space:nowrap">Highlight</label>
+        <input type="color" class="tb-color" id="hi-color" value="#fef08a" title="Highlight" onchange="execCmd('hiliteColor',this.value)">
+        <label style="font-size:10px;color:var(--sub);white-space:nowrap">Page</label>
+        <input type="color" class="tb-color" id="page-color" value="#ffffff" title="Page background" onchange="changePageBg(this.value)">
+      </div>
+    </div>
+
+    <!-- EDITOR AREA -->
+    <div id="editor-area">
+      <!-- Pages injected here -->
+    </div>
+
+    <!-- STATUS BAR -->
+    <div id="statusbar">
+      <div>
+        Words: <span id="wc" class="sb-badge">0</span>
+        &nbsp;|&nbsp; Chars: <span id="cc" class="sb-badge">0</span>
+        &nbsp;|&nbsp; Pages: <span id="pc" class="sb-badge">1</span>
+        &nbsp;|&nbsp; Read: <span id="rt" class="sb-badge">0 min</span>
+      </div>
+      <div class="status-right">
+        <span id="autosave-status"><span class="autosave-dot"></span>Saved</span>
+        <span id="cur-doc-name" style="font-weight:600;font-size:11px;color:var(--sub)"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   NOTEPAD PRO — Complete Application Logic
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── DB Setup ─────────────────────────────────────────────────────── */
+const DB_NAME='notepad_pro';const DB_VER=1;const STORE='documents';
+let db;
+
+function openDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(DB_NAME,DB_VER);
+    req.onupgradeneeded=e=>{
+      const d=e.target.result;
+      if(!d.objectStoreNames.contains(STORE))
+        d.createObjectStore(STORE,{keyPath:'id'});
+    };
+    req.onsuccess=e=>{db=e.target.result;res(db)};
+    req.onerror=e=>rej(e);
+  });
+}
+function dbGet(id){return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readonly');const req=tx.objectStore(STORE).get(id);req.onsuccess=e=>res(e.target.result);req.onerror=rej})}
+function dbPut(obj){return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite');const req=tx.objectStore(STORE).put(obj);req.onsuccess=e=>res(e.target.result);req.onerror=rej})}
+function dbDel(id){return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite');const req=tx.objectStore(STORE).delete(id);req.onsuccess=e=>res(e.target.result);req.onerror=rej})}
+function dbAll(){return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readonly');const req=tx.objectStore(STORE).getAll();req.onsuccess=e=>res(e.target.result);req.onerror=rej})}
+
+/* ── State ───────────────────────────────────────────────────────── */
+let currentDocId=null;
+let autoSaveTimer=null;
+let isDark=false;
+let isFocusMode=false;
+let allDocs=[];
+let pageBg='#ffffff';
+
+/* ── Init ────────────────────────────────────────────────────────── */
+async function init(){
+  await openDB();
+  isDark=localStorage.getItem('np_dark')==='true';
+  if(isDark)document.body.classList.add('dark');
+  allDocs=await dbAll();
+  if(allDocs.length===0){
+    await createDoc(true);
+  } else {
+    const last=localStorage.getItem('np_last');
+    const target=allDocs.find(d=>d.id===last)||allDocs[0];
+    renderDocList();
+    await openDoc(target.id);
+  }
+}
+
+/* ── Document CRUD ───────────────────────────────────────────────── */
+async function createDoc(silent=false){
+  const id='doc_'+Date.now();
+  const doc={
+    id,
+    title:'Untitled Document',
+    pages:['<p>Start typing here…</p>'],
+    pageBg:'#ffffff',
+    created:Date.now(),
+    updated:Date.now(),
+    favourite:false,
+    deleted:false
+  };
+  await dbPut(doc);
+  allDocs=await dbAll();
+  renderDocList();
+  await openDoc(id);
+  if(!silent)toast('New document created');
+}
+
+async function openDoc(id){
+  const doc=await dbGet(id);
+  if(!doc)return;
+  currentDocId=id;
+  localStorage.setItem('np_last',id);
+  document.getElementById('doc-title').value=doc.title;
+  document.getElementById('cur-doc-name').textContent=doc.title;
+  pageBg=doc.pageBg||'#ffffff';
+  document.getElementById('page-color').value=pageBg;
+  renderPages(doc.pages);
+  renderDocList();
+  updateStats();
+  closeSidebar();
+}
+
+async function saveDoc(){
+  if(!currentDocId)return;
+  const doc=await dbGet(currentDocId);
+  if(!doc)return;
+  const pages=getPageContents();
+  doc.pages=pages;
+  doc.updated=Date.now();
+  doc.pageBg=pageBg;
+  await dbPut(doc);
+  allDocs=await dbAll();
+  // Update sidebar item date
+  const item=document.querySelector(`.doc-item[data-id="${currentDocId}"] .doc-meta`);
+  if(item)item.textContent=relDate(doc.updated);
+  showSaved();
+}
+
+let titleSaveTimer;
+function titleInputChange(){
+  if(titleSaveTimer)clearTimeout(titleSaveTimer);
+  titleSaveTimer=setTimeout(saveTitle,500);
+}
+async function saveTitle(){
+  if(!currentDocId)return;
+  const title=document.getElementById('doc-title').value||'Untitled';
+  const doc=await dbGet(currentDocId);
+  if(!doc)return;
+  doc.title=title;
+  doc.updated=Date.now();
+  await dbPut(doc);
+  allDocs=await dbAll();
+  document.getElementById('cur-doc-name').textContent=title;
+  renderDocList();
+}
+
+async function renameDoc(id){
+  const doc=await dbGet(id);
+  if(!doc)return;
+  showModal('Rename Document',`
+    <label>Document Name</label>
+    <input id="rename-val" value="${esc(doc.title)}">
+  `,[
+    {label:'Cancel',cls:'modal-btn-cancel',fn:closeModal},
+    {label:'Rename',cls:'modal-btn-ok',fn:async()=>{
+      const v=document.getElementById('rename-val').value.trim()||'Untitled';
+      doc.title=v;doc.updated=Date.now();
+      await dbPut(doc);allDocs=await dbAll();
+      if(currentDocId===id){
+        document.getElementById('doc-title').value=v;
+        document.getElementById('cur-doc-name').textContent=v;
+      }
+      renderDocList();closeModal();toast('Renamed');
+    }}
+  ]);
+  setTimeout(()=>document.getElementById('rename-val')?.focus(),100);
+}
+
+async function duplicateDoc(){
+  if(!currentDocId)return;
+  const doc=await dbGet(currentDocId);
+  if(!doc)return;
+  const nd={...doc,id:'doc_'+Date.now(),title:doc.title+' (copy)',created:Date.now(),updated:Date.now()};
+  await dbPut(nd);allDocs=await dbAll();renderDocList();toast('Duplicated');
+}
+
+async function deleteDoc(id){
+  const tid=id||currentDocId;
+  if(!tid)return;
+  const doc=await dbGet(tid);
+  if(!doc)return;
+  showModal('Delete Document',`<p style="font-size:13px;color:var(--sub)">Delete "<b>${esc(doc.title)}</b>"? This cannot be undone.</p>`,[
+    {label:'Cancel',cls:'modal-btn-cancel',fn:closeModal},
+    {label:'Delete',cls:'modal-btn-danger',fn:async()=>{
+      await dbDel(tid);allDocs=await dbAll();
+      closeModal();
+      if(currentDocId===tid){
+        currentDocId=null;
+        if(allDocs.length>0)await openDoc(allDocs[0].id);
+        else await createDoc(true);
+      } else renderDocList();
+      toast('Deleted');
+    }}
+  ]);
+}
+
+async function toggleFav(id,e){
+  e.stopPropagation();
+  const doc=await dbGet(id);
+  if(!doc)return;
+  doc.favourite=!doc.favourite;
+  await dbPut(doc);allDocs=await dbAll();renderDocList();
+}
+
+/* ── Pages ───────────────────────────────────────────────────────── */
+function renderPages(pages){
+  const area=document.getElementById('editor-area');
+  area.innerHTML='';
+  pages.forEach((html,i)=>area.appendChild(makePageEl(html,i)));
+  area.appendChild(makeAddPageBtn());
+  updateStats();
+}
+
+function makePageEl(html,index){
+  const wrap=document.createElement('div');
+  wrap.className='page-wrapper';
+  wrap.dataset.pageIndex=index;
+
+  const numTag=document.createElement('div');
+  numTag.className='page-number-tag';
+  numTag.textContent=`— Page ${index+1} —`;
+
+  const page=document.createElement('div');
+  page.className='page';
+  page.contentEditable='true';
+  page.spellcheck=true;
+  page.dataset.placeholder='Start typing here…';
+  page.style.background=pageBg;
+  page.innerHTML=html||'';
+  page.addEventListener('input',()=>scheduleAutoSave());
+  page.addEventListener('keydown',onPageKeydown);
+  // Paste: strip outer formatting but keep content
+  page.addEventListener('paste',e=>{
+    e.preventDefault();
+    const text=e.clipboardData.getData('text/html')||e.clipboardData.getData('text/plain');
+    document.execCommand('insertHTML',false,text);
+  });
+
+  // Delete page button
+  const delBtn=document.createElement('button');
+  delBtn.className='page-del-btn';
+  delBtn.textContent='✕';
+  delBtn.title='Delete this page';
+  delBtn.onclick=(e)=>{e.stopPropagation();deletePage(wrap)};
+
+  wrap.appendChild(numTag);
+  wrap.appendChild(page);
+  wrap.appendChild(delBtn);
+  return wrap;
+}
+
+function makeAddPageBtn(){
+  const btn=document.createElement('button');
+  btn.className='add-page-btn';
+  btn.textContent='+ Add Page';
+  btn.onclick=addPage;
+  return btn;
+}
+
+function addPage(){
+  const area=document.getElementById('editor-area');
+  const addBtn=area.querySelector('.add-page-btn');
+  const wrappers=area.querySelectorAll('.page-wrapper');
+  const newIndex=wrappers.length;
+  const el=makePageEl('',newIndex);
+  area.insertBefore(el,addBtn);
+  reIndexPages();
+  el.querySelector('.page').focus();
+  updateStats();
+  scheduleAutoSave();
+}
+
+function deletePage(wrapper){
+  const area=document.getElementById('editor-area');
+  const wrappers=area.querySelectorAll('.page-wrapper');
+  if(wrappers.length<=1){toast('Cannot delete the only page');return;}
+  wrapper.remove();
+  reIndexPages();
+  updateStats();
+  scheduleAutoSave();
+}
+
+function reIndexPages(){
+  const area=document.getElementById('editor-area');
+  area.querySelectorAll('.page-wrapper').forEach((w,i)=>{
+    w.dataset.pageIndex=i;
+    const tag=w.querySelector('.page-number-tag');
+    if(tag)tag.textContent=`— Page ${i+1} —`;
+  });
+}
+
+function getPageContents(){
+  return [...document.querySelectorAll('.page')].map(p=>p.innerHTML);
+}
+
+function onPageKeydown(e){
+  // Tab → indent
+  if(e.key==='Tab'){e.preventDefault();execCmd(e.shiftKey?'outdent':'indent');}
+}
+
+function changePageBg(val){
+  pageBg=val;
+  document.querySelectorAll('.page').forEach(p=>p.style.background=val);
+  scheduleAutoSave();
+}
+
+/* ── Exec Command ─────────────────────────────────────────────────── */
+function execCmd(cmd,val=null){
+  document.execCommand(cmd,false,val);
+  // re-focus last active page
+  const active=document.activeElement;
+  if(!active||!active.classList.contains('page')){
+    const pages=document.querySelectorAll('.page');
+    if(pages.length)pages[0].focus();
+  }
+  updateStats();
+}
+
+/* ── Insert Helpers ──────────────────────────────────────────────── */
+function insertLink(){
+  showModal('Insert Link',`
+    <label>Display Text</label><input id="link-text" placeholder="Link text">
+    <label>URL</label><input id="link-url" placeholder="https://…">
+  `,[
+    {label:'Cancel',cls:'modal-btn-cancel',fn:closeModal},
+    {label:'Insert',cls:'modal-btn-ok',fn:()=>{
+      const txt=document.getElementById('link-text').value||document.getElementById('link-url').value;
+      const url=document.getElementById('link-url').value;
+      if(!url){toast('Please enter a URL');return;}
+      const a=`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(txt)}</a>`;
+      execCmd('insertHTML',a);
+      closeModal();
+    }}
+  ]);
+}
+
+function insertImage(){
+  showModal('Insert Image',`
+    <label>Image URL <span style="color:var(--sub)">(or paste below)</span></label>
+    <input id="img-url" placeholder="https://…">
+    <label>Or upload from device</label>
+    <input type="file" id="img-file" accept="image/*" style="margin-top:4px;background:none;border:none;padding:0;font-size:12px">
+    <label>Width (optional)</label>
+    <input id="img-w" placeholder="e.g. 100%  or  400px">
+  `,[
+    {label:'Cancel',cls:'modal-btn-cancel',fn:closeModal},
+    {label:'Insert',cls:'modal-btn-ok',fn:()=>{
+      const w=document.getElementById('img-w').value||'100%';
+      const file=document.getElementById('img-file').files[0];
+      if(file){
+        const reader=new FileReader();
+        reader.onload=e=>{execCmd('insertHTML',`<img src="${e.target.result}" style="max-width:${w};height:auto;display:block">`);};
+        reader.readAsDataURL(file);
+        closeModal();return;
+      }
+      const url=document.getElementById('img-url').value;
+      if(!url){toast('Enter image URL or upload file');return;}
+      execCmd('insertHTML',`<img src="${esc(url)}" style="max-width:${w};height:auto;display:block">`);
+      closeModal();
+    }}
+  ]);
+}
+
+function insertTable(){
+  showModal('Insert Table',`
+    <label>Rows</label><input id="tbl-rows" type="number" value="3" min="1" max="20">
+    <label>Columns</label><input id="tbl-cols" type="number" value="3" min="1" max="10">
+  `,[
+    {label:'Cancel',cls:'modal-btn-cancel',fn:closeModal},
+    {label:'Insert',cls:'modal-btn-ok',fn:()=>{
+      const r=parseInt(document.getElementById('tbl-rows').value)||3;
+      const c=parseInt(document.getElementById('tbl-cols').value)||3;
+      let html='<table style="border-collapse:collapse;width:100%;margin:8px 0"><thead><tr>';
+      for(let i=0;i<c;i++)html+=`<th style="border:1px solid #ccc;padding:6px 10px;background:#f3f4f6;text-align:left">Header ${i+1}</th>`;
+      html+='</tr></thead><tbody>';
+      for(let i=0;i<r-1;i++){
+        html+='<tr>';
+        for(let j=0;j<c;j++)html+=`<td style="border:1px solid #ccc;padding:6px 10px"> </td>`;
+        html+='</tr>';
+      }
+      html+='</tbody></table><p></p>';
+      execCmd('insertHTML',html);closeModal();
+    }}
+  ]);
+}
+
+function insertHR(){
+  execCmd('insertHTML','<hr style="border:none;border-top:2px solid var(--border);margin:16px 0">');
+}
+
+/* ── Export / Import ─────────────────────────────────────────────── */
+function exportTxt(){
+  const text=getPageContents().map(h=>{
+    const d=document.createElement('div');d.innerHTML=h;return d.innerText;
+  }).join('\n\n--- Page Break ---\n\n');
+  download(new Blob([text],{type:'text/plain;charset=utf-8'}),docFilename()+'.txt');
+}
+function exportHtml(){
+  const title=document.getElementById('doc-title').value||'Document';
+  const pagesHtml=getPageContents().map((h,i)=>`<div class="page">${h}</div>`).join('\n');
+  const full=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>${esc(title)}</title>
+<style>body{font-family:Inter,sans-serif;background:#f0f2f7;padding:20px}.page{background:#fff;max-width:800px;margin:20px auto;padding:50px;box-shadow:0 4px 20px rgba(0,0,0,.1);border-radius:4px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:6px 10px}</style>
+</head><body>${pagesHtml}</body></html>`;
+  download(new Blob([full],{type:'text/html;charset=utf-8'}),docFilename()+'.html');
+}
+function docFilename(){return (document.getElementById('doc-title').value||'document').replace(/[^a-z0-9_\-]/gi,'_');}
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();}
+
+async function importFile(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  event.target.value='';
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const id='doc_'+Date.now();
+    const isHtml=file.name.endsWith('.html');
+    const content=isHtml?e.target.result:`<p>${e.target.result.replace(/\n/g,'</p><p>')}</p>`;
+    const doc={id,title:file.name.replace(/\.[^.]+$/,''),pages:[content],pageBg:'#ffffff',created:Date.now(),updated:Date.now(),favourite:false};
+    await dbPut(doc);allDocs=await dbAll();renderDocList();await openDoc(id);toast('File imported');
+  };
+  reader.readAsText(file);
+}
+
+/* ── Stats ───────────────────────────────────────────────────────── */
+function updateStats(){
+  const allText=getPageContents().map(h=>{const d=document.createElement('div');d.innerHTML=h;return d.innerText;}).join(' ');
+  const words=allText.trim()?allText.trim().split(/\s+/).filter(w=>w).length:0;
+  const chars=allText.length;
+  const pages=document.querySelectorAll('.page').length;
+  document.getElementById('wc').textContent=words;
+  document.getElementById('cc').textContent=chars;
+  document.getElementById('pc').textContent=pages;
+  document.getElementById('rt').textContent=Math.max(1,Math.ceil(words/200))+' min';
+}
+
+/* ── Auto Save ───────────────────────────────────────────────────── */
+function scheduleAutoSave(){
+  updateStats();
+  if(autoSaveTimer)clearTimeout(autoSaveTimer);
+  const dot=document.querySelector('.autosave-dot');
+  if(dot){dot.classList.add('saving');}
+  document.getElementById('autosave-status').innerHTML='<span class="autosave-dot saving"></span>Saving…';
+  autoSaveTimer=setTimeout(async()=>{
+    await saveDoc();
+    showSaved();
+  },1000);
+}
+function showSaved(){
+  document.getElementById('autosave-status').innerHTML='<span class="autosave-dot"></span>Saved';
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+let sidebarOpen=true;
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('sidebar-overlay');
+  if(window.innerWidth<=900){
+    const isClosed=sb.classList.contains('collapsed');
+    if(isClosed){
+      sb.classList.remove('collapsed');
+      sb.classList.add('open');
+      ov.classList.add('show');
+    } else {
+      sb.classList.add('collapsed');
+      sb.classList.remove('open');
+      ov.classList.remove('show');
+    }
+  } else {
+    sidebarOpen=!sidebarOpen;
+    sb.classList.toggle('collapsed',!sidebarOpen);
+  }
+}
+function closeSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('sidebar-overlay');
+  if(window.innerWidth<=900){
+    sb.classList.add('collapsed');
+    sb.classList.remove('open');
+    ov.classList.remove('show');
+  }
+}
+
+function renderDocList(query=''){
+  const q=(query||'').toLowerCase();
+  const favEl=document.getElementById('fav-list');
+  const docEl=document.getElementById('doc-list');
+  favEl.innerHTML='';
+  docEl.innerHTML='';
+
+  const sorted=[...allDocs].sort((a,b)=>b.updated-a.updated);
+  const filtered=q?sorted.filter(d=>d.title.toLowerCase().includes(q)):sorted;
+
+  const favs=filtered.filter(d=>d.favourite);
+  const unfavs=filtered.filter(d=>!d.favourite);
+
+  const createItem=(doc)=>{
+    const isFav=doc.favourite;
+    const isActive=doc.id===currentDocId;
+    const el=document.createElement('div');
+    el.className='doc-item'+(isActive?' active':'');
+    el.dataset.id=doc.id;
+    el.innerHTML=`
+      <span class="doc-icon">📄</span>
+      <div style="flex:1;overflow:hidden">
+        <div class="doc-name">${esc(doc.title)}</div>
+        <div class="doc-meta">${relDate(doc.updated)}</div>
+      </div>
+      <div class="doc-actions">
+        <button class="doc-action-btn fav-star ${isFav?'on':''}" title="Favourite">${isFav?'★':'☆'}</button>
+        <button class="doc-action-btn" title="Rename">✏</button>
+        <button class="doc-action-btn" title="Delete">🗑</button>
+      </div>
+    `;
+    
+    el.addEventListener('click',()=>openDoc(doc.id));
+    const starBtn=el.querySelector('.fav-star');
+    starBtn.addEventListener('click',(e)=>{e.stopPropagation();toggleFav(doc.id,e)});
+    
+    const renameBtn=el.querySelectorAll('.doc-action-btn')[1];
+    renameBtn.addEventListener('click',(e)=>{e.stopPropagation();renameDoc(doc.id)});
+    
+    const delBtn=el.querySelectorAll('.doc-action-btn')[2];
+    delBtn.addEventListener('click',(e)=>{e.stopPropagation();deleteDoc(doc.id)});
+    
+    return el;
+  };
+
+  favs.forEach(doc=>favEl.appendChild(createItem(doc)));
+  unfavs.forEach(doc=>docEl.appendChild(createItem(doc)));
+  
+  if(!favs.length)favEl.innerHTML='<div style="padding:8px 10px;font-size:12px;color:var(--sub)">No favourites yet</div>';
+}
+
+/* ── Find & Replace ─────────────────────────────────────────────── */
+function openFindBar(){document.getElementById('find-bar').classList.add('open');document.getElementById('fr-find').focus();}
+function closeFindBar(){document.getElementById('find-bar').classList.remove('open');}
+function highlightFind(){}
+function findNext(){
+  const q=document.getElementById('fr-find').value;
+  if(!q)return;
+  window.getSelection().removeAllRanges();
+  const found=window.find(q,false,false,true);
+  if(!found)toast('Not found');
+}
+function findPrev(){
+  const q=document.getElementById('fr-find').value;
+  if(!q)return;
+  window.find(q,false,true,true);
+}
+function doReplace(){
+  const q=document.getElementById('fr-find').value;
+  const r=document.getElementById('fr-replace').value;
+  if(!q)return;
+  document.querySelectorAll('.page').forEach(page=>{
+    page.innerHTML=page.innerHTML.replaceAll(q,r);
+  });
+  scheduleAutoSave();toast('Replaced');
+}
+function doReplaceAll(){
+  const q=document.getElementById('fr-find').value;
+  const r=document.getElementById('fr-replace').value;
+  if(!q)return;
+  document.querySelectorAll('.page').forEach(page=>{
+    page.innerHTML=page.innerHTML.split(q).join(r);
+  });
+  scheduleAutoSave();toast('All replaced');
+}
+
+/* ── Preview ─────────────────────────────────────────────────────── */
+function openPreview(){
+  const ov=document.getElementById('preview-overlay');
+  const content=document.getElementById('preview-content');
+  const titleEl=document.getElementById('preview-title');
+  titleEl.textContent=document.getElementById('doc-title').value||'Untitled';
+  content.innerHTML='';
+  getPageContents().forEach(html=>{
+    const div=document.createElement('div');
+    div.className='preview-page';
+    div.innerHTML=html;
+    content.appendChild(div);
+  });
+  ov.classList.add('open');
+}
+function closePreview(){document.getElementById('preview-overlay').classList.remove('open');}
+
+/* ── Focus Mode ──────────────────────────────────────────────────── */
+function toggleFocusMode(){
+  isFocusMode=!isFocusMode;
+  document.body.classList.toggle('focus-mode',isFocusMode);
+  document.getElementById('focus-btn').classList.toggle('active',isFocusMode);
+  if(isFocusMode){
+    document.getElementById('topbar').style.display='none';
+    document.getElementById('statusbar').style.display='none';
+    document.getElementById('sidebar').classList.add('collapsed');
+  } else {
+    document.getElementById('topbar').style.display='';
+    document.getElementById('statusbar').style.display='';
+    document.getElementById('sidebar').classList.remove('collapsed');
+  }
+}
+
+/* ── Theme ───────────────────────────────────────────────────────── */
+function toggleTheme(){
+  isDark=!isDark;
+  document.body.classList.toggle('dark',isDark);
+  localStorage.setItem('np_dark',isDark);
+}
+
+/* ── Modal ───────────────────────────────────────────────────────── */
+function showModal(title,bodyHtml,buttons){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').innerHTML=bodyHtml;
+  const btns=document.getElementById('modal-btns');
+  btns.innerHTML='';
+  buttons.forEach(b=>{
+    const btn=document.createElement('button');
+    btn.className=b.cls;btn.textContent=b.label;
+    btn.onclick=b.fn;btns.appendChild(btn);
+  });
+  document.getElementById('modal-overlay').style.display='flex';
+}
+function closeModal(){document.getElementById('modal-overlay').style.display='none';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeFindBar();}});
+
+/* ── Toast ───────────────────────────────────────────────────────── */
+let toastTimer;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+/* ── Helpers ─────────────────────────────────────────────────────── */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function relDate(ts){
+  const d=Date.now()-ts,s=Math.floor(d/1000),m=Math.floor(s/60),h=Math.floor(m/60),dy=Math.floor(h/24);
+  if(s<60)return 'just now';if(m<60)return m+'m ago';if(h<24)return h+'h ago';if(dy<7)return dy+'d ago';
+  return new Date(ts).toLocaleDateString();
+}
+
+/* ── Keyboard Shortcuts ──────────────────────────────────────────── */
+document.addEventListener('keydown',e=>{
+  const mod=e.ctrlKey||e.metaKey;
+  if(!mod)return;
+  if(e.key==='s'){e.preventDefault();saveDoc().then(()=>toast('Saved'));}
+  if(e.key==='f'){e.preventDefault();openFindBar();}
+  if(e.key==='p'){e.preventDefault();openPreview();}
+  if(e.key==='b'){e.preventDefault();execCmd('bold');}
+  if(e.key==='i'){e.preventDefault();execCmd('italic');}
+  if(e.key==='u'){e.preventDefault();execCmd('underline');}
+  if(e.key==='z'&&!e.shiftKey){e.preventDefault();execCmd('undo');}
+  if(e.key==='z'&&e.shiftKey){e.preventDefault();execCmd('redo');}
+  if(e.key==='y'){e.preventDefault();execCmd('redo');}
+});
+
+/* ── Responsive sidebar auto-collapse ───────────────────────────── */
+window.addEventListener('resize',()=>{
+  if(window.innerWidth>900){
+    const sb=document.getElementById('sidebar');
+    const ov=document.getElementById('sidebar-overlay');
+    sb.classList.remove('collapsed','open');
+    ov.classList.remove('show');
+    sidebarOpen=true;
+  }
+});
+
+/* ── Start ───────────────────────────────────────────────────────── */
+init();
+</script>
+   <script type="module" src="/toolify/protect.js"></script>
+</body>
+</html>
