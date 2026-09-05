@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mohakchoubey.github.io/toolify/sitemap.xml
